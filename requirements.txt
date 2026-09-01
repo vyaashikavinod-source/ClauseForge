@@ -1,0 +1,11 @@
+# Pinned Phase 0 development and validation dependencies.
+-e .
+mypy==1.15.0
+mypy-extensions==1.1.0
+pytest==8.3.5
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+ruff==0.9.10
+typing-extensions==4.16.0
+colorama==0.4.6; sys_platform == "win32"
