@@ -62,6 +62,31 @@ contributes to loss. Training uses train, selection uses validation macro F1,
 and test remains sealed. Sanity output is labeled **GPU SANITY RUN — NOT MODEL
 PERFORMANCE**.
 
+## Tesla T4 pilot
+
+GPU feasibility and the official one-step sanity command succeeded on a free
+Colab Tesla T4. A full 11,223-example run was manually interrupted because the
+short-lived runtime was too slow; there was no OOM or model failure, and the run
+must not be described as complete.
+
+```bash
+python scripts/train_classifier.py \
+  --config training/configs/phase3b/qwen25_7b_qlora_r8.yaml \
+  --data data/processed/cuad/1.0.0-run-a \
+  --pilot
+```
+
+The default pilot uses 512 deterministic stratified train examples and 256
+validation examples. Optional sample limits and `--max-steps` bound runtime.
+Checkpoints are written every five optimizer steps beneath
+`checkpoints/phase3b/pilot/<experiment-id>/`; resume validates configuration,
+mode, and selected-example checksum.
+
+Train covers all 41 categories. Validation contains only 40 supported
+categories, so the pilot covers all 40 and records the limitation. Test
+contributes zero examples and metrics. Every artifact is labeled **PHASE 3B T4
+PILOT — NOT FINAL MODEL PERFORMANCE**.
+
 ## Real CUAD token analysis
 
 The tracked `token_analysis_qwen2_5_7b.json` report uses the pinned

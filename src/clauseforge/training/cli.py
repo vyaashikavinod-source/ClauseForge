@@ -17,6 +17,7 @@ from clauseforge.training.environment import environment_metadata
 from clauseforge.training.lora import attach_lora
 from clauseforge.training.model import tiny_smoke_model
 from clauseforge.training.phase3b import run_phase3b
+from clauseforge.training.pilot import build_pilot_dataset
 from clauseforge.training.smoke import build_smoke_tokenizer
 from clauseforge.training.templates import render_example
 from clauseforge.training.tokenization import analyze_token_lengths
@@ -43,6 +44,10 @@ def run(
     dry_run: bool,
     sanity_steps: int | None = None,
     resume_from_checkpoint: Path | None = None,
+    pilot: bool = False,
+    pilot_train_examples: int = 512,
+    pilot_validation_examples: int = 256,
+    max_steps: int | None = None,
 ) -> dict[str, object]:
     config.validate()
     dataset = build_training_dataset(
@@ -55,10 +60,21 @@ def run(
     corpus = [render_example(item) for item in dataset.train + dataset.validation]
     if config.model.name != "local/tiny-gpt2":
         if dry_run:
+            pilot_manifest: dict[str, object] | None = None
+            if pilot:
+                pilot_dataset, _, _ = build_pilot_dataset(
+                    dataset,
+                    train_count=pilot_train_examples,
+                    validation_count=pilot_validation_examples,
+                    seed=config.seed,
+                )
+                pilot_manifest = pilot_dataset.manifest
             return {
-                "status": "phase3b-config-valid",
+                "status": "phase3b-pilot-config-valid"
+                if pilot
+                else "phase3b-config-valid",
                 "summary": _summary(config, data_dir),
-                "dataset_manifest": dataset.manifest,
+                "dataset_manifest": pilot_manifest or dataset.manifest,
                 "network_or_model_access": False,
                 "test_evaluated": False,
             }
@@ -67,6 +83,10 @@ def run(
             data_dir,
             sanity_steps=sanity_steps,
             resume_from_checkpoint=resume_from_checkpoint,
+            pilot=pilot,
+            pilot_train_examples=pilot_train_examples,
+            pilot_validation_examples=pilot_validation_examples,
+            max_steps=max_steps,
         )
     tokenizer = build_smoke_tokenizer(corpus)
     report = analyze_token_lengths(
@@ -150,6 +170,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--sanity-steps", type=int)
     parser.add_argument("--resume-from-checkpoint", type=Path)
+    parser.add_argument("--pilot", action="store_true")
+    parser.add_argument("--pilot-train-examples", type=int, default=512)
+    parser.add_argument("--pilot-validation-examples", type=int, default=256)
+    parser.add_argument("--max-steps", type=int)
     return parser
 
 
@@ -165,6 +189,10 @@ def main(argv: list[str] | None = None) -> int:
                 dry_run=args.dry_run,
                 sanity_steps=args.sanity_steps,
                 resume_from_checkpoint=args.resume_from_checkpoint,
+                pilot=args.pilot,
+                pilot_train_examples=args.pilot_train_examples,
+                pilot_validation_examples=args.pilot_validation_examples,
+                max_steps=args.max_steps,
             ),
             indent=2,
             sort_keys=True,

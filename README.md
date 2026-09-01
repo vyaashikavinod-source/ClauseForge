@@ -18,6 +18,8 @@ training infrastructure, but no production transformer model.
 
 **Phase 3B GPU feasibility is validated; the full Qwen rank ablation is pending.**
 
+**A bounded Tesla T4 pilot mode is supported but has not been run here.**
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
@@ -34,6 +36,12 @@ full fine-tuned model evaluation remains pending GPU rank experiments.
 Qwen2.5-7B-Instruct successfully completed a genuine 4-bit NF4 QLoRA optimizer
 step on a free Colab Tesla T4. This proves infrastructure feasibility, not
 model quality. Controlled rank-8/16/32/64 training remains to be run.
+
+The official one-step sanity run also completed on T4. Full 11,223-example
+training was manually interrupted due to free Colab runtime constraints, not
+OOM or model failure. Pilot mode uses deterministic 512-example train and
+256-example validation subsets, frequent resumable checkpoints, and never
+evaluates held-out test. Pilot results are explicitly non-final.
 
 ## Architecture direction
 

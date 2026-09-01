@@ -56,3 +56,15 @@ smaller rank. The Phase 2 held-out test macro F1 of 0.672683, with 95%
 contract-bootstrap CI [0.608234, 0.689092], is context only and cannot be
 directly compared with Qwen validation. Test stays sealed until configuration
 lock.
+
+## Bounded T4 pilot
+
+Before the longer-lived rank sweep, rank 8 may run a 512-train/256-validation
+pilot with seed 42 and five-step checkpoints. It reports genuine pilot training
+and validation loss, accuracy, macro/weighted F1, invalid-output rate, resource
+use, adapter size, and category coverage. These validation pilot measurements
+remain separate from final rank selection and the Phase 2 held-out test.
+
+Train supports 41 categories; validation supports 40. The pilot cannot create
+coverage for a category absent from validation. Full rank ablation still
+requires longer-lived GPU compute.
