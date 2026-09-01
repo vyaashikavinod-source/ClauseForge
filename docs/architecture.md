@@ -3,8 +3,8 @@
 This document distinguishes implemented foundations from planned system
 components. Phase 1 implements local CUAD preparation, and Phase 2 implements
 classical classification baselines and their evaluation harness. Fine-tuning,
-risk evaluation and quantization remain planned. The serving foundation is
-implemented with a development provider; real-model inference remains pending.
+risk evaluation remains planned. Quantization and production-serving
+preparation are implemented; real artifact execution remains pending.
 
 ## Planned component boundaries
 
@@ -22,11 +22,13 @@ implemented with a development provider; real-model inference remains pending.
    fine-tuning and explanations remain unimplemented.
 4. **Extended evaluation (planned):** measure task quality, hallucination
    behavior, calibration, latency, and cost against versioned benchmark inputs.
-5. **Quantization (planned):** create and validate deployment-oriented model
-   variants without changing evaluation contracts.
+5. **Quantization (preparation implemented):** typed AWQ/GGUF plans, strict
+   merge compatibility, lineage manifests, checksums, and validation. No real
+   artifact has been produced in this repository.
 6. **Serving (foundation implemented):** FastAPI schemas, request identity,
    structured errors, privacy-preserving logs, liveness/readiness, and explicit
-   mock versus local-transformer providers. Real adapter loading remains pending.
+   mock, local-transformer, vLLM, and llama.cpp providers. Real adapter loading
+   and deployment remain pending.
 7. **Regression CI (partially implemented):** deterministic unit and fixture
    evaluation checks run in Phase 2 CI. Future model-dependent regression gates
    remain planned.
@@ -112,6 +114,12 @@ Every successful response is checked against the packaged, versioned 41-label
 CUAD taxonomy. Unknown output is a controlled error, never a fuzzy match.
 Request middleware logs request ID, route, status, latency, and safe size
 metadata without clause text. No CORS middleware is enabled by default.
+
+Production preparation adds explicit vLLM and llama.cpp HTTP adapters without
+silent mock fallback. Deployment manifests and exact-cache keys bind model,
+adapter, taxonomy, prompt, quantization, and inference identities. Heavy
+backend runtimes stay outside the base dependency set so offline CI remains
+deterministic.
 
 ## Safety evaluation boundary
 

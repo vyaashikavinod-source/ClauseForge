@@ -5,7 +5,7 @@
 ClauseForge is a planned contract-clause intelligence system. The project is
 intended to support clause classification, grounded risk analysis, model
 evaluation, quantized deployment, and production-style inference. Risk
-analysis, quantization, and deployment remain unimplemented. Phase 3A provides
+analysis and real deployment remain unimplemented. Phase 3A provides
 training infrastructure, but no production transformer model.
 
 ## Current status
@@ -20,6 +20,12 @@ training infrastructure, but no production transformer model.
 
 **A bounded Tesla T4 pilot mode is supported but has not been run here.**
 
+**Quantization and production-serving preparation is implemented; no model has
+been quantized or deployed.**
+
+Final adapter training and rank selection, real quantization, deployment, and
+final serving benchmarks remain pending.
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
@@ -29,7 +35,7 @@ the Phase 2 evaluator. A FastAPI service exposes health, readiness, and
 versioned clause classification through an implementation-neutral provider.
 
 ClauseForge does not yet have a production fine-tuned model and does not analyze
-legal risk, quantize models, or provide a deployed inference service. Its local
+legal risk or provide a deployed inference service. Its local
 API defaults to a clearly identified deterministic development stub. Real
 full fine-tuned model evaluation remains pending GPU rank experiments.
 
@@ -62,7 +68,8 @@ for the planned component boundaries.
 - [x] SEC EDGAR out-of-distribution data pipeline
 - [ ] Phase 3: Grounded risk analysis
 - [ ] Phase 4: Evaluation and frontier-model comparison
-- [ ] Phase 5: Quantization and inference serving
+- [x] Phase 5 preparation: quantization plans, manifests, providers, benchmarks
+- [ ] Phase 5 execution: build and validate real artifacts and deploy serving
 - [ ] Phase 6: Regression evaluation and production hardening
 
 Only one phase is implemented and validated at a time. Later phases remain
@@ -88,6 +95,12 @@ curl -X POST http://127.0.0.1:8000/v1/classify \
 
 OpenAPI documentation is available at `/docs`. The service assists with
 contract clause analysis and does not provide legal advice.
+
+AWQ/GGUF preparation, vLLM/llama.cpp backends, deployment manifests, exact
+caching, and benchmark methodology are documented in
+[quantization](docs/quantization.md), [serving backends](docs/serving_backends.md),
+and [benchmarking](docs/benchmarking.md). These are preparation capabilities,
+not evidence that a model was quantized, evaluated, or deployed.
 
 ## Safety and robustness
 

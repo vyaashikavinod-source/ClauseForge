@@ -1,0 +1,14 @@
+method: awq
+source_model: Qwen/Qwen2.5-7B-Instruct
+source_revision: a09a35458c702b33eeacc393d103063234e8bc28
+adapter_path: checkpoints/phase3b/best_validation/adapter
+adapter_metadata: checkpoints/phase3b/best_validation/adapter_metadata.json
+merged_model_path: artifacts/merged/qwen25-7b-clauseforge
+output_path: artifacts/awq/qwen25-7b-clauseforge
+bits: 4
+group_size: 128
+quantization_type: awq
+calibration_source: data/processed/cuad/1.0.0-run-a/validation_calibration.jsonl
+max_sequence_length: 1024
+device: cuda
+seed: 42

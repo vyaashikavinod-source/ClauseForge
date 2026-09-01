@@ -33,6 +33,8 @@ data/processed/*
 
 # Models and checkpoints
 /models/
+/artifacts/
+*.gguf
 checkpoints/
 training/outputs/
 **/adapter_model.*

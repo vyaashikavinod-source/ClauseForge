@@ -9,6 +9,8 @@ not a deployed product or evidence of trained-model performance.
 - `ClauseClassifierProvider` separates HTTP behavior from model frameworks.
 - `mock-development` is the explicit deterministic local default.
 - `local-transformer` fails readiness until real artifacts are provisioned.
+- `vllm` and `llamacpp` require explicit external servers and validated
+  artifacts; neither falls back to mock.
 - The packaged `cuad-v1-41` taxonomy validates every successful result.
 - Structured errors omit traces, paths, environment values, and raw outputs.
 - Logs contain request IDs, route/status/latency, and safe size metadata only.
@@ -40,7 +42,9 @@ The mock provider exposes no fabricated confidence or scores.
 Transformer mode requires `CLAUSEFORGE_MODEL_PATH`,
 `CLAUSEFORGE_ADAPTER_PATH`, and `CLAUSEFORGE_TOKENIZER_PATH`. Missing artifacts
 produce unavailable readiness. Actual transformer loading remains pending a
-trained adapter and CUDA-capable host.
+trained adapter and CUDA-capable host. Production preparation supports explicit
+`vllm` and `llamacpp` backends; see `docs/serving_backends.md`. The repository
+does not start these external runtimes.
 
 This system assists with contract clause analysis and does not provide legal
 advice.
