@@ -25,3 +25,11 @@ def save_adapter(model: Any, experiment_dir: Path) -> Path:
 
 def reload_adapter(base_model: Any, adapter_dir: Path) -> Any:
     return PeftModel.from_pretrained(base_model, adapter_dir)
+
+
+def resume_adapter(base_model: Any, checkpoint_dir: Path) -> Any:
+    """Restore adapter weights as trainable parameters for interrupted training."""
+    adapter_dir = checkpoint_dir / "adapter"
+    if not adapter_dir.is_dir():
+        raise ValueError(f"checkpoint adapter is missing: {adapter_dir}")
+    return PeftModel.from_pretrained(base_model, adapter_dir, is_trainable=True)

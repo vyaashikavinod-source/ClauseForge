@@ -16,6 +16,7 @@ from clauseforge.training.dataset import build_training_dataset
 from clauseforge.training.environment import environment_metadata
 from clauseforge.training.lora import attach_lora
 from clauseforge.training.model import tiny_smoke_model
+from clauseforge.training.phase3b import run_phase3b
 from clauseforge.training.smoke import build_smoke_tokenizer
 from clauseforge.training.templates import render_example
 from clauseforge.training.tokenization import analyze_token_lengths
@@ -35,7 +36,14 @@ def _summary(config: TrainingConfig, data_dir: Path) -> dict[str, object]:
     }
 
 
-def run(config: TrainingConfig, data_dir: Path, *, dry_run: bool) -> dict[str, object]:
+def run(
+    config: TrainingConfig,
+    data_dir: Path,
+    *,
+    dry_run: bool,
+    sanity_steps: int | None = None,
+    resume_from_checkpoint: Path | None = None,
+) -> dict[str, object]:
     config.validate()
     dataset = build_training_dataset(
         data_dir,
@@ -47,11 +55,19 @@ def run(config: TrainingConfig, data_dir: Path, *, dry_run: bool) -> dict[str, o
     corpus = [render_example(item) for item in dataset.train + dataset.validation]
     if config.model.name != "local/tiny-gpt2":
         if dry_run:
-            raise ValueError(
-                "offline dry-run supports local/tiny-gpt2; production model validation "
-                "requires an explicitly provisioned tokenizer"
-            )
-        raise ValueError("Phase 3A CLI deliberately permits only the local smoke model")
+            return {
+                "status": "phase3b-config-valid",
+                "summary": _summary(config, data_dir),
+                "dataset_manifest": dataset.manifest,
+                "network_or_model_access": False,
+                "test_evaluated": False,
+            }
+        return run_phase3b(
+            config,
+            data_dir,
+            sanity_steps=sanity_steps,
+            resume_from_checkpoint=resume_from_checkpoint,
+        )
     tokenizer = build_smoke_tokenizer(corpus)
     report = analyze_token_lengths(
         dataset.train, tokenizer, config.data.max_sequence_length
@@ -132,6 +148,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--sanity-steps", type=int)
+    parser.add_argument("--resume-from-checkpoint", type=Path)
     return parser
 
 
@@ -141,7 +159,15 @@ def main(argv: list[str] | None = None) -> int:
     print(json.dumps(_summary(config, args.data), indent=2, sort_keys=True))
     print(
         json.dumps(
-            run(config, args.data, dry_run=args.dry_run), indent=2, sort_keys=True
+            run(
+                config,
+                args.data,
+                dry_run=args.dry_run,
+                sanity_steps=args.sanity_steps,
+                resume_from_checkpoint=args.resume_from_checkpoint,
+            ),
+            indent=2,
+            sort_keys=True,
         )
     )
     return 0

@@ -12,6 +12,8 @@ import yaml
 
 Precision = Literal["float32", "float16", "bfloat16"]
 Quantization = Literal["none", "4bit"]
+OptimizerName = Literal["adamw_torch", "paged_adamw_8bit"]
+SchedulerName = Literal["linear", "cosine"]
 
 
 class ConfigurationError(ValueError):
@@ -27,6 +29,9 @@ class ModelConfig:
     license: str
     precision: Precision = "float32"
     quantization: Quantization = "none"
+    quant_type: str = "nf4"
+    double_quant: bool = True
+    use_cache: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +50,12 @@ class OptimizationConfig:
     gradient_accumulation: int = 1
     warmup_ratio: float = 0.0
     weight_decay: float = 0.0
+    optimizer: OptimizerName = "adamw_torch"
+    scheduler: SchedulerName = "linear"
+    gradient_checkpointing: bool = False
+    gradient_checkpointing_use_reentrant: bool = False
+    save_steps: int = 100
+    eval_steps: int = 100
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +108,14 @@ class TrainingConfig:
             raise ConfigurationError("warmup_ratio must be in [0, 1)")
         if self.model.quantization == "4bit" and self.model.precision == "float32":
             raise ConfigurationError("4-bit training requires float16 or bfloat16")
+        if self.model.quant_type != "nf4":
+            raise ConfigurationError("Phase 3B supports only NF4 quantization")
+        if self.optimization.optimizer not in {"adamw_torch", "paged_adamw_8bit"}:
+            raise ConfigurationError("unsupported optimizer")
+        if self.optimization.scheduler not in {"linear", "cosine"}:
+            raise ConfigurationError("unsupported scheduler")
+        if min(self.optimization.save_steps, self.optimization.eval_steps) <= 0:
+            raise ConfigurationError("save_steps and eval_steps must be positive")
         if self.output_dir.resolve() == Path.cwd().resolve():
             raise ConfigurationError("output_dir may not be the repository root")
 
@@ -165,6 +184,9 @@ def load_config(path: Path) -> TrainingConfig:
                 license=_str(model, "license"),
                 precision=cast(Precision, model.get("precision", "float32")),
                 quantization=cast(Quantization, model.get("quantization", "none")),
+                quant_type=str(model.get("quant_type", "nf4")),
+                double_quant=bool(model.get("double_quant", True)),
+                use_cache=bool(model.get("use_cache", False)),
             ),
             lora=LoraSettings(
                 rank=_int(lora, "rank", 16),
@@ -179,6 +201,18 @@ def load_config(path: Path) -> TrainingConfig:
                 gradient_accumulation=_int(optimization, "gradient_accumulation", 1),
                 warmup_ratio=_float(optimization, "warmup_ratio", 0.0),
                 weight_decay=_float(optimization, "weight_decay", 0.0),
+                optimizer=cast(
+                    OptimizerName, optimization.get("optimizer", "adamw_torch")
+                ),
+                scheduler=cast(SchedulerName, optimization.get("scheduler", "linear")),
+                gradient_checkpointing=bool(
+                    optimization.get("gradient_checkpointing", False)
+                ),
+                gradient_checkpointing_use_reentrant=bool(
+                    optimization.get("gradient_checkpointing_use_reentrant", False)
+                ),
+                save_steps=_int(optimization, "save_steps", 100),
+                eval_steps=_int(optimization, "eval_steps", 100),
             ),
             data=DataConfig(
                 max_sequence_length=_int(data, "max_sequence_length", 1024),

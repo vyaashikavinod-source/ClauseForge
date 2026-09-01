@@ -16,6 +16,8 @@ training infrastructure, but no production transformer model.
 
 **The SEC EDGAR unlabeled OOD data pipeline is complete and offline-validated.**
 
+**Phase 3B GPU feasibility is validated; the full Qwen rank ablation is pending.**
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
@@ -27,7 +29,11 @@ versioned clause classification through an implementation-neutral provider.
 ClauseForge does not yet have a production fine-tuned model and does not analyze
 legal risk, quantize models, or provide a deployed inference service. Its local
 API defaults to a clearly identified deterministic development stub. Real
-fine-tuned model execution remains pending a CUDA GPU.
+full fine-tuned model evaluation remains pending GPU rank experiments.
+
+Qwen2.5-7B-Instruct successfully completed a genuine 4-bit NF4 QLoRA optimizer
+step on a free Colab Tesla T4. This proves infrastructure feasibility, not
+model quality. Controlled rank-8/16/32/64 training remains to be run.
 
 ## Architecture direction
 
@@ -43,6 +49,7 @@ for the planned component boundaries.
 - [x] Phase 2: Clause classification baseline and evaluation harness
 - [x] Phase 3A: Reproducible LoRA/QLoRA training infrastructure
 - [ ] Phase 3B: Real-model training and comparison
+- [ ] Phase 3B Stage 1: Qwen rank ablation (GPU feasibility validated)
 - [x] Serving/API foundation with development stub
 - [x] SEC EDGAR out-of-distribution data pipeline
 - [ ] Phase 3: Grounded risk analysis

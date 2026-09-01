@@ -63,6 +63,12 @@ Phase-specific directories remain deliberately separate so later workflows do
 not become coupled to notebooks or serving code. Data and generated artifacts
 are excluded from version control by default.
 
+The Phase 3B extension stays inside `clauseforge.training`: canonical taxonomy
+metadata, pinned Qwen rank configs, assistant-only masking, non-reentrant
+gradient checkpointing, adapter/resume checkpoints, resource metrics,
+exact-output validation, and rank selection. Train and validation are the only
+optimization and model-selection views; held-out test stays sealed.
+
 ## Design constraints
 
 - Python 3.11 is the target runtime.

@@ -6,7 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from clauseforge.training.checkpoints import reload_adapter, save_adapter, write_json
+from clauseforge.training.checkpoints import (
+    reload_adapter,
+    resume_adapter,
+    save_adapter,
+    write_json,
+)
 from clauseforge.training.config import ConfigurationError, load_config
 from clauseforge.training.dataset import build_training_dataset
 from clauseforge.training.lora import attach_lora, build_lora_config
@@ -97,6 +102,15 @@ def test_checkpoint_metadata_and_reload(tmp_path: Path) -> None:
     assert reloaded.peft_config
     write_json(tmp_path / "metadata.json", {"verified": True})
     assert json.loads((tmp_path / "metadata.json").read_text())["verified"] is True
+
+
+def test_resume_adapter_restores_trainable_weights(tmp_path: Path) -> None:
+    config = load_config(Path("training/configs/smoke.yaml"))
+    model = attach_lora(tiny_smoke_model(64), config.model, config.lora)
+    checkpoint = tmp_path / "checkpoint-1"
+    save_adapter(model, checkpoint)
+    resumed = resume_adapter(tiny_smoke_model(64), checkpoint)
+    assert any(parameter.requires_grad for parameter in resumed.parameters())
 
 
 def test_tiny_end_to_end_training() -> None:

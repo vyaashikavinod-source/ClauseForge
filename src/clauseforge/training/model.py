@@ -47,13 +47,15 @@ def require_qlora_runtime() -> None:
         )
 
 
-def build_4bit_config(precision: str) -> Any:
+def build_4bit_config(
+    precision: str, *, quant_type: str = "nf4", double_quant: bool = True
+) -> Any:
     from transformers import BitsAndBytesConfig
 
     return BitsAndBytesConfig(
         load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type=quant_type,
+        bnb_4bit_use_double_quant=double_quant,
         bnb_4bit_compute_dtype=(
             torch.bfloat16 if precision == "bfloat16" else torch.float16
         ),
@@ -83,9 +85,15 @@ def load_production_model(config: ModelConfig) -> tuple[Any, Any]:
     kwargs: dict[str, object] = {"revision": config.revision}
     if config.quantization == "4bit":
         require_qlora_runtime()
-        kwargs["quantization_config"] = build_4bit_config(config.precision)
+        kwargs["quantization_config"] = build_4bit_config(
+            config.precision,
+            quant_type=config.quant_type,
+            double_quant=config.double_quant,
+        )
+        kwargs["device_map"] = "auto"
     tokenizer = AutoTokenizer.from_pretrained(
         config.tokenizer_name, revision=config.revision
     )
     model = AutoModelForCausalLM.from_pretrained(config.name, **kwargs)
+    model.config.use_cache = config.use_cache
     return model, tokenizer

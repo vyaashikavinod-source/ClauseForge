@@ -1,8 +1,8 @@
 # Phase 3B experiment plan
 
-This is a plan, not results. No model below was downloaded or trained in Phase
-3A. Before execution, pin a model revision, re-review its license, validate its
-tokenizer, and measure hardware requirements on the actual host.
+Full rank-ablation results remain pending. Qwen2.5-7B-Instruct completed one
+genuine 4-bit NF4 rank-8 QLoRA optimizer step on a free Colab Tesla T4 without
+OOM. This is infrastructure feasibility evidence, not model performance.
 
 ## Selection objective
 
@@ -48,3 +48,11 @@ expanding into MLP projections is a separate predeclared ablation.
 
 Additional seeds are required around the leader before a final claim. Smoke
 losses and smoke accuracy are excluded from all selection tables.
+
+Stage 1 uses FP16 and the validated attention-only targets. Expected trainable
+parameters are 5,046,272 (r8), 10,092,544 (r16), 20,185,088 (r32), and
+40,370,176 (r64). Validation macro F1 selects the winner; exact ties select the
+smaller rank. The Phase 2 held-out test macro F1 of 0.672683, with 95%
+contract-bootstrap CI [0.608234, 0.689092], is context only and cannot be
+directly compared with Qwen validation. Test stays sealed until configuration
+lock.

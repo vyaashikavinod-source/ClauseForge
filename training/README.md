@@ -27,8 +27,40 @@ only and must not be compared with benchmark metrics.
 Standard LoRA is supported through PEFT. The QLoRA example uses NF4 4-bit
 loading and double quantization, but is not run in Phase 3A. It checks CUDA
 before importing optional `bitsandbytes` and reports a clear error on CPU.
-GPT-2 target `c_attn` is smoke-tested. Qwen2, Mistral, and Llama attention
-targets remain experimental until their candidates are provisioned and tested.
+GPT-2 target `c_attn` is smoke-tested. Qwen2.5 attention targets `q_proj`,
+`k_proj`, `v_proj`, and `o_proj` completed a genuine rank-8 4-bit QLoRA
+optimizer step on a Tesla T4. This is GPU feasibility evidence, not model
+quality. Mistral and Llama remain outside Stage 1.
+
+## Phase 3B Stage 1: Qwen rank experiment
+
+The authoritative taxonomy remains the 41 complete CUAD question strings.
+`clauseforge.taxonomy` also exposes a stable ID and quoted short name; neither
+replaces the canonical training target or serving value.
+
+All rank configs use pinned Qwen2.5-7B-Instruct, NF4 double quantization, FP16,
+length 1,024, micro-batch 1, accumulation 16, cosine scheduling, paged 8-bit
+AdamW, seed 42, disabled cache, and non-reentrant gradient checkpointing. Only
+rank and its 2× alpha change. Attention-only targets stay within the validated
+T4 envelope; MLP projections are deferred.
+
+```bash
+# Offline config validation
+python scripts/train_classifier.py --config training/configs/phase3b/qwen25_7b_qlora_r8.yaml --data data/processed/cuad/1.0.0-run-a --dry-run
+# One genuine GPU optimizer step
+python scripts/train_classifier.py --config training/configs/phase3b/qwen25_7b_qlora_r8.yaml --data data/processed/cuad/1.0.0-run-a --sanity-steps 1
+# Full rank-8 run
+python scripts/train_classifier.py --config training/configs/phase3b/qwen25_7b_qlora_r8.yaml --data data/processed/cuad/1.0.0-run-a
+# Resume
+python scripts/train_classifier.py --config training/configs/phase3b/qwen25_7b_qlora_r8.yaml --data data/processed/cuad/1.0.0-run-a --resume-from-checkpoint checkpoints/phase3b/<experiment>/checkpoint-<step>
+# Print rank-8/16/32/64 commands
+python scripts/run_phase3b_rank_sweep.py --data data/processed/cuad/1.0.0-run-a
+```
+
+Prompt tokens use the `-100` loss mask; only the assistant canonical answer
+contributes to loss. Training uses train, selection uses validation macro F1,
+and test remains sealed. Sanity output is labeled **GPU SANITY RUN — NOT MODEL
+PERFORMANCE**.
 
 ## Real CUAD token analysis
 

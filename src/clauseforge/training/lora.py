@@ -25,6 +25,15 @@ def build_lora_config(model: ModelConfig, settings: LoraSettings) -> LoraConfig:
 
 def attach_lora(model_instance: Any, model: ModelConfig, settings: LoraSettings) -> Any:
     if model.quantization == "4bit":
-        require_qlora_runtime()
-        model_instance = prepare_model_for_kbit_training(model_instance)
+        model_instance = prepare_qlora_base(model_instance)
     return get_peft_model(model_instance, build_lora_config(model, settings))
+
+
+def prepare_qlora_base(model_instance: Any) -> Any:
+    """Prepare a quantized base consistently for new or resumed adapters."""
+    require_qlora_runtime()
+    return prepare_model_for_kbit_training(
+        model_instance,
+        use_gradient_checkpointing=True,
+        gradient_checkpointing_kwargs={"use_reentrant": False},
+    )
