@@ -1,24 +1,30 @@
 # Target architecture
 
 This document distinguishes implemented foundations from planned system
-components. Phase 1 implements local CUAD preparation only; model training,
-model evaluation, quantization, and inference remain planned.
+components. Phase 1 implements local CUAD preparation, and Phase 2 implements
+classical classification baselines and their evaluation harness. Fine-tuning,
+risk evaluation, quantization, and inference remain planned.
 
 ## Planned component boundaries
 
 1. **Data preparation (partially implemented):** CUAD v1 SQuAD-style ingestion,
    normalization, validation, segmentation, splitting, manifests, and
    statistics are implemented. Other sources are not implemented.
-2. **Training (planned):** build reproducible clause-classification and grounded
+2. **Classical baselines and evaluation (implemented):** expose a model-neutral
+   classifier protocol, leakage-safe dataset views, metrics, contract-level
+   bootstrap intervals, calibration diagnostics, confusion analysis, and
+   machine-readable errors.
+3. **Training (planned):** build reproducible clause-classification and grounded
    explanation experiments with explicit configurations and tracked artifacts.
-3. **Evaluation (planned):** measure task quality, hallucination behavior,
-   calibration, latency, and cost against versioned benchmark inputs.
-4. **Quantization (planned):** create and validate deployment-oriented model
+4. **Extended evaluation (planned):** measure task quality, hallucination
+   behavior, calibration, latency, and cost against versioned benchmark inputs.
+5. **Quantization (planned):** create and validate deployment-oriented model
    variants without changing evaluation contracts.
-5. **Serving (planned):** expose versioned inference interfaces with input
+6. **Serving (planned):** expose versioned inference interfaces with input
    validation, observability, and clear failure behavior.
-6. **Regression CI (planned):** run suitably scoped deterministic checks before
-   changes are accepted. Model-dependent evaluation is not part of Phase 0 CI.
+7. **Regression CI (partially implemented):** deterministic unit and fixture
+   evaluation checks run in Phase 2 CI. Future model-dependent regression gates
+   remain planned.
 
 ## Implemented foundation
 

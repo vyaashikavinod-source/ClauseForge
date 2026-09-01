@@ -44,6 +44,7 @@ checkpoints/
 
 # Generated evaluations and experiment tracking
 eval/outputs/
+eval/results/
 evaluation_outputs/
 runs/
 wandb/

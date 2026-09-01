@@ -15,8 +15,9 @@ data pipeline for the public CUAD v1 dataset. The pipeline parses CUAD's SQuAD
 validates normalized records, creates contract-level splits, and writes
 manifests and statistics.
 
-ClauseForge does not currently fine-tune models, analyze contracts, run model
-benchmarks, quantize models, or provide a deployed inference service.
+ClauseForge does not currently fine-tune models, analyze legal risk, quantize
+models, or provide a deployed inference service. It does provide measured
+classical clause-classification baselines for comparison with future work.
 
 ## Architecture direction
 
@@ -29,7 +30,7 @@ for the planned component boundaries.
 
 - [x] Phase 0: Repository foundation and development tooling
 - [x] Phase 1: Public dataset ingestion and validation
-- [ ] Phase 2: Clause classification baseline
+- [x] Phase 2: Clause classification baseline and evaluation harness
 - [ ] Phase 3: Grounded risk analysis
 - [ ] Phase 4: Evaluation and frontier-model comparison
 - [ ] Phase 5: Quantization and inference serving
@@ -78,6 +79,22 @@ Splitting occurs at the contract level with a deterministic seed and default
 80/10/10 ratios. This prevents annotations from one contract appearing in more
 than one split. CUAD annotation text and offsets remain ground truth; the
 pipeline does not invent, rewrite, or relocate labels.
+
+## Baseline evaluation
+
+Phase 2 evaluates four pre-fine-tuning baselines on the held-out CUAD test
+split. Macro F1 is primary because all 41 categories should carry equal weight
+despite strong class imbalance.
+
+| Baseline | Test accuracy | Test macro F1 |
+|---|---:|---:|
+| Majority class | 0.180251 | 0.007450 |
+| Keyword rules | 0.316614 | 0.201389 |
+| TF-IDF logistic regression | 0.779781 | 0.672683 |
+| TF-IDF LinearSVC | 0.786050 | 0.665255 |
+
+These are measured classical baselines, not fine-tuned language-model results.
+See [eval/README.md](eval/README.md) for methodology and limitations.
 
 ## Data and security
 

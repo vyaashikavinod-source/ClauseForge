@@ -1,7 +1,10 @@
-# Pinned Phase 0 development and validation dependencies.
+# Pinned development, validation, and classical-baseline dependencies.
 -e .
-mypy==1.15.0
+mypy==2.3.1
 mypy-extensions==1.1.0
+ast-serialize==0.8.0
+librt==0.15.0
+pathspec==1.1.1
 pytest==8.3.5
 iniconfig==2.3.0
 packaging==26.3
@@ -9,3 +12,10 @@ pluggy==1.6.0
 ruff==0.9.10
 typing-extensions==4.16.0
 colorama==0.4.6; sys_platform == "win32"
+cloudpickle==3.1.2
+joblib==1.6.0
+narwhals==2.25.0
+numpy==2.2.6
+scikit-learn==1.9.0
+scipy==1.18.1
+threadpoolctl==3.6.0
