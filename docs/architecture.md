@@ -14,8 +14,10 @@ risk evaluation, quantization, and inference remain planned.
    classifier protocol, leakage-safe dataset views, metrics, contract-level
    bootstrap intervals, calibration diagnostics, confusion analysis, and
    machine-readable errors.
-3. **Training (planned):** build reproducible clause-classification and grounded
-   explanation experiments with explicit configurations and tracked artifacts.
+3. **Training (infrastructure implemented):** typed configurations, deterministic
+   exact-label SFT examples, truncation analysis, LoRA/optional QLoRA setup,
+   adapter checkpoints, metadata, and a local smoke path. Production-scale
+   fine-tuning and explanations remain unimplemented.
 4. **Extended evaluation (planned):** measure task quality, hallucination
    behavior, calibration, latency, and cost against versioned benchmark inputs.
 5. **Quantization (planned):** create and validate deployment-oriented model
@@ -71,3 +73,15 @@ recorded in `docs/decisions/` before implementation.
 
 SEC EDGAR remains a planned out-of-distribution evaluation source. No EDGAR
 ingestion or placeholder implementation exists in Phase 1.
+
+## Phase 3A training boundary
+
+`clauseforge.training` consumes the existing leakage-safe evaluation dataset.
+It materializes train and validation examples, validates the 41-label taxonomy,
+and asserts train, validation, and test contract sets are pairwise disjoint.
+Test examples are never returned to the trainer.
+
+PEFT supplies adapter attachment and reload. A local tiny GPT-2 proves the path
+without downloading a checkpoint. Optional 4-bit configuration is isolated
+behind CUDA and `bitsandbytes` checks. `TransformerClassifier` structurally
+implements the Phase 2 protocol so future checkpoints use existing metrics.

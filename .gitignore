@@ -32,8 +32,11 @@ data/processed/*
 !data/processed/.gitkeep
 
 # Models and checkpoints
-models/
+/models/
 checkpoints/
+training/outputs/
+**/adapter_model.*
+**/pytorch_model.*
 *.bin
 *.ckpt
 *.gguf

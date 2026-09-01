@@ -1,0 +1,1 @@
+"""Transformer-facing model adapters."""

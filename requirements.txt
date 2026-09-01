@@ -19,3 +19,7 @@ numpy==2.2.6
 scikit-learn==1.9.0
 scipy==1.18.1
 threadpoolctl==3.6.0
+torch==2.8.0
+transformers==5.16.1
+peft==0.20.0
+PyYAML==6.0.2

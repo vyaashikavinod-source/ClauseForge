@@ -1,0 +1,28 @@
+model:
+  name: local/tiny-gpt2
+  revision: locally-constructed-v1
+  tokenizer_name: local/wordlevel-smoke
+  family: gpt2
+  license: Apache-2.0-compatible test construction
+  precision: float32
+  quantization: none
+lora:
+  rank: 4
+  alpha: 8
+  dropout: 0.05
+  target_modules: [c_attn]
+optimization:
+  learning_rate: 0.001
+  epochs: 1
+  batch_size: 1
+  gradient_accumulation: 2
+  warmup_ratio: 0.0
+  weight_decay: 0.0
+data:
+  max_sequence_length: 128
+  max_train_examples: 4
+  max_validation_examples: 2
+seed: 42
+output_dir: checkpoints
+prompt_template_version: cuad-classification-v1
+tags: [phase-3a, smoke-not-performance]

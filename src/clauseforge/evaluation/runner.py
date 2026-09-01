@@ -67,12 +67,14 @@ def _jsonl(path: Path, values: list[dict[str, object]]) -> None:
 
 
 def _confidence_values(
-    model: ClassifierProtocol, texts: list[str], scores: FloatMatrix
+    model: ClassifierProtocol, texts: list[str], scores: FloatMatrix | None
 ) -> tuple[list[float | None], FloatMatrix | None]:
     probabilities = model.predict_proba(texts)
     if probabilities is not None:
         return [float(value) for value in probabilities.max(axis=1)], probabilities
-    return [float(value) for value in scores.max(axis=1)], None
+    if scores is not None:
+        return [float(value) for value in scores.max(axis=1)], None
+    return [None] * len(texts), None
 
 
 def _class_distribution(
@@ -111,12 +113,17 @@ def evaluate_model(
     y_true = [item.label for item in evaluation]
     predictions_array = model.predict(texts)
     predictions = predictions_array.tolist()
-    scores = model.predict_scores(texts)
+    try:
+        scores: FloatMatrix | None = model.predict_scores(texts)
+    except NotImplementedError:
+        scores = None
     classes = model.classes_.tolist()
     metrics = classification_metrics(y_true, predictions, dataset.labels)
-    metrics["top_k_recall"] = {
-        f"recall_at_{k}": top_k_recall(y_true, scores, classes, k) for k in (1, 3, 5)
-    }
+    metrics["top_k_recall"] = (
+        {f"recall_at_{k}": top_k_recall(y_true, scores, classes, k) for k in (1, 3, 5)}
+        if scores is not None
+        else {"available": False, "reason": "model does not expose ranked scores"}
+    )
     confidence, probabilities = _confidence_values(model, texts, scores)
     bootstrap = bootstrap_confidence_intervals(
         y_true,

@@ -5,19 +5,24 @@
 ClauseForge is a planned contract-clause intelligence system. The project is
 intended to support clause classification, grounded risk analysis, model
 evaluation, quantized deployment, and production-style inference. These
-capabilities are not implemented yet.
+Risk analysis, quantization, and deployment remain unimplemented. Phase 3A now
+provides training infrastructure, but no production transformer model.
 
 ## Current status
 
-The repository contains the Phase 0 engineering foundation and a Phase 1 local
-data pipeline for the public CUAD v1 dataset. The pipeline parses CUAD's SQuAD
-2.0-style JSON, preserves authoritative annotation spans and provenance,
-validates normalized records, creates contract-level splits, and writes
-manifests and statistics.
+**Phase 3A training infrastructure is complete.**
 
-ClauseForge does not currently fine-tune models, analyze legal risk, quantize
-models, or provide a deployed inference service. It does provide measured
-classical clause-classification baselines for comparison with future work.
+The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
+Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
+harness builds deterministic exact-label examples, measures tokenizer
+truncation, attaches LoRA adapters, configures optional QLoRA, records adapter
+checkpoints and metadata, and bridges pre-trained generative classifiers into
+the Phase 2 evaluator.
+
+ClauseForge does not yet have a production fine-tuned model and does not analyze
+legal risk, quantize models, or provide a deployed inference service. It provides
+measured classical baselines and a validated LoRA/QLoRA training harness with a
+tiny local smoke path. Smoke output is not model-performance evidence.
 
 ## Architecture direction
 
@@ -31,6 +36,8 @@ for the planned component boundaries.
 - [x] Phase 0: Repository foundation and development tooling
 - [x] Phase 1: Public dataset ingestion and validation
 - [x] Phase 2: Clause classification baseline and evaluation harness
+- [x] Phase 3A: Reproducible LoRA/QLoRA training infrastructure
+- [ ] Phase 3B: Real-model training and comparison
 - [ ] Phase 3: Grounded risk analysis
 - [ ] Phase 4: Evaluation and frontier-model comparison
 - [ ] Phase 5: Quantization and inference serving

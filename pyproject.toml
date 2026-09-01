@@ -16,7 +16,12 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "peft==0.20.0",
+    "PyYAML==6.0.2",
+    "torch==2.8.0",
+    "transformers==5.16.1",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -39,6 +44,20 @@ strict = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["numpy", "numpy.*", "sklearn", "sklearn.*"]
+module = [
+    "numpy",
+    "numpy.*",
+    "peft",
+    "peft.*",
+    "sklearn",
+    "sklearn.*",
+    "torch",
+    "torch.*",
+    "tokenizers",
+    "tokenizers.*",
+    "transformers",
+    "transformers.*",
+    "yaml",
+]
 follow_imports = "skip"
 ignore_missing_imports = true

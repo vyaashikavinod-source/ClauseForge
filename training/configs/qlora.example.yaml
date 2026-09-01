@@ -1,0 +1,28 @@
+model:
+  name: Qwen/Qwen2.5-7B-Instruct
+  revision: REPLACE_WITH_REVIEWED_COMMIT_SHA
+  tokenizer_name: Qwen/Qwen2.5-7B-Instruct
+  family: qwen2
+  license: Apache-2.0
+  precision: bfloat16
+  quantization: 4bit
+lora:
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+optimization:
+  learning_rate: 0.0002
+  epochs: 3
+  batch_size: 1
+  gradient_accumulation: 16
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+data:
+  max_sequence_length: 1024
+  max_train_examples: null
+  max_validation_examples: null
+seed: 42
+output_dir: checkpoints
+prompt_template_version: cuad-classification-v1
+tags: [phase-3b-plan, experimental-targets]
