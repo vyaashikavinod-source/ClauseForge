@@ -1,0 +1,69 @@
+{
+  "adapter_metadata": {
+    "adapter_only": true,
+    "alpha": 16,
+    "rank": 8,
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"]
+  },
+  "experiment_config": {
+    "data": {
+      "max_sequence_length": 1024,
+      "max_train_examples": null,
+      "max_validation_examples": null
+    },
+    "lora": {
+      "alpha": 16,
+      "dropout": 0.05,
+      "rank": 8,
+      "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"]
+    },
+    "model": {
+      "double_quant": true,
+      "family": "qwen2",
+      "license": "Apache-2.0",
+      "name": "Qwen/Qwen2.5-7B-Instruct",
+      "precision": "float16",
+      "quant_type": "nf4",
+      "quantization": "4bit",
+      "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "tokenizer_name": "Qwen/Qwen2.5-7B-Instruct",
+      "use_cache": false
+    },
+    "optimization": {
+      "batch_size": 1,
+      "epochs": 3,
+      "eval_steps": 250,
+      "gradient_accumulation": 16,
+      "gradient_checkpointing": true,
+      "gradient_checkpointing_use_reentrant": false,
+      "learning_rate": 0.0002,
+      "optimizer": "paged_adamw_8bit",
+      "save_steps": 100,
+      "scheduler": "cosine",
+      "warmup_ratio": 0.03,
+      "weight_decay": 0.01
+    },
+    "output_dir": "checkpoints/phase3b",
+    "prompt_template_version": "cuad-classification-v1",
+    "seed": 42,
+    "tags": ["phase-3b-stage-1", "qwen25-7b", "t4", "validation-only"]
+  },
+  "pilot_config": {
+    "checkpoint_steps": 5,
+    "label": "PHASE 3B T4 PILOT — NOT FINAL MODEL PERFORMANCE",
+    "max_steps": 10,
+    "seed": 42,
+    "selection_checksum": "a287835bc6954916c2d9066e7a4b76b18c6946419290abf839f6996bc73ba458",
+    "test_evaluated": false,
+    "train_examples": 256,
+    "validation_examples": 128
+  },
+  "resume_state": {
+    "epoch": 0,
+    "examples_seen": 160,
+    "experiment_id": "qwen2.5-7b-instruct_lora-r8_seed42_ebbf06b3b6cf",
+    "global_step": 10,
+    "run_mode": "pilot",
+    "subset_checksum": "a287835bc6954916c2d9066e7a4b76b18c6946419290abf839f6996bc73ba458"
+  }
+}

@@ -57,3 +57,32 @@ Recommendation: retain the canonical question as authoritative metadata, but
 prefer stable category IDs for a future deliberately versioned target migration.
 Evaluate constrained decoding independently. Do not retrofit current checkpoints
 or accept diagnostic short names as canonical outputs.
+
+## Historical checkpoint compatibility
+
+Validation-only evaluation uses persisted `experiment_config.json`,
+`pilot_config.json`, `resume_state.json`, `adapter_metadata.json`, and the
+dataset manifest as historical lineage. The stored experiment ID is reproduced
+from the stored configuration rather than recalculated from current defaults.
+
+Model-critical checks cover model/tokenizer name, immutable revision, family,
+precision, quantization mode/type and double-quantization setting, LoRA rank and
+alpha, target modules, and agreement with adapter metadata. These fields
+determine which base weights, tokens, and adapter structure can be loaded.
+Training-critical evaluation checks cover historical
+experiment identity, pilot run mode, selected-subset checksum, prompt template,
+maximum sequence length, and exact taxonomy. These bind the meaning and input
+population of the checkpoint.
+
+`validation_max_new_tokens` is evaluation-only: it controls post-training
+generation length and cannot change adapter tensors or learned weights. A
+current explicit value may override its historical value (or its absence), and
+both values are recorded. Output paths, documentation tags, save/eval cadence,
+and other optimizer controls are not used to decide validation-only loading;
+they remain part of persisted lineage. Training resume continues to use the
+stricter current experiment ID and subset checks and is unchanged.
+
+Compatibility reports contain only named checks and safe configuration values;
+they omit local paths and raw clause content. Blocking field names are included
+in developer-facing errors so incompatibility can be diagnosed without exposing
+private filesystem information.

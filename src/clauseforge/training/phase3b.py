@@ -19,6 +19,7 @@ from clauseforge.models.transformer_classifier import (
     normalize_generated_label,
 )
 from clauseforge.training.checkpoints import resume_adapter, save_adapter, write_json
+from clauseforge.training.compatibility import checkpoint_evaluation_compatibility
 from clauseforge.training.config import TrainingConfig
 from clauseforge.training.dataset import TrainingDataset, build_training_dataset
 from clauseforge.training.diagnostics import (
@@ -317,19 +318,41 @@ def evaluate_phase3b_checkpoint(
         subset_checksum = combined_selection_checksum(
             train_selection, validation_selection
         )
-    resume_metadata_path = checkpoint / "resume_state.json"
-    if not resume_metadata_path.is_file():
-        raise ValueError("checkpoint resume metadata is required for diagnostics")
-    resume_metadata = json.loads(resume_metadata_path.read_text(encoding="utf-8"))
-    if not isinstance(resume_metadata, dict):
-        raise ValueError("checkpoint resume metadata is malformed")
-    state = ResumeState(**cast(dict[str, Any], resume_metadata))
-    validate_resume_compatibility(
-        state,
-        config.experiment_id,
-        "pilot" if pilot else "full",
-        subset_checksum,
+    experiment_dir = checkpoint.parent
+
+    def load_metadata(name: str, root: Path = experiment_dir) -> dict[str, object]:
+        metadata_path = root / name
+        if not metadata_path.is_file():
+            raise ValueError(f"checkpoint lineage metadata is missing: {name}")
+        value = json.loads(metadata_path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            raise ValueError(f"checkpoint lineage metadata is malformed: {name}")
+        return cast(dict[str, object], value)
+
+    historical_config = load_metadata("experiment_config.json")
+    pilot_config = load_metadata("pilot_config.json") if pilot else {}
+    resume_metadata = load_metadata("resume_state.json", checkpoint)
+    adapter_metadata = load_metadata("adapter_metadata.json")
+    historical_dataset = load_metadata("dataset_manifest.json")
+    historical_taxonomy = historical_dataset.get("taxonomy")
+    if not isinstance(historical_taxonomy, list) or not all(
+        isinstance(item, str) for item in historical_taxonomy
+    ):
+        raise ValueError("checkpoint taxonomy lineage is malformed")
+    compatibility = checkpoint_evaluation_compatibility(
+        config,
+        historical_config,
+        pilot_config,
+        resume_metadata,
+        adapter_metadata,
+        expected_run_mode="pilot" if pilot else "full",
+        expected_subset_checksum=subset_checksum,
+        historical_taxonomy=historical_taxonomy,
+        current_taxonomy=dataset.taxonomy,
     )
+    if not compatibility.compatible:
+        fields = ", ".join(compatibility.blocking_differences)
+        raise ValueError(f"checkpoint evaluation is incompatible: {fields}")
     model, tokenizer = load_production_model(config.model)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -347,10 +370,26 @@ def evaluate_phase3b_checkpoint(
     )
     metrics.update(
         {
-            "checkpoint": str(checkpoint),
+            "checkpoint_id": checkpoint.name,
             "pilot": pilot,
-            "prediction_artifact": str(predictions_path),
+            "prediction_artifact": predictions_path.name,
             "prompt_template_version": config.prompt_template_version,
+            "checkpoint_training_lineage": {
+                "experiment_id": resume_metadata["experiment_id"],
+                "run_mode": resume_metadata["run_mode"],
+                "subset_checksum": resume_metadata["subset_checksum"],
+                "model": historical_config["model"],
+                "lora": historical_config["lora"],
+                "prompt_template_version": historical_config["prompt_template_version"],
+                "max_sequence_length": cast(
+                    dict[str, object], historical_config["data"]
+                )["max_sequence_length"],
+            },
+            "evaluation_configuration": {
+                "validation_max_new_tokens": config.data.validation_max_new_tokens,
+                "diagnostics": True,
+            },
+            "compatibility_report": compatibility.to_dict(),
             "test_evaluated": False,
         }
     )
