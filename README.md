@@ -14,6 +14,8 @@ training infrastructure, but no production transformer model.
 
 **The CPU-safe safety and robustness harness is complete.**
 
+**The SEC EDGAR unlabeled OOD data pipeline is complete and offline-validated.**
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
@@ -42,6 +44,7 @@ for the planned component boundaries.
 - [x] Phase 3A: Reproducible LoRA/QLoRA training infrastructure
 - [ ] Phase 3B: Real-model training and comparison
 - [x] Serving/API foundation with development stub
+- [x] SEC EDGAR out-of-distribution data pipeline
 - [ ] Phase 3: Grounded risk analysis
 - [ ] Phase 4: Evaluation and frontier-model comparison
 - [ ] Phase 5: Quantization and inference serving
@@ -142,6 +145,21 @@ despite strong class imbalance.
 
 These are measured classical baselines, not fine-tuned language-model results.
 See [eval/README.md](eval/README.md) for methodology and limitations.
+
+## Preparing SEC EDGAR OOD data
+
+EDGAR retrieval is explicit and requires `SEC_USER_AGENT` and
+`SEC_CONTACT_EMAIL`:
+
+```bash
+python scripts/fetch_edgar_contracts.py --output data/raw/edgar --cik 320193 --limit 25 --resume
+python scripts/prepare_edgar.py --input data/raw/edgar/documents.jsonl --output data/processed/edgar/1.0.0
+python scripts/validate_edgar.py --input data/processed/edgar/1.0.0
+```
+
+EDGAR candidates are unlabeled OOD inputs, never CUAD training examples.
+Downloaded and processed files remain ignored. See
+[docs/edgar_ood.md](docs/edgar_ood.md) for etiquette and limitations.
 
 ## Data and security
 

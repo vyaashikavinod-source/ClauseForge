@@ -73,3 +73,10 @@ The runner writes summary, adversarial/paraphrase JSONL, taxonomy metadata, run
 configuration, and Markdown artifacts beneath ignored `eval/results/`. Outputs
 are **DEVELOPMENT SAFETY HARNESS RESULTS — NOT FINAL MODEL PERFORMANCE**. Final
 trained-model safety performance remains pending Phase 3B GPU execution.
+
+## SEC EDGAR unlabeled OOD evaluation
+
+EDGAR segments are unlabeled and separate from CUAD. Valid future measurements
+include taxonomy-valid and invalid-output rates, prediction and genuine-score
+confidence distributions, abstention rate, and processing failures. Accuracy,
+precision, recall, and F1 must not be reported without authoritative labels.

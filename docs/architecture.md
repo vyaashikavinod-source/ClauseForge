@@ -10,7 +10,8 @@ implemented with a development provider; real-model inference remains pending.
 
 1. **Data preparation (partially implemented):** CUAD v1 SQuAD-style ingestion,
    normalization, validation, segmentation, splitting, manifests, and
-   statistics are implemented. Other sources are not implemented.
+   statistics are implemented. A separate SEC EDGAR pipeline creates unlabeled
+   OOD candidates without entering CUAD splits.
 2. **Classical baselines and evaluation (implemented):** expose a model-neutral
    classifier protocol, leakage-safe dataset views, metrics, contract-level
    bootstrap intervals, calibration diagnostics, confusion analysis, and
@@ -73,8 +74,13 @@ are excluded from version control by default.
 Architectural decisions that materially change these constraints should be
 recorded in `docs/decisions/` before implementation.
 
-SEC EDGAR remains a planned out-of-distribution evaluation source. No EDGAR
-ingestion or placeholder implementation exists in Phase 1.
+## SEC EDGAR OOD boundary
+
+`clauseforge.data.edgar` owns explicit identified retrieval, tolerant HTML/text
+extraction, explainable filtering, checksum deduplication, segmentation,
+validation, manifests, and statistics. It reuses `segment_contract` while
+preserving EDGAR provenance. `clauseforge.evaluation.ood` reports only
+label-free validity and distributions. EDGAR data never enters CUAD splits.
 
 ## Phase 3A training boundary
 

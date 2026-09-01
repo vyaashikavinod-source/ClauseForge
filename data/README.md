@@ -42,3 +42,22 @@ distributions are not parsed in Phase 1.
 
 The generated manifest records the source SHA-256 checksum, CUAD and processing
 versions, split configuration, record counts, and generated-file checksums.
+
+## SEC EDGAR OOD layout
+
+Public EDGAR exhibits are a separate unlabeled evaluation source:
+
+```text
+data/raw/edgar/documents.jsonl
+data/processed/edgar/1.0.0/
+├── documents.jsonl
+├── segments.jsonl
+├── rejected.jsonl
+├── failures.jsonl
+├── manifest.json
+└── statistics.json
+```
+
+Retrieval is explicit, identified, rate-limited, retry-capped, and resumable.
+Preparation uses explainable filtering, checksum deduplication, and the shared
+legal segmenter. Records never enter CUAD splits or receive CUAD categories.

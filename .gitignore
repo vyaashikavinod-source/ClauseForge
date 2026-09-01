@@ -48,6 +48,7 @@ training/outputs/
 # Generated evaluations and experiment tracking
 eval/outputs/
 eval/results/
+eval/review/
 evaluation_outputs/
 runs/
 wandb/
