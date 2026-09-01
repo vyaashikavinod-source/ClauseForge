@@ -20,6 +20,7 @@ optimization:
   weight_decay: 0.01
 data:
   max_sequence_length: 1024
+  validation_max_new_tokens: 160
   max_train_examples: null
   max_validation_examples: null
 seed: 42

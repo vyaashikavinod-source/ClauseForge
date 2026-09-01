@@ -33,6 +33,7 @@ def _summary(config: TrainingConfig, data_dir: Path) -> dict[str, object]:
         "license": config.model.license,
         "quantization": config.model.quantization,
         "max_sequence_length": config.data.max_sequence_length,
+        "validation_max_new_tokens": config.data.validation_max_new_tokens,
         "output_dir": str(config.output_dir.resolve()),
     }
 

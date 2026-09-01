@@ -1,5 +1,10 @@
 # Phase 3B experiment plan
 
+The completed 10-step rank-8 T4 pilot validated the infrastructure but produced
+0 exact canonical validation outputs. Larger training is paused pending output
+diagnostics. Canonical validation remains strict; recognized short names or
+wrapped answers do not become accepted predictions.
+
 Full rank-ablation results remain pending. Qwen2.5-7B-Instruct completed one
 genuine 4-bit NF4 rank-8 QLoRA optimizer step on a free Colab Tesla T4 without
 OOM. This is infrastructure feasibility evidence, not model performance.

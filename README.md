@@ -26,6 +26,12 @@ been quantized or deployed.**
 Final adapter training and rank selection, real quantization, deployment, and
 final serving benchmarks remain pending.
 
+The completed 10-step T4 pilot was a successful infrastructure/training pilot,
+but produced 0 exact taxonomy-valid validation outputs. This indicates an
+output-compliance problem requiring diagnosis before a larger GPU run; it is
+not final model performance or a conclusion that the model failed. See
+[Phase 3B output diagnostics](docs/phase3b_output_diagnostics.md).
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer

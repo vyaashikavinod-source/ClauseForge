@@ -1,5 +1,10 @@
 # Training
 
+The completed 10-step T4 pilot produced no exact taxonomy-valid validation
+outputs. This is an output-compliance diagnostic finding, not final model
+performance or a model-failure conclusion. See
+[`docs/phase3b_output_diagnostics.md`](../docs/phase3b_output_diagnostics.md).
+
 Phase 3A implements a reproducible supervised fine-tuning harness for exact
 CUAD category classification. It is training infrastructure, not a trained
 production model and not evidence that a transformer beats the Phase 2

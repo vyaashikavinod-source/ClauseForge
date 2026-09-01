@@ -9,7 +9,7 @@ import time
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import torch
 
@@ -21,6 +21,12 @@ from clauseforge.models.transformer_classifier import (
 from clauseforge.training.checkpoints import resume_adapter, save_adapter, write_json
 from clauseforge.training.config import TrainingConfig
 from clauseforge.training.dataset import TrainingDataset, build_training_dataset
+from clauseforge.training.diagnostics import (
+    ValidationPrediction,
+    aggregate_diagnostics,
+    build_prediction,
+    write_predictions,
+)
 from clauseforge.training.environment import environment_metadata
 from clauseforge.training.lora import attach_lora, prepare_qlora_base
 from clauseforge.training.model import load_production_model
@@ -190,7 +196,8 @@ def _generate_label(
     example: TrainingExample,
     taxonomy: tuple[str, ...],
     max_length: int,
-) -> tuple[str | None, str]:
+    max_new_tokens: int,
+) -> tuple[str | None, ValidationPrediction]:
     inputs = tokenizer(
         render_prompt(example.clause_text),
         return_tensors="pt",
@@ -201,38 +208,58 @@ def _generate_label(
     with torch.no_grad():
         generated = model.generate(
             **device_inputs,
-            max_new_tokens=160,
+            max_new_tokens=max_new_tokens,
             do_sample=False,
             pad_token_id=tokenizer.pad_token_id,
         )
     new_tokens = generated[0, device_inputs["input_ids"].shape[1] :]
     raw = tokenizer.decode(new_tokens, skip_special_tokens=True)
+    prediction_record = build_prediction(
+        clause_id=example.clause_id,
+        canonical_target=example.target_label,
+        raw_generated_text=raw,
+        generated_token_count=int(new_tokens.numel()),
+        target_token_count=len(
+            tokenizer.encode(example.target_label, add_special_tokens=False)
+        ),
+        generation_limit=max_new_tokens,
+    )
     try:
-        return normalize_generated_label(raw, taxonomy), "exact"
+        accepted = normalize_generated_label(raw, taxonomy)
     except UnknownGeneratedLabelError:
-        candidate = raw.strip()
-        if not candidate:
-            return None, "empty"
-        if "\n" in candidate or candidate.startswith(("'", '"', "```")):
-            return None, "malformed"
-        return None, "invalid"
+        accepted = None
+    return accepted, prediction_record
 
 
 def validation_metrics(
-    model: Any, tokenizer: Any, dataset: TrainingDataset, max_length: int
+    model: Any,
+    tokenizer: Any,
+    dataset: TrainingDataset,
+    max_length: int,
+    max_new_tokens: int = 160,
+    predictions_path: Path | None = None,
 ) -> dict[str, object]:
     predictions: list[str] = []
     expected: list[str] = []
     statuses: Counter[str] = Counter()
+    records: list[ValidationPrediction] = []
     for example in dataset.validation:
-        prediction, status = _generate_label(
-            model, tokenizer, example, dataset.taxonomy, max_length
+        prediction, record = _generate_label(
+            model,
+            tokenizer,
+            example,
+            dataset.taxonomy,
+            max_length,
+            max_new_tokens,
         )
-        statuses[status] += 1
+        statuses[record.validation_status] += 1
+        records.append(record)
         predictions.append(prediction or "__INVALID_GENERATION__")
         expected.append(example.target_label)
     metrics = classification_metrics(expected, predictions, list(dataset.taxonomy))
     invalid_count = statuses["invalid"] + statuses["empty"] + statuses["malformed"]
+    if predictions_path is not None:
+        write_predictions(predictions_path, records)
     return {
         "selection_split": "validation",
         "selection_metric": "macro_f1",
@@ -245,6 +272,8 @@ def validation_metrics(
         "empty_outputs": statuses["empty"],
         "malformed_outputs": statuses["malformed"],
         "invalid_output_rate": invalid_count / len(dataset.validation),
+        "max_new_tokens": max_new_tokens,
+        "output_diagnostics": aggregate_diagnostics(records),
         "test_evaluated": False,
     }
 
@@ -260,6 +289,73 @@ def validation_loss(
             batch = {key: value.to(model.device) for key, value in batch.items()}
             losses.append(float(model(**batch).loss.detach()))
     return sum(losses) / len(losses)
+
+
+def evaluate_phase3b_checkpoint(
+    config: TrainingConfig,
+    data_dir: Path,
+    checkpoint: Path,
+    output_dir: Path,
+    *,
+    pilot: bool = False,
+    pilot_validation_examples: int = 256,
+) -> dict[str, object]:
+    """Evaluate an explicitly provisioned checkpoint on validation only."""
+    dataset = build_training_dataset(
+        data_dir,
+        max_train_examples=config.data.max_train_examples,
+        max_validation_examples=config.data.max_validation_examples,
+    )
+    subset_checksum = ""
+    if pilot:
+        dataset, train_selection, validation_selection = build_pilot_dataset(
+            dataset,
+            train_count=min(512, len(dataset.train)),
+            validation_count=pilot_validation_examples,
+            seed=config.seed,
+        )
+        subset_checksum = combined_selection_checksum(
+            train_selection, validation_selection
+        )
+    resume_metadata_path = checkpoint / "resume_state.json"
+    if not resume_metadata_path.is_file():
+        raise ValueError("checkpoint resume metadata is required for diagnostics")
+    resume_metadata = json.loads(resume_metadata_path.read_text(encoding="utf-8"))
+    if not isinstance(resume_metadata, dict):
+        raise ValueError("checkpoint resume metadata is malformed")
+    state = ResumeState(**cast(dict[str, Any], resume_metadata))
+    validate_resume_compatibility(
+        state,
+        config.experiment_id,
+        "pilot" if pilot else "full",
+        subset_checksum,
+    )
+    model, tokenizer = load_production_model(config.model)
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    model = resume_adapter(prepare_qlora_base(model), checkpoint)
+    configure_gradient_checkpointing(model, config)
+    model.eval()
+    predictions_path = output_dir / "validation_predictions.jsonl"
+    metrics = validation_metrics(
+        model,
+        tokenizer,
+        dataset,
+        config.data.max_sequence_length,
+        config.data.validation_max_new_tokens,
+        predictions_path,
+    )
+    metrics.update(
+        {
+            "checkpoint": str(checkpoint),
+            "pilot": pilot,
+            "prediction_artifact": str(predictions_path),
+            "prompt_template_version": config.prompt_template_version,
+            "test_evaluated": False,
+        }
+    )
+    write_json(output_dir / "validation_diagnostics.json", metrics)
+    return metrics
 
 
 def run_phase3b(
@@ -316,6 +412,7 @@ def run_phase3b(
             "seed": config.seed,
             "max_steps": max_steps,
             "checkpoint_steps": 5,
+            "validation_max_new_tokens": config.data.validation_max_new_tokens,
             "selection_checksum": subset_checksum,
             "test_evaluated": False,
         }
@@ -417,6 +514,7 @@ def run_phase3b(
                             tokenizer,
                             dataset,
                             config.data.max_sequence_length,
+                            config.data.validation_max_new_tokens,
                         )
                         measured["global_step"] = state.global_step
                         _append_log(log_path, {"event": "validation", **measured})
@@ -499,7 +597,12 @@ def run_phase3b(
             {"skipped": True, "reason": SANITY_LABEL, "test_evaluated": False}
             if sanity_steps is not None
             else validation_metrics(
-                model, tokenizer, dataset, config.data.max_sequence_length
+                model,
+                tokenizer,
+                dataset,
+                config.data.max_sequence_length,
+                config.data.validation_max_new_tokens,
+                experiment_dir / "validation_predictions.jsonl",
             )
         )
         if sanity_steps is None:

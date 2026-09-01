@@ -35,6 +35,7 @@ data/processed/*
 /models/
 /artifacts/
 *.gguf
+validation_predictions.jsonl
 checkpoints/
 training/outputs/
 **/adapter_model.*

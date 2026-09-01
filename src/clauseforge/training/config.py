@@ -61,6 +61,7 @@ class OptimizationConfig:
 @dataclass(frozen=True, slots=True)
 class DataConfig:
     max_sequence_length: int = 1024
+    validation_max_new_tokens: int = 160
     max_train_examples: int | None = None
     max_validation_examples: int | None = None
 
@@ -89,6 +90,8 @@ class TrainingConfig:
             )
         if self.data.max_sequence_length < 32:
             raise ConfigurationError("max_sequence_length must be at least 32")
+        if self.data.validation_max_new_tokens <= 0:
+            raise ConfigurationError("validation_max_new_tokens must be positive")
         if self.lora.rank <= 0 or self.lora.alpha <= 0:
             raise ConfigurationError("LoRA rank and alpha must be positive")
         if not 0.0 <= self.lora.dropout < 1.0:
@@ -216,6 +219,7 @@ def load_config(path: Path) -> TrainingConfig:
             ),
             data=DataConfig(
                 max_sequence_length=_int(data, "max_sequence_length", 1024),
+                validation_max_new_tokens=_int(data, "validation_max_new_tokens", 160),
                 max_train_examples=_optional_int(data, "max_train_examples"),
                 max_validation_examples=_optional_int(data, "max_validation_examples"),
             ),
