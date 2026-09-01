@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "data": [
+    {
+      "title": "public-schema-contract-a.txt",
+      "paragraphs": [
+        {
+          "context": "1. TERM\nThis Agreement begins on January 1.\n\n2. LAW\nThis Agreement is governed by New York law.",
+          "qas": [
+            {
+              "id": "a-term",
+              "question": "Effective Date",
+              "answers": [{"text": "January 1", "answer_start": 33}],
+              "is_impossible": false
+            },
+            {
+              "id": "a-law",
+              "question": "Governing Law",
+              "answers": [{"text": "New York", "answer_start": 82}],
+              "is_impossible": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "public-schema-contract-b.txt",
+      "paragraphs": [
+        {
+          "context": "This document has no answer span for the represented category.",
+          "qas": [
+            {
+              "id": "b-none",
+              "question": "Governing Law",
+              "answers": [],
+              "is_impossible": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

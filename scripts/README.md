@@ -1,4 +1,3 @@
 # Scripts
 
-Future repeatable command-line maintenance and data workflow entry points will
-live here. No project scripts are required in Phase 0.
+`prepare_cuad.py` is a thin local entry point for the Phase 1 CUAD pipeline.
