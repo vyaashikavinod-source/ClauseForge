@@ -3,7 +3,8 @@
 This document distinguishes implemented foundations from planned system
 components. Phase 1 implements local CUAD preparation, and Phase 2 implements
 classical classification baselines and their evaluation harness. Fine-tuning,
-risk evaluation, quantization, and inference remain planned.
+risk evaluation and quantization remain planned. The serving foundation is
+implemented with a development provider; real-model inference remains pending.
 
 ## Planned component boundaries
 
@@ -22,8 +23,9 @@ risk evaluation, quantization, and inference remain planned.
    behavior, calibration, latency, and cost against versioned benchmark inputs.
 5. **Quantization (planned):** create and validate deployment-oriented model
    variants without changing evaluation contracts.
-6. **Serving (planned):** expose versioned inference interfaces with input
-   validation, observability, and clear failure behavior.
+6. **Serving (foundation implemented):** FastAPI schemas, request identity,
+   structured errors, privacy-preserving logs, liveness/readiness, and explicit
+   mock versus local-transformer providers. Real adapter loading remains pending.
 7. **Regression CI (partially implemented):** deterministic unit and fixture
    evaluation checks run in Phase 2 CI. Future model-dependent regression gates
    remain planned.
@@ -85,3 +87,16 @@ PEFT supplies adapter attachment and reload. A local tiny GPT-2 proves the path
 without downloading a checkpoint. Optional 4-bit configuration is isolated
 behind CUDA and `bitsandbytes` checks. `TransformerClassifier` structurally
 implements the Phase 2 protocol so future checkpoints use existing metrics.
+
+## Serving boundary
+
+`clauseforge.serving.app` owns HTTP transport and response formatting;
+`providers.base` defines the model-independent asynchronous contract. The
+deterministic `mock-development` provider supports local integration without
+claiming model quality. The transformer provider is explicitly configured and
+fails readiness when artifacts are absent; it never silently selects the mock.
+
+Every successful response is checked against the packaged, versioned 41-label
+CUAD taxonomy. Unknown output is a controlled error, never a fuzzy match.
+Request middleware logs request ID, route, status, latency, and safe size
+metadata without clause text. No CORS middleware is enabled by default.

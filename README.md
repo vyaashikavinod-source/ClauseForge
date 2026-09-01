@@ -4,25 +4,26 @@
 
 ClauseForge is a planned contract-clause intelligence system. The project is
 intended to support clause classification, grounded risk analysis, model
-evaluation, quantized deployment, and production-style inference. These
-Risk analysis, quantization, and deployment remain unimplemented. Phase 3A now
-provides training infrastructure, but no production transformer model.
+evaluation, quantized deployment, and production-style inference. Risk
+analysis, quantization, and deployment remain unimplemented. Phase 3A provides
+training infrastructure, but no production transformer model.
 
 ## Current status
 
-**Phase 3A training infrastructure is complete.**
+**Phase 3A training infrastructure and the serving/API foundation are complete.**
 
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
 truncation, attaches LoRA adapters, configures optional QLoRA, records adapter
 checkpoints and metadata, and bridges pre-trained generative classifiers into
-the Phase 2 evaluator.
+the Phase 2 evaluator. A FastAPI service exposes health, readiness, and
+versioned clause classification through an implementation-neutral provider.
 
 ClauseForge does not yet have a production fine-tuned model and does not analyze
-legal risk, quantize models, or provide a deployed inference service. It provides
-measured classical baselines and a validated LoRA/QLoRA training harness with a
-tiny local smoke path. Smoke output is not model-performance evidence.
+legal risk, quantize models, or provide a deployed inference service. Its local
+API defaults to a clearly identified deterministic development stub. Real
+fine-tuned model execution remains pending a CUDA GPU.
 
 ## Architecture direction
 
@@ -38,6 +39,7 @@ for the planned component boundaries.
 - [x] Phase 2: Clause classification baseline and evaluation harness
 - [x] Phase 3A: Reproducible LoRA/QLoRA training infrastructure
 - [ ] Phase 3B: Real-model training and comparison
+- [x] Serving/API foundation with development stub
 - [ ] Phase 3: Grounded risk analysis
 - [ ] Phase 4: Evaluation and frontier-model comparison
 - [ ] Phase 5: Quantization and inference serving
@@ -45,6 +47,27 @@ for the planned component boundaries.
 
 Only one phase is implemented and validated at a time. Later phases remain
 planning targets, not claims of working functionality.
+
+## Local inference API
+
+```bash
+uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
+```
+
+The default `mock-development` provider is deterministic test infrastructure,
+not a trained legal model. Transformer mode requires explicit model, adapter,
+and tokenizer paths; missing artifacts fail readiness without fallback.
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/ready
+curl -X POST http://127.0.0.1:8000/v1/classify \
+  -H "Content-Type: application/json" \
+  -d '{"text":"This agreement is governed by the laws of Delaware."}'
+```
+
+OpenAPI documentation is available at `/docs`. The service assists with
+contract clause analysis and does not provide legal advice.
 
 ## Local development
 

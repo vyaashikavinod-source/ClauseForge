@@ -17,14 +17,19 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "fastapi==0.141.1",
     "peft==0.20.0",
     "PyYAML==6.0.2",
     "torch==2.8.0",
     "transformers==5.16.1",
+    "uvicorn==0.52.4",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+clauseforge = ["cuad_taxonomy.json"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers"
