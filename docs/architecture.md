@@ -100,3 +100,11 @@ Every successful response is checked against the packaged, versioned 41-label
 CUAD taxonomy. Unknown output is a controlled error, never a fuzzy match.
 Request middleware logs request ID, route, status, latency, and safe size
 metadata without clause text. No CORS middleware is enabled by default.
+
+## Safety evaluation boundary
+
+`clauseforge.safety` loads versioned synthetic fixtures and evaluates any
+serving-compatible provider. It reuses the packaged taxonomy and exact output
+validation. Adversarial and paraphrase artifacts go to ignored evaluation
+directories. Mock and classical runs validate harness behavior only; real-model
+safety measurement remains pending Phase 3B.

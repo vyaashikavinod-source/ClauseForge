@@ -44,3 +44,10 @@ trained adapter and CUDA-capable host.
 
 This system assists with contract clause analysis and does not provide legal
 advice.
+
+## Safety regression
+
+The offline safety runner uses the same provider and taxonomy boundary. It
+covers instruction-bearing data, invalid output, provider failures, input
+limits, and disclaimer/logging invariants. Current mock/classical measurements
+validate the harness only; see `docs/safety_and_threat_model.md`.

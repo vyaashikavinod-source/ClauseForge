@@ -12,6 +12,8 @@ training infrastructure, but no production transformer model.
 
 **Phase 3A training infrastructure and the serving/API foundation are complete.**
 
+**The CPU-safe safety and robustness harness is complete.**
+
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The
 harness builds deterministic exact-label examples, measures tokenizer
@@ -68,6 +70,21 @@ curl -X POST http://127.0.0.1:8000/v1/classify \
 
 OpenAPI documentation is available at `/docs`. The service assists with
 contract clause analysis and does not provide legal advice.
+
+## Safety and robustness
+
+The offline harness evaluates synthetic adversarial clauses, exact taxonomy
+integrity, instruction-like text, malformed-input rejection, and deterministic
+paraphrase consistency through the serving provider boundary.
+
+```bash
+python scripts/run_safety_eval.py --provider mock --output eval/results/safety
+python scripts/run_safety_eval.py --provider classical --output eval/results/safety-rules
+```
+
+Results are ignored and labeled development evidence, not final model
+performance. Final trained-model safety performance remains pending Phase 3B
+GPU execution. See [the threat model](docs/safety_and_threat_model.md).
 
 ## Local development
 

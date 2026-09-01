@@ -59,3 +59,17 @@ split after configuration lock.
 
 Machine-readable metrics, intervals, calibration, confusion matrices, and
 errors are generated locally in `eval/results/phase2-final/`.
+
+## Safety and robustness harness
+
+Versioned synthetic public-safe fixtures live in `eval/fixtures/`.
+
+```bash
+python scripts/run_safety_eval.py --provider mock --output eval/results/safety
+python scripts/run_safety_eval.py --provider classical --output eval/results/safety-rules
+```
+
+The runner writes summary, adversarial/paraphrase JSONL, taxonomy metadata, run
+configuration, and Markdown artifacts beneath ignored `eval/results/`. Outputs
+are **DEVELOPMENT SAFETY HARNESS RESULTS — NOT FINAL MODEL PERFORMANCE**. Final
+trained-model safety performance remains pending Phase 3B GPU execution.

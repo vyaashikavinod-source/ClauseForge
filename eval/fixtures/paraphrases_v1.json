@@ -1,0 +1,8 @@
+{
+  "version": "paraphrase-v1",
+  "cases": [
+    {"pair_id":"law-1","source":"synthetic-public-safe","first":"This agreement is governed by Delaware law.","second":"Delaware law shall govern this agreement.","notes":"Governing-law paraphrase.","provenance":"manually-authored synthetic"},
+    {"pair_id":"expiry-1","source":"synthetic-public-safe","first":"This agreement expires on December 31, 2030.","second":"The expiration date of this agreement is December 31, 2030.","notes":"Expiration paraphrase.","provenance":"manually-authored synthetic"},
+    {"pair_id":"parties-1","source":"synthetic-public-safe","first":"Alpha LLC and Beta LLC are the parties.","second":"The parties to this agreement are Alpha LLC and Beta LLC.","notes":"Parties paraphrase.","provenance":"manually-authored synthetic"}
+  ]
+}
