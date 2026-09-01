@@ -7,11 +7,18 @@ import json
 import random
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from typing import cast
 
 from clauseforge.training.dataset import TrainingDataset
 from clauseforge.training.templates import TrainingExample
 
 PILOT_LABEL = "PHASE 3B T4 PILOT — NOT FINAL MODEL PERFORMANCE"
+
+
+def selection_checksum(example_ids: tuple[str, ...]) -> str:
+    return hashlib.sha256(
+        json.dumps(example_ids, ensure_ascii=False, separators=(",", ":")).encode()
+    ).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,9 +77,7 @@ def stratified_selection(
             break
         position += 1
     ids = tuple(example.clause_id for example in selected)
-    checksum = hashlib.sha256(
-        json.dumps(ids, ensure_ascii=False, separators=(",", ":")).encode()
-    ).hexdigest()
+    checksum = selection_checksum(ids)
     counts = Counter(example.target_label for example in selected)
     return PilotSelection(
         split=split,
@@ -125,3 +130,76 @@ def combined_selection_checksum(
     return hashlib.sha256(
         f"{train.checksum}:{validation.checksum}".encode()
     ).hexdigest()
+
+
+def restore_pilot_selection(
+    examples: tuple[TrainingExample, ...], metadata: dict[str, object], *, split: str
+) -> PilotSelection:
+    """Restore and validate an ordered selection from persisted example IDs."""
+    if metadata.get("split") != split:
+        raise ValueError(f"persisted {split} selection has the wrong split")
+    raw_ids = metadata.get("selected_example_ids")
+    if not isinstance(raw_ids, list) or not all(
+        isinstance(item, str) for item in raw_ids
+    ):
+        raise ValueError(f"persisted {split} selection IDs are malformed")
+    ids = tuple(raw_ids)
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"persisted {split} selection contains duplicate IDs")
+    by_id = {item.clause_id: item for item in examples if item.split == split}
+    if len(by_id) != len(examples) or any(item not in by_id for item in ids):
+        raise ValueError(f"persisted {split} selection contains unknown IDs")
+    selected = tuple(by_id[item] for item in ids)
+    checksum = selection_checksum(ids)
+    requested = metadata.get("requested_count")
+    selected_count = metadata.get("selected_count")
+    stored_checksum = metadata.get("checksum")
+    counts = dict(sorted(Counter(item.target_label for item in selected).items()))
+    stored_counts = metadata.get("category_counts")
+    if stored_checksum != checksum:
+        raise ValueError(
+            f"persisted {split} selection checksum differs: "
+            f"stored={stored_checksum}, calculated={checksum}"
+        )
+    if (
+        not isinstance(requested, int)
+        or requested != len(ids)
+        or selected_count != len(ids)
+        or stored_counts != counts
+    ):
+        raise ValueError(f"persisted {split} selection metadata is inconsistent")
+    supported = len({item.target_label for item in examples})
+    covered = len(counts)
+    if (
+        metadata.get("supported_category_count") != supported
+        or metadata.get("covered_category_count") != covered
+        or metadata.get("test_examples_selected") != 0
+    ):
+        raise ValueError(f"persisted {split} selection coverage is inconsistent")
+    return PilotSelection(
+        split=split,
+        requested_count=requested,
+        selected=selected,
+        category_counts=cast(dict[str, int], stored_counts),
+        supported_category_count=supported,
+        covered_category_count=covered,
+        selected_example_ids=ids,
+        checksum=checksum,
+    )
+
+
+def diagnostic_validation_selection(
+    examples: tuple[TrainingExample, ...],
+    historical: PilotSelection,
+    *,
+    requested_count: int | None,
+    seed: int,
+) -> tuple[PilotSelection, bool]:
+    """Use historical validation IDs unless an explicit new size is requested."""
+    count = historical.requested_count if requested_count is None else requested_count
+    if count == historical.requested_count:
+        return historical, False
+    return (
+        stratified_selection(examples, count=count, seed=seed, split="validation"),
+        True,
+    )

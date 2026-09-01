@@ -86,3 +86,26 @@ Compatibility reports contain only named checks and safe configuration values;
 they omit local paths and raw clause content. Blocking field names are included
 in developer-facing errors so incompatibility can be diagnosed without exposing
 private filesystem information.
+
+Historical pilot evaluation also restores persisted selected-example IDs. The
+pilot used 256 train and 128 validation examples, whose combined checksum is
+`a287835bc6954916c2d9066e7a4b76b18c6946419290abf839f6996bc73ba458`.
+Reconstructing with the later 512-train default instead produces
+`d16b99769131b050fde76cd4a8016f6cf394d030b9e8e338664006e25ff9bbf6`;
+that was the subset mismatch.
+
+When present, `selected_train_examples.json` and
+`selected_validation_examples.json` are authoritative. Their ordered IDs,
+individual checksums, counts, category coverage, split identity, and zero-test
+marker are validated against the current source dataset. If legacy selection
+files are absent, reconstruction uses persisted pilot counts and seed, never
+current defaults. The combined checksum must still equal both pilot and resume
+metadata.
+
+Omitting `--pilot-validation-examples`, or explicitly passing the persisted 128,
+evaluates the exact historical validation IDs. A different explicit size creates
+a deterministic new validation-only diagnostic sample. The report marks this as
+`evaluation_override=true` and records historical training, historical
+validation, and evaluation validation summaries separately; it never relabels
+the new sample as the original pilot subset. Historical training IDs remain
+lineage-only and are not passed through model evaluation.

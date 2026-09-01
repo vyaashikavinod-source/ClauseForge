@@ -35,6 +35,8 @@ from clauseforge.training.pilot import (
     PILOT_LABEL,
     build_pilot_dataset,
     combined_selection_checksum,
+    diagnostic_validation_selection,
+    restore_pilot_selection,
 )
 from clauseforge.training.templates import TrainingExample, render_prompt
 from clauseforge.training.trainer import build_training_batch, seed_everything
@@ -299,25 +301,14 @@ def evaluate_phase3b_checkpoint(
     output_dir: Path,
     *,
     pilot: bool = False,
-    pilot_validation_examples: int = 256,
+    pilot_validation_examples: int | None = None,
 ) -> dict[str, object]:
     """Evaluate an explicitly provisioned checkpoint on validation only."""
-    dataset = build_training_dataset(
+    source_dataset = build_training_dataset(
         data_dir,
         max_train_examples=config.data.max_train_examples,
         max_validation_examples=config.data.max_validation_examples,
     )
-    subset_checksum = ""
-    if pilot:
-        dataset, train_selection, validation_selection = build_pilot_dataset(
-            dataset,
-            train_count=min(512, len(dataset.train)),
-            validation_count=pilot_validation_examples,
-            seed=config.seed,
-        )
-        subset_checksum = combined_selection_checksum(
-            train_selection, validation_selection
-        )
     experiment_dir = checkpoint.parent
 
     def load_metadata(name: str, root: Path = experiment_dir) -> dict[str, object]:
@@ -339,6 +330,60 @@ def evaluate_phase3b_checkpoint(
         isinstance(item, str) for item in historical_taxonomy
     ):
         raise ValueError("checkpoint taxonomy lineage is malformed")
+    dataset = source_dataset
+    subset_checksum = ""
+    historical_train_summary: dict[str, object] = {}
+    historical_validation_summary: dict[str, object] = {}
+    evaluation_validation_summary: dict[str, object] = {}
+    evaluation_override = False
+    if pilot:
+        train_count = pilot_config.get("train_examples")
+        validation_count = pilot_config.get("validation_examples")
+        seed = pilot_config.get("seed")
+        if not all(
+            isinstance(item, int) for item in (train_count, validation_count, seed)
+        ):
+            raise ValueError("persisted pilot sample configuration is malformed")
+        selected_train_path = experiment_dir / "selected_train_examples.json"
+        selected_validation_path = experiment_dir / "selected_validation_examples.json"
+        if selected_train_path.is_file() and selected_validation_path.is_file():
+            train_selection = restore_pilot_selection(
+                source_dataset.train,
+                load_metadata("selected_train_examples.json"),
+                split="train",
+            )
+            validation_selection = restore_pilot_selection(
+                source_dataset.validation,
+                load_metadata("selected_validation_examples.json"),
+                split="validation",
+            )
+        elif selected_train_path.exists() or selected_validation_path.exists():
+            raise ValueError("persisted pilot selection metadata is incomplete")
+        else:
+            _, train_selection, validation_selection = build_pilot_dataset(
+                source_dataset,
+                train_count=cast(int, train_count),
+                validation_count=cast(int, validation_count),
+                seed=cast(int, seed),
+            )
+        subset_checksum = combined_selection_checksum(
+            train_selection, validation_selection
+        )
+        historical_train_summary = train_selection.metadata()
+        historical_validation_summary = validation_selection.metadata()
+        evaluation_selection, evaluation_override = diagnostic_validation_selection(
+            source_dataset.validation,
+            validation_selection,
+            requested_count=pilot_validation_examples,
+            seed=config.seed,
+        )
+        evaluation_validation_summary = evaluation_selection.metadata()
+        dataset = TrainingDataset(
+            train_selection.selected,
+            evaluation_selection.selected,
+            source_dataset.taxonomy,
+            source_dataset.manifest,
+        )
     compatibility = checkpoint_evaluation_compatibility(
         config,
         historical_config,
@@ -349,9 +394,18 @@ def evaluate_phase3b_checkpoint(
         expected_subset_checksum=subset_checksum,
         historical_taxonomy=historical_taxonomy,
         current_taxonomy=dataset.taxonomy,
+        historical_training_subset=historical_train_summary,
+        historical_validation_subset=historical_validation_summary,
+        evaluation_validation_subset=evaluation_validation_summary,
+        evaluation_override=evaluation_override,
     )
     if not compatibility.compatible:
         fields = ", ".join(compatibility.blocking_differences)
+        if "selected_subset_checksum" in compatibility.blocking_differences:
+            fields += (
+                f" (stored={resume_metadata.get('subset_checksum')}, "
+                f"calculated={subset_checksum})"
+            )
         raise ValueError(f"checkpoint evaluation is incompatible: {fields}")
     model, tokenizer = load_production_model(config.model)
     if tokenizer.pad_token_id is None:
@@ -388,6 +442,11 @@ def evaluate_phase3b_checkpoint(
             "evaluation_configuration": {
                 "validation_max_new_tokens": config.data.validation_max_new_tokens,
                 "diagnostics": True,
+                "validation_subset_mode": (
+                    "new_diagnostic_subset"
+                    if evaluation_override
+                    else "historical_pilot_subset"
+                ),
             },
             "compatibility_report": compatibility.to_dict(),
             "test_evaluated": False,

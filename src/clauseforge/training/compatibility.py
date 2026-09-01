@@ -18,6 +18,12 @@ class CompatibilityReport:
     evaluation_overrides: dict[str, object]
     ignored_nonstructural_differences: tuple[str, ...]
     blocking_differences: tuple[str, ...]
+    historical_training_subset: dict[str, object]
+    historical_validation_subset: dict[str, object]
+    evaluation_validation_subset: dict[str, object]
+    training_subset_match: bool
+    validation_subset_match: bool
+    evaluation_override: bool
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -51,6 +57,10 @@ def checkpoint_evaluation_compatibility(
     expected_subset_checksum: str,
     historical_taxonomy: list[str],
     current_taxonomy: tuple[str, ...],
+    historical_training_subset: dict[str, object],
+    historical_validation_subset: dict[str, object],
+    evaluation_validation_subset: dict[str, object],
+    evaluation_override: bool,
 ) -> CompatibilityReport:
     """Compare structural lineage while allowing explicit evaluation controls."""
     current_dict = current.to_dict()
@@ -87,13 +97,22 @@ def checkpoint_evaluation_compatibility(
     ) == tuple(cast(list[str], _nested(historical, "lora", "target_modules")))
 
     stored_id = str(resume.get("experiment_id", ""))
+    combined_matches = (
+        resume.get("subset_checksum")
+        == expected_subset_checksum
+        == pilot.get("selection_checksum")
+    )
+    training_subset_match = combined_matches and pilot.get(
+        "train_examples"
+    ) == historical_training_subset.get("selected_count")
+    validation_subset_match = combined_matches and pilot.get(
+        "validation_examples"
+    ) == historical_validation_subset.get("selected_count")
     training_matches = {
         "experiment_identity": stored_id == historical_experiment_id(historical),
         "run_mode": resume.get("run_mode") == expected_run_mode,
         "selected_subset_checksum": (
-            resume.get("subset_checksum")
-            == expected_subset_checksum
-            == pilot.get("selection_checksum")
+            training_subset_match and validation_subset_match
             if expected_run_mode == "pilot"
             else resume.get("subset_checksum") == expected_subset_checksum == ""
         ),
@@ -123,4 +142,10 @@ def checkpoint_evaluation_compatibility(
         },
         ignored_nonstructural_differences=tuple(ignored),
         blocking_differences=blocking,
+        historical_training_subset=historical_training_subset,
+        historical_validation_subset=historical_validation_subset,
+        evaluation_validation_subset=evaluation_validation_subset,
+        training_subset_match=training_subset_match,
+        validation_subset_match=validation_subset_match,
+        evaluation_override=evaluation_override,
     )

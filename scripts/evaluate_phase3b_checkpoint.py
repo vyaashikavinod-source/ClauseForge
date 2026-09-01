@@ -17,7 +17,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--pilot", action="store_true")
-    parser.add_argument("--pilot-validation-examples", type=int, default=256)
+    parser.add_argument(
+        "--pilot-validation-examples",
+        type=int,
+        help="override persisted validation subset size for a new diagnostic sample",
+    )
     parser.add_argument("--diagnostics", action="store_true", required=True)
     return parser
 
