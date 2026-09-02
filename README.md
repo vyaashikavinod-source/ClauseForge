@@ -1,5 +1,13 @@
 # ClauseForge
 
+## Phase 3B v2 category-ID experiments
+
+The completed 25-step T4 canonical-question pilot is historical infrastructure
+evidence: it checkpointed successfully but produced 0 taxonomy-valid outputs
+(128/128 unrelated). It is not final model performance. The untrained v2 family
+targets one of 41 stable IDs (`cuad-category-id-v1`) with prompt
+`cuad-classification-id-v2`; canonical CUAD questions remain authoritative.
+
 **Status: In Development**
 
 ClauseForge is a planned contract-clause intelligence system. The project is
@@ -30,17 +38,14 @@ are prepared; ClauseForge is not production-model ready.**
 Final adapter training and rank selection, real quantization, deployment, and
 final serving benchmarks remain pending.
 
-The completed 10-step T4 pilot was a successful infrastructure/training pilot,
-but produced 0 exact taxonomy-valid validation outputs. This indicates an
-output-compliance problem requiring diagnosis before a larger GPU run; it is
-not final model performance or a conclusion that the model failed. See
+The completed 25-step T4 canonical-target pilot was successful infrastructure
+evidence but produced 0 exact taxonomy-valid outputs (128/128 unrelated). It is
+historical evidence, not final performance or a conclusion that the model
+failed. See
 [Phase 3B output diagnostics](docs/phase3b_output_diagnostics.md).
 
-Checkpoint-10 diagnostics found 0 exact canonical matches, 2 short-name-only
-outputs, 122 unrelated outputs, and 4 malformed outputs across 128 validation
-examples. This is pilot diagnostic evidence, not final performance. Later
-checkpoint diagnosis, final rank/adapter selection, and model quality remain
-pending; held-out test remains sealed.
+The new category-ID v2 family has not yet been trained. Final adapter selection
+and model quality remain pending; held-out test remains sealed.
 
 ## Docker quickstart and operations
 

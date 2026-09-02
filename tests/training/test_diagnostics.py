@@ -82,6 +82,7 @@ def test_prediction_artifact_serialization_and_aggregates(tmp_path: Path) -> Non
         "exact_match",
         "generated_token_count",
         "target_token_count",
+        "target_representation",
     }
     assert all(row["clause_id"].startswith("validation-") for row in rows)
     counts = aggregate_diagnostics(records)

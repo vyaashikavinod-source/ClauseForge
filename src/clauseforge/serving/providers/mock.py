@@ -10,6 +10,8 @@ class MockDevelopmentProvider:
     model_id = "deterministic-fixture-rules-v1"
     provider_type = "mock"
     is_mock = True
+    target_representation = "canonical_question"
+    target_representation_version = "cuad-canonical-question-v1"
 
     def __init__(self, taxonomy: tuple[str, ...]) -> None:
         self._taxonomy = taxonomy

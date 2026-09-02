@@ -34,6 +34,9 @@ def _summary(config: TrainingConfig, data_dir: Path) -> dict[str, object]:
         "quantization": config.model.quantization,
         "max_sequence_length": config.data.max_sequence_length,
         "validation_max_new_tokens": config.data.validation_max_new_tokens,
+        "target_representation": config.target_representation,
+        "target_representation_version": config.target_representation_version,
+        "prompt_template_version": config.prompt_template_version,
         "output_dir": str(config.output_dir.resolve()),
     }
 
@@ -46,15 +49,26 @@ def run(
     sanity_steps: int | None = None,
     resume_from_checkpoint: Path | None = None,
     pilot: bool = False,
-    pilot_train_examples: int = 512,
-    pilot_validation_examples: int = 256,
+    pilot_train_examples: int | None = None,
+    pilot_validation_examples: int | None = None,
     max_steps: int | None = None,
 ) -> dict[str, object]:
     config.validate()
+    if pilot_train_examples is None:
+        pilot_train_examples = (
+            256 if config.target_representation == "category_id" else 512
+        )
+    if pilot_validation_examples is None:
+        pilot_validation_examples = (
+            128 if config.target_representation == "category_id" else 256
+        )
     dataset = build_training_dataset(
         data_dir,
         max_train_examples=config.data.max_train_examples,
         max_validation_examples=config.data.max_validation_examples,
+        target_representation=config.target_representation,
+        target_representation_version=config.target_representation_version,
+        prompt_template_version=config.prompt_template_version,
     )
     if config.prompt_template_version != dataset.manifest["template_version"]:
         raise ValueError("configured and implemented prompt template versions differ")
@@ -172,8 +186,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sanity-steps", type=int)
     parser.add_argument("--resume-from-checkpoint", type=Path)
     parser.add_argument("--pilot", action="store_true")
-    parser.add_argument("--pilot-train-examples", type=int, default=512)
-    parser.add_argument("--pilot-validation-examples", type=int, default=256)
+    parser.add_argument("--pilot-train-examples", type=int)
+    parser.add_argument("--pilot-validation-examples", type=int)
     parser.add_argument("--max-steps", type=int)
     return parser
 

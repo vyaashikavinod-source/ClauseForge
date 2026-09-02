@@ -1,8 +1,17 @@
 # Training
 
-The completed 10-step T4 pilot produced no exact taxonomy-valid validation
-outputs. This is an output-compliance diagnostic finding, not final model
-performance or a model-failure conclusion. See
+## Category-ID v2
+
+The v2 QLoRA config trains exact stable IDs with a 256-train/128-validation
+pilot default. Only surrounding whitespace is stripped; short names, canonical
+questions, case changes, partial IDs, commentary, and unknown IDs stay invalid.
+Pilot sampling remains split-isolated and never reads test.
+The validation generation limit is 24 tokens because valid v2 targets are short
+IDs; this bounds runtime while leaving ample room for every allowed ID.
+
+The completed 25-step canonical-target T4 pilot produced no exact taxonomy-valid
+outputs (128/128 unrelated). It is historical infrastructure evidence, not
+final performance or a model-failure conclusion. See
 [`docs/phase3b_output_diagnostics.md`](../docs/phase3b_output_diagnostics.md).
 
 Phase 3A implements a reproducible supervised fine-tuning harness for exact

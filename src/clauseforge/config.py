@@ -35,6 +35,9 @@ class Settings:
     metrics_enabled: bool = False
     rate_limit_per_minute: int = 0
     exact_cache_capacity: int = 0
+    target_representation: str = "canonical_question"
+    target_representation_version: str = "cuad-canonical-question-v1"
+    prompt_template_version: str = "cuad-classification-v1"
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -75,6 +78,16 @@ class Settings:
             exact_cache_capacity=int(
                 os.getenv("CLAUSEFORGE_EXACT_CACHE_CAPACITY", "0")
             ),
+            target_representation=os.getenv(
+                "CLAUSEFORGE_TARGET_REPRESENTATION", "canonical_question"
+            ),
+            target_representation_version=os.getenv(
+                "CLAUSEFORGE_TARGET_REPRESENTATION_VERSION",
+                "cuad-canonical-question-v1",
+            ),
+            prompt_template_version=os.getenv(
+                "CLAUSEFORGE_PROMPT_TEMPLATE_VERSION", "cuad-classification-v1"
+            ),
         )
         settings.validate()
         return settings
@@ -105,6 +118,13 @@ class Settings:
             raise ValueError("CLAUSEFORGE_RATE_LIMIT_PER_MINUTE may not be negative")
         if self.exact_cache_capacity < 0:
             raise ValueError("CLAUSEFORGE_EXACT_CACHE_CAPACITY may not be negative")
+        from clauseforge.training.targets import validate_target_version
+
+        validate_target_version(
+            self.target_representation,  # type: ignore[arg-type]
+            self.target_representation_version,
+            self.prompt_template_version,
+        )
 
     def backend_configuration_issues(self) -> tuple[str, ...]:
         """Return backend-specific missing configuration without fallback."""

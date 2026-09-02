@@ -1,21 +1,25 @@
 # GPU resume plan
 
-1. Obtain GPU access.
-2. Restore and preserve pilot artifacts.
-3. Evaluate checkpoint-25 on the historical 128-example validation subset.
-4. Compare checkpoint-10 and checkpoint-25 diagnostics.
-5. Decide between continuing canonical-question targets or versioning the
-   model-facing target representation.
-6. If representation changes, create a new experiment family and never reuse
-   incompatible adapters.
-7. Run a bounded validation pilot.
-8. Select configuration using validation only.
-9. Perform full training on adequate compute.
-10. Run rank selection.
-11. Lock the model and configuration.
-12. Evaluate held-out test once.
-13. Run final safety evaluation.
-14. Run SEC EDGAR OOD evaluation.
+Next validation-only pilot (GPU only; do not run locally):
+
+```bash
+python scripts/train_classifier.py \
+  --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8.yaml \
+  --data data/processed/cuad/1.0.0-run-a \
+  --pilot --pilot-train-examples 256 \
+  --pilot-validation-examples 128 --max-steps 25
+```
+
+Engineering success means exact valid IDs above zero, invalid rate below 1.0,
+visible category structure, decreasing loss, checkpoints, and zero test access.
+These are pilot criteria, not final quality thresholds.
+
+1. Obtain GPU access and preserve historical pilot artifacts.
+2. Run the bounded category-ID v2 validation pilot above with a new adapter.
+3. Inspect strict ID diagnostics and checkpoints; do not access test.
+4. Select configuration using validation only, then obtain durable compute.
+5. Complete rank selection, lock one model/configuration, and only then perform
+   the one-time held-out test, safety, and SEC EDGAR OOD evaluations.
 15. Merge the adapter.
 16. Quantize.
 17. Validate the artifact and lineage.
@@ -24,4 +28,3 @@
 
 Do not overwrite historical artifacts or reinterpret new validation samples as
 the original pilot. The held-out test remains sealed through step 11.
-

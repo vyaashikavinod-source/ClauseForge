@@ -10,6 +10,12 @@ from typing import Literal, cast
 
 import yaml
 
+from clauseforge.training.targets import (
+    CANONICAL_TARGET_VERSION,
+    TargetRepresentation,
+    validate_target_version,
+)
+
 Precision = Literal["float32", "float16", "bfloat16"]
 Quantization = Literal["none", "4bit"]
 OptimizerName = Literal["adamw_torch", "paged_adamw_8bit"]
@@ -75,6 +81,8 @@ class TrainingConfig:
     seed: int
     output_dir: Path
     prompt_template_version: str = "cuad-classification-v1"
+    target_representation: TargetRepresentation = "canonical_question"
+    target_representation_version: str = CANONICAL_TARGET_VERSION
     tags: tuple[str, ...] = field(default_factory=tuple)
 
     def validate(self) -> None:
@@ -121,6 +129,14 @@ class TrainingConfig:
             raise ConfigurationError("save_steps and eval_steps must be positive")
         if self.output_dir.resolve() == Path.cwd().resolve():
             raise ConfigurationError("output_dir may not be the repository root")
+        try:
+            validate_target_version(
+                self.target_representation,
+                self.target_representation_version,
+                self.prompt_template_version,
+            )
+        except (KeyError, ValueError) as exc:
+            raise ConfigurationError(str(exc)) from exc
 
     def to_dict(self) -> dict[str, object]:
         value = asdict(self)
@@ -227,6 +243,13 @@ def load_config(path: Path) -> TrainingConfig:
             output_dir=Path(cast(str, root["output_dir"])),
             prompt_template_version=str(
                 root.get("prompt_template_version", "cuad-classification-v1")
+            ),
+            target_representation=cast(
+                TargetRepresentation,
+                root.get("target_representation", "canonical_question"),
+            ),
+            target_representation_version=str(
+                root.get("target_representation_version", CANONICAL_TARGET_VERSION)
             ),
             tags=tuple(cast(list[str], root.get("tags", []))),
         )

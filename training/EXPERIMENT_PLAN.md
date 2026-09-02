@@ -1,9 +1,16 @@
 # Phase 3B experiment plan
 
-The completed 10-step rank-8 T4 pilot validated the infrastructure but produced
-0 exact canonical validation outputs. Larger training is paused pending output
-diagnostics. Canonical validation remains strict; recognized short names or
-wrapped answers do not become accepted predictions.
+## V2: stable category IDs
+
+This is a new adapter family, not a migration. Model-critical lineage includes
+target representation/version, prompt version, taxonomy, and stable-ID map
+checksum. Diagnostics recognize exact IDs, short names, canonical questions,
+commentary-wrapped IDs, invalid IDs, empty, malformed, and unrelated output
+without accepting non-exact forms. Selection remains validation-only.
+
+The completed 25-step rank-8 canonical-target T4 pilot validated infrastructure
+but produced 0 exact canonical outputs (128/128 unrelated). That experiment is
+historical; the category-ID family starts with new adapters and identity.
 
 Full rank-ablation results remain pending. Qwen2.5-7B-Instruct completed one
 genuine 4-bit NF4 rank-8 QLoRA optimizer step on a free Colab Tesla T4 without

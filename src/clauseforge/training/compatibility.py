@@ -8,6 +8,10 @@ from dataclasses import asdict, dataclass
 from typing import cast
 
 from clauseforge.training.config import TrainingConfig
+from clauseforge.training.targets import (
+    CANONICAL_TARGET_VERSION,
+    stable_id_map_checksum,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +83,18 @@ def checkpoint_evaluation_compatibility(
         == _nested(current_dict, "model", field)
         for field in model_fields
     }
+    historical_representation = str(
+        historical.get("target_representation", "canonical_question")
+    )
+    historical_target_version = str(
+        historical.get("target_representation_version", CANONICAL_TARGET_VERSION)
+    )
+    model_matches["target_representation"] = (
+        historical_representation == current.target_representation
+    )
+    model_matches["target_representation_version"] = (
+        historical_target_version == current.target_representation_version
+    )
     for field in ("rank", "alpha", "target_modules"):
         historical_value = _nested(historical, "lora", field)
         current_value = _nested(current_dict, "lora", field)
@@ -95,6 +111,22 @@ def checkpoint_evaluation_compatibility(
     model_matches["adapter.target_modules"] = tuple(
         cast(list[str], adapter.get("target_modules", []))
     ) == tuple(cast(list[str], _nested(historical, "lora", "target_modules")))
+    adapter_representation = str(
+        adapter.get("target_representation", "canonical_question")
+    )
+    adapter_version = str(
+        adapter.get("target_representation_version", CANONICAL_TARGET_VERSION)
+    )
+    model_matches["adapter.target_representation"] = (
+        adapter_representation == historical_representation
+    )
+    model_matches["adapter.target_representation_version"] = (
+        adapter_version == historical_target_version
+    )
+    if historical_representation == "category_id":
+        model_matches["stable_id_map_checksum"] = (
+            adapter.get("stable_id_map_checksum") == stable_id_map_checksum()
+        )
 
     stored_id = str(resume.get("experiment_id", ""))
     combined_matches = (

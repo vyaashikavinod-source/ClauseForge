@@ -27,6 +27,8 @@ class ProcessingMetadata(BaseModel):
     latency_ms: float
     score_availability: Literal["available", "unavailable"]
     cache_hit: bool = False
+    target_representation: str = "canonical_question"
+    target_representation_version: str = "cuad-canonical-question-v1"
 
 
 class ClassificationResponse(BaseModel):

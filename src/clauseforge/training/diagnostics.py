@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from clauseforge.taxonomy import TaxonomyCategory, load_taxonomy_metadata
+from clauseforge.training.targets import TargetRepresentation
 
 _SPACE = re.compile(r"\s+")
 _COMMENTARY = re.compile(
@@ -29,6 +30,7 @@ class ValidationPrediction:
     exact_match: bool
     generated_token_count: int
     target_token_count: int
+    target_representation: str = "canonical_question"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -72,6 +74,28 @@ def diagnose_output(
     return "invalid", "completely_unrelated"
 
 
+def diagnose_id_output(raw: str, target: TaxonomyCategory) -> tuple[str, str, bool]:
+    """Diagnose ID output without promoting recognizable invalid forms."""
+    candidate = raw.strip()
+    categories = load_taxonomy_metadata()
+    exact_ids = {item.category_id: item for item in categories}
+    if candidate in exact_ids:
+        return "exact", "exact_id_match", candidate == target.category_id
+    if not candidate:
+        return "empty", "empty", False
+    if candidate in {item.category_name for item in categories}:
+        return "invalid", "short_name_output", False
+    if candidate in {item.canonical for item in categories}:
+        return "invalid", "canonical_question_output", False
+    if target.category_id in candidate and candidate != target.category_id:
+        return "malformed", "commentary_wrapped_id", False
+    if "\n" in raw or raw.lstrip().startswith(("'", '"', "```")):
+        return "malformed", "malformed", False
+    if re.fullmatch(r"[a-z][a-z0-9_]*", candidate):
+        return "invalid", "invalid_id", False
+    return "invalid", "unrelated", False
+
+
 def build_prediction(
     *,
     clause_id: str,
@@ -80,27 +104,38 @@ def build_prediction(
     generated_token_count: int,
     target_token_count: int,
     generation_limit: int,
+    target_representation: TargetRepresentation = "canonical_question",
 ) -> ValidationPrediction:
-    categories = {item.canonical: item for item in load_taxonomy_metadata()}
-    target = categories[canonical_target]
-    status, reason = diagnose_output(
-        raw_generated_text,
-        target,
-        generated_token_count=generated_token_count,
-        generation_limit=generation_limit,
-    )
+    categories = load_taxonomy_metadata()
+    if target_representation == "category_id":
+        target = next(
+            item for item in categories if item.category_id == canonical_target
+        )
+        status, reason, exact_match = diagnose_id_output(raw_generated_text, target)
+        authoritative_target = target.canonical
+    else:
+        target = next(item for item in categories if item.canonical == canonical_target)
+        status, reason = diagnose_output(
+            raw_generated_text,
+            target,
+            generated_token_count=generated_token_count,
+            generation_limit=generation_limit,
+        )
+        exact_match = status == "exact"
+        authoritative_target = canonical_target
     return ValidationPrediction(
         clause_id=clause_id,
-        canonical_target=canonical_target,
+        canonical_target=authoritative_target,
         canonical_target_id=target.category_id,
         canonical_target_name=target.category_name,
         raw_generated_text=raw_generated_text,
         normalized_generated_text=normalize_diagnostic_text(raw_generated_text),
         validation_status=status,
         status_reason=reason,
-        exact_match=status == "exact",
+        exact_match=exact_match,
         generated_token_count=generated_token_count,
         target_token_count=target_token_count,
+        target_representation=target_representation,
     )
 
 
@@ -119,6 +154,12 @@ def aggregate_diagnostics(
         "empty_outputs": reasons["empty_output"],
         "malformed_outputs": statuses["malformed"],
         "completely_unrelated_outputs": reasons["completely_unrelated"],
+        "exact_id_matches": reasons["exact_id_match"],
+        "short_name_outputs": reasons["short_name_output"],
+        "canonical_question_outputs": reasons["canonical_question_output"],
+        "commentary_wrapped_ids": reasons["commentary_wrapped_id"],
+        "invalid_ids": reasons["invalid_id"],
+        "unrelated_outputs": reasons["unrelated"],
     }
 
 

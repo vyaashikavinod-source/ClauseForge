@@ -14,10 +14,7 @@ from typing import Any, cast
 import torch
 
 from clauseforge.evaluation.metrics import classification_metrics
-from clauseforge.models.transformer_classifier import (
-    UnknownGeneratedLabelError,
-    normalize_generated_label,
-)
+from clauseforge.serving.constants import TAXONOMY_VERSION
 from clauseforge.training.checkpoints import resume_adapter, save_adapter, write_json
 from clauseforge.training.compatibility import checkpoint_evaluation_compatibility
 from clauseforge.training.config import TrainingConfig
@@ -37,6 +34,12 @@ from clauseforge.training.pilot import (
     combined_selection_checksum,
     diagnostic_validation_selection,
     restore_pilot_selection,
+)
+from clauseforge.training.targets import (
+    TargetRepresentation,
+    UnknownTargetError,
+    resolve_generated_target,
+    stable_id_map_checksum,
 )
 from clauseforge.training.templates import TrainingExample, render_prompt
 from clauseforge.training.trainer import build_training_batch, seed_everything
@@ -200,9 +203,10 @@ def _generate_label(
     taxonomy: tuple[str, ...],
     max_length: int,
     max_new_tokens: int,
+    target_representation: TargetRepresentation = "canonical_question",
 ) -> tuple[str | None, ValidationPrediction]:
     inputs = tokenizer(
-        render_prompt(example.clause_text),
+        render_prompt(example.clause_text, example.prompt_template_version),
         return_tensors="pt",
         truncation=True,
         max_length=max_length,
@@ -226,10 +230,15 @@ def _generate_label(
             tokenizer.encode(example.target_label, add_special_tokens=False)
         ),
         generation_limit=max_new_tokens,
+        target_representation=target_representation,
     )
     try:
-        accepted = normalize_generated_label(raw, taxonomy)
-    except UnknownGeneratedLabelError:
+        accepted: str | None = resolve_generated_target(
+            raw, target_representation
+        ).canonical
+        if accepted not in taxonomy:
+            accepted = None
+    except UnknownTargetError:
         accepted = None
     return accepted, prediction_record
 
@@ -241,6 +250,7 @@ def validation_metrics(
     max_length: int,
     max_new_tokens: int = 160,
     predictions_path: Path | None = None,
+    target_representation: TargetRepresentation = "canonical_question",
 ) -> dict[str, object]:
     predictions: list[str] = []
     expected: list[str] = []
@@ -254,11 +264,12 @@ def validation_metrics(
             dataset.taxonomy,
             max_length,
             max_new_tokens,
+            target_representation,
         )
         statuses[record.validation_status] += 1
         records.append(record)
         predictions.append(prediction or "__INVALID_GENERATION__")
-        expected.append(example.target_label)
+        expected.append(record.canonical_target)
     metrics = classification_metrics(expected, predictions, list(dataset.taxonomy))
     invalid_count = statuses["invalid"] + statuses["empty"] + statuses["malformed"]
     if predictions_path is not None:
@@ -271,12 +282,18 @@ def validation_metrics(
         "accuracy": metrics["accuracy"],
         "total": len(dataset.validation),
         "exact_outputs": statuses["exact"],
+        "exact_id_outputs": sum(
+            record.status_reason == "exact_id_match" for record in records
+        ),
         "invalid_outputs": statuses["invalid"],
         "empty_outputs": statuses["empty"],
         "malformed_outputs": statuses["malformed"],
         "invalid_output_rate": invalid_count / len(dataset.validation),
         "max_new_tokens": max_new_tokens,
         "output_diagnostics": aggregate_diagnostics(records),
+        "prediction_distribution": dict(Counter(predictions)),
+        "target_representation": target_representation,
+        "stable_id_map_checksum": stable_id_map_checksum(),
         "test_evaluated": False,
     }
 
@@ -308,6 +325,9 @@ def evaluate_phase3b_checkpoint(
         data_dir,
         max_train_examples=config.data.max_train_examples,
         max_validation_examples=config.data.max_validation_examples,
+        target_representation=config.target_representation,
+        target_representation_version=config.target_representation_version,
+        prompt_template_version=config.prompt_template_version,
     )
     experiment_dir = checkpoint.parent
 
@@ -421,6 +441,7 @@ def evaluate_phase3b_checkpoint(
         config.data.max_sequence_length,
         config.data.validation_max_new_tokens,
         predictions_path,
+        config.target_representation,
     )
     metrics.update(
         {
@@ -480,6 +501,9 @@ def run_phase3b(
         data_dir,
         max_train_examples=config.data.max_train_examples,
         max_validation_examples=config.data.max_validation_examples,
+        target_representation=config.target_representation,
+        target_representation_version=config.target_representation_version,
+        prompt_template_version=config.prompt_template_version,
     )
     subset_checksum = ""
     train_selection = validation_selection = None
@@ -512,6 +536,11 @@ def run_phase3b(
             "checkpoint_steps": 5,
             "validation_max_new_tokens": config.data.validation_max_new_tokens,
             "selection_checksum": subset_checksum,
+            "target_representation": config.target_representation,
+            "target_representation_version": config.target_representation_version,
+            "prompt_template_version": config.prompt_template_version,
+            "taxonomy_version": TAXONOMY_VERSION,
+            "stable_id_map_checksum": stable_id_map_checksum(),
             "test_evaluated": False,
         }
         write_json(experiment_dir / "pilot_config.json", pilot_config)
@@ -613,6 +642,7 @@ def run_phase3b(
                             dataset,
                             config.data.max_sequence_length,
                             config.data.validation_max_new_tokens,
+                            target_representation=config.target_representation,
                         )
                         measured["global_step"] = state.global_step
                         _append_log(log_path, {"event": "validation", **measured})
@@ -688,6 +718,11 @@ def run_phase3b(
                 "trainable_parameters": trainable,
                 "total_parameters": total,
                 "adapter_size_bytes": training["adapter_size_bytes"],
+                "target_representation": config.target_representation,
+                "target_representation_version": config.target_representation_version,
+                "prompt_template_version": config.prompt_template_version,
+                "stable_id_map_checksum": stable_id_map_checksum(),
+                "taxonomy_version": TAXONOMY_VERSION,
             },
         )
         write_json(experiment_dir / "training_metrics.json", training)
@@ -701,6 +736,7 @@ def run_phase3b(
                 config.data.max_sequence_length,
                 config.data.validation_max_new_tokens,
                 experiment_dir / "validation_predictions.jsonl",
+                config.target_representation,
             )
         )
         if sanity_steps is None:

@@ -23,6 +23,9 @@ def build_provider(
             settings.max_new_tokens,
             settings.temperature,
             settings.inference_timeout_seconds,
+            settings.target_representation,
+            settings.target_representation_version,
+            settings.prompt_template_version,
         )
     if settings.model_provider == "llamacpp":
         return LlamaCppProvider(
@@ -32,6 +35,9 @@ def build_provider(
             settings.max_new_tokens,
             settings.temperature,
             settings.inference_timeout_seconds,
+            settings.target_representation,
+            settings.target_representation_version,
+            settings.prompt_template_version,
         )
     return LocalTransformerProvider(
         settings.model_path,
@@ -39,4 +45,6 @@ def build_provider(
         settings.tokenizer_path,
         settings.device,
         settings.max_sequence_length,
+        settings.target_representation,
+        settings.target_representation_version,
     )

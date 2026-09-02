@@ -1,13 +1,17 @@
 # Project status
 
+The 25-step T4 canonical-target pilot completed as infrastructure evidence but
+returned no exact canonical validation outputs. That family is historical. The
+category-ID v2 family is implemented but untrained; Phase 3B is not complete.
+
 | Component | Status | Evidence | Remaining work |
 |---|---|---|---|
 | Data pipeline | COMPLETE | Deterministic CUAD ingestion, segmentation, validation, manifests | Rebuild only for a new source version |
 | Classical baselines | VALIDATED | Held-out results and reproducible evaluation harness | Retain as fixed context |
 | Training infrastructure | COMPLETE | LoRA/QLoRA configs, checkpoints, resume, pilot mode | Execute longer GPU experiments |
 | GPU feasibility | VALIDATED | T4 load and real NF4 optimizer step | Obtain durable compute |
-| T4 pilot | PARTIAL | 10-step run and checkpoint artifacts | Diagnose checkpoint-25 |
-| Checkpoint diagnostics | VALIDATED | Checkpoint-10: 0/128 exact outputs; test untouched | Compare later checkpoint |
+| T4 pilot | PARTIAL | 25-step canonical-target run; 0/128 exact | Run new v2 pilot |
+| Checkpoint diagnostics | VALIDATED | Canonical pilot: 128/128 unrelated; test untouched | Validate category-ID outputs |
 | Serving/API | COMPLETE | Strict FastAPI boundary and offline tests | Validate with final model |
 | Safety harness | COMPLETE | Synthetic/offline robustness framework | Rerun on final model |
 | EDGAR OOD | COMPLETE | Isolated unlabeled public OOD pipeline | Run final model OOD analysis |
@@ -27,4 +31,3 @@ Repository structure: `src/clauseforge/` contains the package; `scripts/` holds
 explicit CLIs; `training/` contains versioned experiment configuration; `tests/`
 is CPU/offline; `demo/` is synthetic; `docs/` is the handoff set; generated
 data, evaluations, checkpoints, and artifacts remain ignored.
-

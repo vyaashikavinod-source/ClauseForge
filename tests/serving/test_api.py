@@ -115,6 +115,17 @@ class BrokenProvider(InvalidProvider):
         raise RuntimeError("secret path C:/private/model")
 
 
+class CategoryIdProvider(InvalidProvider):
+    target_representation = "category_id"
+    target_representation_version = "cuad-category-id-v1"
+
+    def __init__(self, output: str) -> None:
+        self.output = output
+
+    async def classify(self, text: str) -> ProviderResult:
+        return ProviderResult(self.output, self.output, None)
+
+
 def test_unavailable_provider_readiness_and_classification() -> None:
     with _client(UnavailableProvider()) as client:
         ready = client.get("/ready")
@@ -131,6 +142,36 @@ def test_unknown_model_label_is_never_success() -> None:
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "invalid_model_output"
     assert "hallucinated" not in response.text
+
+
+def test_category_id_provider_resolves_to_authoritative_taxonomy() -> None:
+    with _client(CategoryIdProvider("renewal_term")) as client:
+        response = client.post("/v1/classify", json={"text": "valid clause"})
+    assert response.status_code == 200
+    assert '"Renewal Term"' in response.json()["predicted_category"]
+    assert response.json()["processing"]["target_representation"] == "category_id"
+
+
+@pytest.mark.parametrize(
+    "output",
+    [
+        "unknown_category",
+        "Renewal Term",
+        "renewal term",
+        "renewal_ term",
+        "The category is renewal_term",
+    ],
+)
+def test_category_id_provider_rejects_non_exact_outputs(output: str) -> None:
+    with _client(CategoryIdProvider(output)) as client:
+        response = client.post("/v1/classify", json={"text": "valid clause"})
+    assert response.status_code == 422
+
+
+def test_category_id_provider_allows_surrounding_whitespace_only() -> None:
+    with _client(CategoryIdProvider("renewal_term ")) as client:
+        response = client.post("/v1/classify", json={"text": "valid clause"})
+    assert response.status_code == 200
 
 
 def test_timeout_is_structured() -> None:

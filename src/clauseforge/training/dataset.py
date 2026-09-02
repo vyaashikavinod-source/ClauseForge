@@ -9,6 +9,13 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from clauseforge.evaluation.dataset import load_evaluation_dataset
+from clauseforge.training.targets import (
+    CANONICAL_TARGET_VERSION,
+    TargetRepresentation,
+    stable_id_map_checksum,
+    target_for_canonical,
+    validate_target_version,
+)
 from clauseforge.training.templates import PROMPT_TEMPLATE_VERSION, TrainingExample
 
 
@@ -37,7 +44,15 @@ def build_training_dataset(
     *,
     max_train_examples: int | None = None,
     max_validation_examples: int | None = None,
+    target_representation: TargetRepresentation = "canonical_question",
+    target_representation_version: str = CANONICAL_TARGET_VERSION,
+    prompt_template_version: str = PROMPT_TEMPLATE_VERSION,
 ) -> TrainingDataset:
+    validate_target_version(
+        target_representation,
+        target_representation_version,
+        prompt_template_version,
+    )
     source = load_evaluation_dataset(data_dir)
     taxonomy = tuple(source.labels)
     if len(taxonomy) != 41:
@@ -53,11 +68,19 @@ def build_training_dataset(
             values = values[:limit]
         examples = tuple(
             TrainingExample(
-                item.clause_id, item.contract_id, item.text, item.label, split
+                item.clause_id,
+                item.contract_id,
+                item.text,
+                target_for_canonical(item.label, target_representation),
+                split,
+                prompt_template_version,
             )
             for item in values
         )
-        unknown = {item.target_label for item in examples} - set(taxonomy)
+        allowed_targets = {
+            target_for_canonical(item, target_representation) for item in taxonomy
+        }
+        unknown = {item.target_label for item in examples} - allowed_targets
         if unknown:
             raise TrainingDataError(f"unknown target categories: {sorted(unknown)}")
         return examples
@@ -76,7 +99,10 @@ def build_training_dataset(
         (split_checksums["train"] + split_checksums["validation"]).encode()
     ).hexdigest()
     manifest: dict[str, object] = {
-        "template_version": PROMPT_TEMPLATE_VERSION,
+        "template_version": prompt_template_version,
+        "target_representation": target_representation,
+        "target_representation_version": target_representation_version,
+        "stable_id_map_checksum": stable_id_map_checksum(),
         "training_example_count": len(train),
         "validation_example_count": len(validation),
         "class_distribution": dict(

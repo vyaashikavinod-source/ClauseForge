@@ -41,6 +41,7 @@ from clauseforge.serving.schemas import (
     ProcessingMetadata,
     ReadyResponse,
 )
+from clauseforge.training.targets import UnknownTargetError, resolve_generated_target
 from clauseforge.training.templates import PROMPT_TEMPLATE_VERSION
 
 LOGGER = logging.getLogger("clauseforge.serving")
@@ -247,12 +248,26 @@ def create_app(
             if cache_enabled:
                 application.state.exact_cache.put(key, result)
         assert result is not None
-        if result.category is None or result.category not in taxonomy:
+        category = result.category
+        representation = getattr(
+            active_provider, "target_representation", "canonical_question"
+        )
+        representation_version = getattr(
+            active_provider,
+            "target_representation_version",
+            "cuad-canonical-question-v1",
+        )
+        if category is not None and representation == "category_id":
+            try:
+                category = resolve_generated_target(category, "category_id").canonical
+            except UnknownTargetError:
+                category = None
+        if category is None or category not in taxonomy:
             raise InvalidModelOutputError
         latency_ms = (time.perf_counter() - started) * 1000
         return ClassificationResponse(
             request_id=_request_id(request),
-            predicted_category=result.category,
+            predicted_category=category,
             provider=active_provider.name,
             model_id=active_provider.model_id,
             taxonomy_version=TAXONOMY_VERSION,
@@ -265,6 +280,8 @@ def create_app(
                     "available" if result.scores is not None else "unavailable"
                 ),
                 cache_hit=cache_hit,
+                target_representation=representation,
+                target_representation_version=representation_version,
             ),
             disclaimer=DISCLAIMER,
             scores=result.scores,

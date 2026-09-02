@@ -20,11 +20,15 @@ class LocalTransformerProvider:
         tokenizer_path: Path | None,
         device: str,
         max_sequence_length: int,
+        target_representation: str = "canonical_question",
+        target_representation_version: str = "cuad-canonical-question-v1",
     ) -> None:
         self.model_id = model_path.name if model_path else "unconfigured"
         self._paths = (model_path, adapter_path, tokenizer_path)
         self._device = device
         self._max_sequence_length = max_sequence_length
+        self.target_representation = target_representation
+        self.target_representation_version = target_representation_version
 
     def is_ready(self) -> tuple[bool, str | None]:
         if any(path is None or not path.exists() for path in self._paths):

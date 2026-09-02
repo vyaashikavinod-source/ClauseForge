@@ -25,6 +25,9 @@ class VllmProvider:
         max_new_tokens: int,
         temperature: float,
         timeout: float,
+        target_representation: str = "canonical_question",
+        target_representation_version: str = "cuad-canonical-question-v1",
+        prompt_template_version: str = "cuad-classification-v1",
     ) -> None:
         self.model_id = model.name if model else "unconfigured"
         self._url = base_url.rstrip("/") if base_url else None
@@ -32,6 +35,9 @@ class VllmProvider:
         self._max_new_tokens = max_new_tokens
         self._temperature = temperature
         self._timeout = timeout
+        self.target_representation = target_representation
+        self.target_representation_version = target_representation_version
+        self._prompt_template_version = prompt_template_version
 
     def is_ready(self) -> tuple[bool, str | None]:
         if not self._url:
@@ -55,7 +61,7 @@ class VllmProvider:
         data = json.dumps(
             {
                 "model": self.model_id,
-                "prompt": render_prompt(text),
+                "prompt": render_prompt(text, self._prompt_template_version),
                 "max_tokens": self._max_new_tokens,
                 "temperature": self._temperature,
             }
@@ -75,6 +81,8 @@ class VllmProvider:
     async def classify(self, text: str) -> ProviderResult:
         raw = await asyncio.to_thread(self._complete, text)
         category = raw.strip()
+        if self.target_representation == "category_id":
+            return ProviderResult(raw, category, None)
         return ProviderResult(
             raw, category if category in self._taxonomy else None, None
         )
@@ -88,4 +96,6 @@ class VllmProvider:
             "backend": self.provider_type,
             "model": self.model_id,
             "scores_available": False,
+            "target_representation": self.target_representation,
+            "target_representation_version": self.target_representation_version,
         }

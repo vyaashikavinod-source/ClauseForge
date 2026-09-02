@@ -58,7 +58,8 @@ def build_training_batch(
         max_length=max_length,
     )
     prompt_ids = tokenizer.encode(
-        render_prompt(example.clause_text), add_special_tokens=True
+        render_prompt(example.clause_text, example.prompt_template_version),
+        add_special_tokens=True,
     )
     encoded["labels"] = mask_prompt_tokens(encoded["input_ids"], len(prompt_ids))
     if bool((encoded["labels"] != -100).sum() == 0):
