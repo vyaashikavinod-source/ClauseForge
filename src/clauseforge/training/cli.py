@@ -16,6 +16,7 @@ from clauseforge.training.dataset import build_training_dataset
 from clauseforge.training.environment import environment_metadata
 from clauseforge.training.lora import attach_lora
 from clauseforge.training.model import tiny_smoke_model
+from clauseforge.training.overfit import run_overfit_diagnostic
 from clauseforge.training.phase3b import run_phase3b
 from clauseforge.training.pilot import build_pilot_dataset
 from clauseforge.training.smoke import build_smoke_tokenizer
@@ -52,8 +53,14 @@ def run(
     pilot_train_examples: int | None = None,
     pilot_validation_examples: int | None = None,
     max_steps: int | None = None,
+    overfit_diagnostic: bool = False,
+    overfit_examples: int = 8,
+    overfit_steps: int = 100,
+    overfit_eval_every: int = 10,
 ) -> dict[str, object]:
     config.validate()
+    if overfit_diagnostic and (pilot or sanity_steps is not None):
+        raise ValueError("overfit, pilot, and sanity modes are mutually exclusive")
     if pilot_train_examples is None:
         pilot_train_examples = (
             256 if config.target_representation == "category_id" else 512
@@ -85,14 +92,26 @@ def run(
                 )
                 pilot_manifest = pilot_dataset.manifest
             return {
-                "status": "phase3b-pilot-config-valid"
-                if pilot
-                else "phase3b-config-valid",
+                "status": (
+                    "phase3b-overfit-config-valid"
+                    if overfit_diagnostic
+                    else "phase3b-pilot-config-valid"
+                    if pilot
+                    else "phase3b-config-valid"
+                ),
                 "summary": _summary(config, data_dir),
                 "dataset_manifest": pilot_manifest or dataset.manifest,
                 "network_or_model_access": False,
                 "test_evaluated": False,
             }
+        if overfit_diagnostic:
+            return run_overfit_diagnostic(
+                config,
+                data_dir,
+                examples_count=overfit_examples,
+                steps=overfit_steps,
+                eval_every=overfit_eval_every,
+            )
         return run_phase3b(
             config,
             data_dir,
@@ -189,6 +208,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pilot-train-examples", type=int)
     parser.add_argument("--pilot-validation-examples", type=int)
     parser.add_argument("--max-steps", type=int)
+    parser.add_argument("--overfit-diagnostic", action="store_true")
+    parser.add_argument("--overfit-examples", type=int, default=8)
+    parser.add_argument("--overfit-steps", type=int, default=100)
+    parser.add_argument("--overfit-eval-every", type=int, default=10)
     return parser
 
 
@@ -208,6 +231,10 @@ def main(argv: list[str] | None = None) -> int:
                 pilot_train_examples=args.pilot_train_examples,
                 pilot_validation_examples=args.pilot_validation_examples,
                 max_steps=args.max_steps,
+                overfit_diagnostic=args.overfit_diagnostic,
+                overfit_examples=args.overfit_examples,
+                overfit_steps=args.overfit_steps,
+                overfit_eval_every=args.overfit_eval_every,
             ),
             indent=2,
             sort_keys=True,

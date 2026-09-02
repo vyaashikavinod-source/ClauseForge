@@ -15,6 +15,7 @@ import torch
 
 from clauseforge.evaluation.metrics import classification_metrics
 from clauseforge.serving.constants import TAXONOMY_VERSION
+from clauseforge.training.audits import generated_token_slice
 from clauseforge.training.checkpoints import resume_adapter, save_adapter, write_json
 from clauseforge.training.compatibility import checkpoint_evaluation_compatibility
 from clauseforge.training.config import TrainingConfig
@@ -41,8 +42,13 @@ from clauseforge.training.targets import (
     resolve_generated_target,
     stable_id_map_checksum,
 )
-from clauseforge.training.templates import TrainingExample, render_prompt
-from clauseforge.training.trainer import build_training_batch, seed_everything
+from clauseforge.training.templates import TrainingExample
+from clauseforge.training.trainer import (
+    build_training_batch,
+    encode_generation_prompt,
+    reserved_target_token_count,
+    seed_everything,
+)
 
 SANITY_LABEL = "GPU SANITY RUN — NOT MODEL PERFORMANCE"
 QWEN25_7B_ATTENTION_LORA_PARAMETERS_PER_RANK = 630_784
@@ -205,12 +211,8 @@ def _generate_label(
     max_new_tokens: int,
     target_representation: TargetRepresentation = "canonical_question",
 ) -> tuple[str | None, ValidationPrediction]:
-    inputs = tokenizer(
-        render_prompt(example.clause_text, example.prompt_template_version),
-        return_tensors="pt",
-        truncation=True,
-        max_length=max_length,
-    )
+    reserved = reserved_target_token_count(tokenizer, example.prompt_template_version)
+    inputs = encode_generation_prompt(example, tokenizer, max_length, reserved)
     device_inputs = {key: value.to(model.device) for key, value in inputs.items()}
     with torch.no_grad():
         generated = model.generate(
@@ -219,7 +221,9 @@ def _generate_label(
             do_sample=False,
             pad_token_id=tokenizer.pad_token_id,
         )
-    new_tokens = generated[0, device_inputs["input_ids"].shape[1] :]
+    new_tokens = generated_token_slice(
+        generated, int(device_inputs["input_ids"].shape[1])
+    )[0]
     raw = tokenizer.decode(new_tokens, skip_special_tokens=True)
     prediction_record = build_prediction(
         clause_id=example.clause_id,

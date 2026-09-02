@@ -2,7 +2,10 @@
 
 The 25-step T4 canonical-target pilot completed as infrastructure evidence but
 returned no exact canonical validation outputs. That family is historical. The
-category-ID v2 family is implemented but untrained; Phase 3B is not complete.
+category-ID v2 25-step T4 pilot also completed: training loss 3.095277,
+validation loss 1.416373, accuracy/macro F1/weighted F1 0, exact IDs 0, and
+invalid-output rate 1.0 (3 commentary-wrapped, 8 malformed, 120 unrelated out
+of 128; categories can overlap). Test remained sealed. Phase 3B is not complete.
 
 | Component | Status | Evidence | Remaining work |
 |---|---|---|---|
@@ -10,7 +13,7 @@ category-ID v2 family is implemented but untrained; Phase 3B is not complete.
 | Classical baselines | VALIDATED | Held-out results and reproducible evaluation harness | Retain as fixed context |
 | Training infrastructure | COMPLETE | LoRA/QLoRA configs, checkpoints, resume, pilot mode | Execute longer GPU experiments |
 | GPU feasibility | VALIDATED | T4 load and real NF4 optimizer step | Obtain durable compute |
-| T4 pilot | PARTIAL | 25-step canonical-target run; 0/128 exact | Run new v2 pilot |
+| T4 pilot | PARTIAL | Category-ID v2: 25 steps, 0/128 exact, invalid rate 1.0 | Run tiny overfit diagnostic |
 | Checkpoint diagnostics | VALIDATED | Canonical pilot: 128/128 unrelated; test untouched | Validate category-ID outputs |
 | Serving/API | COMPLETE | Strict FastAPI boundary and offline tests | Validate with final model |
 | Safety harness | COMPLETE | Synthetic/offline robustness framework | Rerun on final model |

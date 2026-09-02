@@ -11,11 +11,14 @@ import numpy as np
 import torch
 
 from clauseforge.training.config import OptimizationConfig
+from clauseforge.training.targets import stable_id_map
 from clauseforge.training.templates import (
+    ID_PROMPT_TEMPLATE_VERSION,
     TrainingExample,
-    render_example,
     render_prompt,
 )
+
+_TARGET_TOKEN_RESERVATIONS: dict[tuple[int, str], int] = {}
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,25 +51,90 @@ def mask_prompt_tokens(labels: Any, prompt_length: int) -> Any:
     return masked
 
 
+def build_loss_labels(
+    input_ids: torch.Tensor, attention_mask: torch.Tensor, prompt_length: int
+) -> torch.Tensor:
+    labels = mask_prompt_tokens(input_ids, prompt_length)
+    labels[attention_mask == 0] = -100
+    return labels
+
+
+def target_token_ids(tokenizer: Any, target: str) -> list[int]:
+    values = tokenizer.encode(target, add_special_tokens=False)
+    if not values:
+        raise ValueError("assistant target tokenizes to zero tokens")
+    return cast(list[int], values)
+
+
+def reserved_target_token_count(tokenizer: Any, prompt_template_version: str) -> int:
+    key = (id(tokenizer), prompt_template_version)
+    cached = _TARGET_TOKEN_RESERVATIONS.get(key)
+    if cached is not None:
+        return cached
+    targets = (
+        [item.category_id for item in stable_id_map()]
+        if prompt_template_version == ID_PROMPT_TEMPLATE_VERSION
+        else [item.canonical for item in stable_id_map()]
+    )
+    count = max(len(target_token_ids(tokenizer, target)) for target in targets)
+    _TARGET_TOKEN_RESERVATIONS[key] = count
+    return count
+
+
+def prompt_token_ids(
+    example: TrainingExample,
+    tokenizer: Any,
+    max_length: int,
+    target_length: int,
+) -> tuple[list[int], bool]:
+    """Encode the shared generation prompt while reserving the complete target."""
+    eos_count = 1 if tokenizer.eos_token_id is not None else 0
+    budget = max_length - target_length - eos_count
+    if budget <= 0:
+        raise ValueError("max sequence length cannot contain the assistant target")
+    values = cast(
+        list[int],
+        tokenizer.encode(
+            render_prompt(example.clause_text, example.prompt_template_version),
+            add_special_tokens=True,
+        ),
+    )
+    return values[:budget], len(values) > budget
+
+
+def encode_generation_prompt(
+    example: TrainingExample,
+    tokenizer: Any,
+    max_length: int,
+    reserved_target_tokens: int,
+) -> dict[str, Any]:
+    ids, _ = prompt_token_ids(example, tokenizer, max_length, reserved_target_tokens)
+    input_ids = torch.tensor([ids], dtype=torch.long)
+    return {"input_ids": input_ids, "attention_mask": torch.ones_like(input_ids)}
+
+
 def build_training_batch(
     example: TrainingExample, tokenizer: Any, max_length: int
 ) -> dict[str, Any]:
-    encoded = tokenizer(
-        render_example(example),
-        return_tensors="pt",
-        truncation=True,
-        max_length=max_length,
-    )
-    prompt_ids = tokenizer.encode(
-        render_prompt(example.clause_text, example.prompt_template_version),
-        add_special_tokens=True,
-    )
-    encoded["labels"] = mask_prompt_tokens(encoded["input_ids"], len(prompt_ids))
-    if bool((encoded["labels"] != -100).sum() == 0):
-        raise ValueError(
-            f"max sequence length truncates the complete target for {example.clause_id}"
-        )
-    return cast(dict[str, Any], encoded)
+    if tokenizer.eos_token_id is None:
+        raise ValueError("tokenizer EOS token is required for supervised training")
+    target_ids = target_token_ids(tokenizer, example.target_label)
+    reserved = reserved_target_token_count(tokenizer, example.prompt_template_version)
+    prompt_ids, _ = prompt_token_ids(example, tokenizer, max_length, reserved)
+    eos_ids = [int(tokenizer.eos_token_id)]
+    sequence = prompt_ids + target_ids + eos_ids
+    input_ids = torch.tensor([sequence], dtype=torch.long)
+    attention_mask = torch.ones_like(input_ids)
+    labels = build_loss_labels(input_ids, attention_mask, len(prompt_ids))
+    unmasked = labels[0][labels[0] != -100].tolist()
+    expected = target_ids + eos_ids
+    if unmasked != expected:
+        raise ValueError(f"assistant target alignment failed for {example.clause_id}")
+    return {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+        "labels": labels,
+    }
 
 
 def _mean_loss(

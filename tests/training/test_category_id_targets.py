@@ -100,6 +100,9 @@ def test_id_validation_and_diagnostics_remain_strict() -> None:
 
 
 class _Tokenizer:
+    eos_token_id = 999
+    pad_token_id = 0
+
     def encode(self, text: str, **_: object) -> list[int]:
         return list(range(len(text)))
 

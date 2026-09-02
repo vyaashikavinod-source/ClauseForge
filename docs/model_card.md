@@ -5,7 +5,9 @@
 Historical adapters target full canonical questions under
 `cuad-canonical-question-v1`. Phase 3B v2 targets exact stable IDs under
 `cuad-category-id-v1` and must use `cuad-classification-id-v2`. It is not yet
-trained or validated, and no improvement is claimed.
+shown to generalize. Its 25-step T4 pilot produced accuracy and macro/weighted
+F1 of 0, 0 exact IDs, and invalid-output rate 1.0. This is diagnostic evidence,
+not final performance; the held-out test was untouched.
 
 ## Status and use
 

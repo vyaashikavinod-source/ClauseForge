@@ -9,6 +9,20 @@ Pilot sampling remains split-isolated and never reads test.
 The validation generation limit is 24 tokens because valid v2 targets are short
 IDs; this bounds runtime while leaving ample room for every allowed ID.
 
+The executed 25-step v2 T4 pilot saw 400 examples but produced accuracy and F1
+of 0, no exact IDs, and invalid rate 1.0. Before another pilot, use
+`--overfit-diagnostic --overfit-examples 8 --overfit-steps 100`. This train-only
+memorization harness records token/mask, EOS/PAD, target round-trip, length,
+learning-rate, gradient, parameter-update, checkpoint, loss-trace, and sanitized
+generation artifacts under `checkpoints/phase3b_v2/overfit/`.
+
+Training now constructs prompt and target token IDs separately, reserves room
+for the longest allowed target, appends tokenizer EOS explicitly, and masks the
+entire prompt plus any attention-mask padding. Generation uses the identical
+prompt encoder and slices at the exact input-token length. Qwen may use EOS as
+PAD; loss masking therefore follows the attention mask rather than masking all
+tokens whose ID equals PAD, so a real terminal EOS still contributes to loss.
+
 The completed 25-step canonical-target T4 pilot produced no exact taxonomy-valid
 outputs (128/128 unrelated). It is historical infrastructure evidence, not
 final performance or a model-failure conclusion. See

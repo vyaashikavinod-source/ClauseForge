@@ -1,18 +1,22 @@
 # GPU resume plan
 
-Next validation-only pilot (GPU only; do not run locally):
+Do not run another normal pilot yet. First run this GPU-only memorization test:
 
 ```bash
 python scripts/train_classifier.py \
   --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8.yaml \
   --data data/processed/cuad/1.0.0-run-a \
-  --pilot --pilot-train-examples 256 \
-  --pilot-validation-examples 128 --max-steps 25
+  --overfit-diagnostic \
+  --overfit-examples 8 \
+  --overfit-steps 100
 ```
 
-Engineering success means exact valid IDs above zero, invalid rate below 1.0,
-visible category structure, decreasing loss, checkpoints, and zero test access.
-These are pilot criteria, not final quality thresholds.
+For a shorter infrastructure smoke use `--overfit-steps 10`. If the model cannot
+memorize eight examples, treat the pipeline or optimization as incompatible and
+do not run a normal pilot. If it can, investigate sample size, learning rate,
+duration, and generalization next. Memorization is not model quality.
+The equivalent dedicated overfit config is
+`training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_overfit.yaml`.
 
 1. Obtain GPU access and preserve historical pilot artifacts.
 2. Run the bounded category-ID v2 validation pilot above with a new adapter.

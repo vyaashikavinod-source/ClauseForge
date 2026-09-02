@@ -8,6 +8,12 @@ checksum. Diagnostics recognize exact IDs, short names, canonical questions,
 commentary-wrapped IDs, invalid IDs, empty, malformed, and unrelated output
 without accepting non-exact forms. Selection remains validation-only.
 
+The first v2 T4 pilot (256 train, 128 validation, 25 steps) produced training
+loss 3.095277, validation loss 1.416373, zero accuracy/F1/exact IDs, and invalid
+rate 1.0. The next gate is an eight-example train-only memorization diagnostic.
+Failure to memorize blocks another pilot; successful memorization supports the
+pipeline's ability to learn but says nothing about generalization or final quality.
+
 The completed 25-step rank-8 canonical-target T4 pilot validated infrastructure
 but produced 0 exact canonical outputs (128/128 unrelated). That experiment is
 historical; the category-ID family starts with new adapters and identity.
