@@ -8,6 +8,13 @@ from datetime import UTC, datetime
 from typing import Any
 
 _STANDARD_LOG_RECORD_FIELDS = frozenset(logging.makeLogRecord({}).__dict__)
+_SENSITIVE_KEYS = ("authorization", "password", "secret", "token", "clause", "text")
+
+
+def _safe_value(key: str, value: Any) -> Any:
+    if any(part in key.casefold() for part in _SENSITIVE_KEYS):
+        return "[REDACTED]"
+    return value
 
 
 class JsonFormatter(logging.Formatter):
@@ -21,7 +28,7 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
         extras = {
-            key: value
+            key: _safe_value(key, value)
             for key, value in record.__dict__.items()
             if key not in _STANDARD_LOG_RECORD_FIELDS and key not in payload
         }

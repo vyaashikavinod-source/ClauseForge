@@ -73,6 +73,19 @@ optimization and model-selection views; held-out test stays sealed.
 
 ## Design constraints
 
+The release flow is: data → training → adapter → merge → quantization → artifact
+validation → provider → exact cache → API → structured logging/metrics →
+deployment. Data/training interfaces, adapter infrastructure, quantization
+planning, artifact validation, provider/cache/API boundaries, and operational
+instrumentation are implemented. Final adapter selection, merge, real
+quantization, final artifact validation, model serving benchmarks, and deployment
+have not been executed.
+
+Release readiness is evaluated in four independent layers: infrastructure,
+model artifact, deployment, and production validation. Infrastructure readiness
+cannot promote blocked model or validation layers.
+
+
 - Python 3.11 is the target runtime.
 - Secrets must enter through the execution environment, never source control.
 - Data provenance and model artifacts must be explicit and reproducible.

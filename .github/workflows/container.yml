@@ -1,0 +1,19 @@
+name: Container
+on:
+  pull_request:
+  push:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t clauseforge:ci .
+      - run: docker run -d --name clauseforge -p 8000:8000 clauseforge:ci
+      - run: |
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/health && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8000/ready
+          curl -fsS http://127.0.0.1:8000/version
+      - if: always()
+        run: docker rm -f clauseforge || true

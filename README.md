@@ -23,6 +23,9 @@ training infrastructure, but no production transformer model.
 **Quantization and production-serving preparation is implemented; no model has
 been quantized or deployed.**
 
+**Release-readiness, CPU container, CI/CD, metrics, and operations interfaces
+are prepared; ClauseForge is not production-model ready.**
+
 Final adapter training and rank selection, real quantization, deployment, and
 final serving benchmarks remain pending.
 
@@ -31,6 +34,29 @@ but produced 0 exact taxonomy-valid validation outputs. This indicates an
 output-compliance problem requiring diagnosis before a larger GPU run; it is
 not final model performance or a conclusion that the model failed. See
 [Phase 3B output diagnostics](docs/phase3b_output_diagnostics.md).
+
+Checkpoint-10 diagnostics found 0 exact canonical matches, 2 short-name-only
+outputs, 122 unrelated outputs, and 4 malformed outputs across 128 validation
+examples. This is pilot diagnostic evidence, not final performance. Later
+checkpoint diagnosis, final rank/adapter selection, and model quality remain
+pending; held-out test remains sealed.
+
+## Docker quickstart and operations
+
+```bash
+docker compose up --build
+python scripts/check_release_readiness.py --json
+```
+
+The default container runs the explicit mock backend without datasets or model
+weights. Supported configured boundaries are mock, local transformer, vLLM, and
+llama.cpp; real backends require external validated artifacts/services. See the
+[deployment guide](docs/deployment.md), [operations runbook](docs/operations_runbook.md),
+and [release checklist](docs/release_checklist.md).
+
+Run `make check` (or the equivalent Python commands on Windows) for tests, Ruff,
+formatting, and strict mypy. CI is CPU/offline and never evaluates the held-out
+test or downloads production model weights.
 
 The repository contains the Phase 0 foundation, Phase 1 CUAD data pipeline,
 Phase 2 classical baselines/evaluation, and a Phase 3A training harness. The

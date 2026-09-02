@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      CLAUSEFORGE_ENVIRONMENT: development
+      CLAUSEFORGE_MODEL_BACKEND: mock
+      CLAUSEFORGE_METRICS_ENABLED: "false"
+    ports:
+      - "8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

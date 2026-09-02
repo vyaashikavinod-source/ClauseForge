@@ -21,11 +21,12 @@ class ClassificationRequest(BaseModel):
 
 class ProcessingMetadata(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    provider_type: Literal["mock", "transformer"]
+    provider_type: Literal["mock", "transformer", "vllm", "llamacpp"]
     is_mock: bool
     character_count: int
     latency_ms: float
     score_availability: Literal["available", "unavailable"]
+    cache_hit: bool = False
 
 
 class ClassificationResponse(BaseModel):

@@ -36,7 +36,8 @@ CLAUSEFORGE_MODEL_PROVIDER=mock \
   uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
 ```
 
-Routes are `GET /health`, `GET /ready`, `POST /v1/classify`, and `GET /docs`.
+Routes are `GET /health`, `GET /ready`, `GET /version`, `POST /v1/classify`,
+optional internal `GET /metrics`, and `GET /docs`.
 The mock provider exposes no fabricated confidence or scores.
 
 Transformer mode requires `CLAUSEFORGE_MODEL_PATH`,
@@ -48,6 +49,12 @@ does not start these external runtimes.
 
 This system assists with contract clause analysis and does not provide legal
 advice.
+
+Every response receives a validated or generated request ID plus `nosniff`,
+no-referrer, and no-store headers. Process-local exact caching, metrics, and rate
+limiting are disabled by default and configured explicitly. They make no
+distributed enforcement or production-savings claim. Provider resources are
+created once and closed during graceful shutdown.
 
 ## Safety regression
 

@@ -32,6 +32,9 @@ class Settings:
     inference_timeout_seconds: float = 30.0
     max_new_tokens: int = 160
     temperature: float = 0.0
+    metrics_enabled: bool = False
+    rate_limit_per_minute: int = 0
+    exact_cache_capacity: int = 0
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -65,6 +68,13 @@ class Settings:
             ),
             max_new_tokens=int(os.getenv("CLAUSEFORGE_MAX_NEW_TOKENS", "160")),
             temperature=float(os.getenv("CLAUSEFORGE_TEMPERATURE", "0")),
+            metrics_enabled=_env_bool("CLAUSEFORGE_METRICS_ENABLED", False),
+            rate_limit_per_minute=int(
+                os.getenv("CLAUSEFORGE_RATE_LIMIT_PER_MINUTE", "0")
+            ),
+            exact_cache_capacity=int(
+                os.getenv("CLAUSEFORGE_EXACT_CACHE_CAPACITY", "0")
+            ),
         )
         settings.validate()
         return settings
@@ -91,8 +101,43 @@ class Settings:
             raise ValueError("CLAUSEFORGE_INFERENCE_TIMEOUT_SECONDS must be positive")
         if self.max_new_tokens <= 0 or not 0.0 <= self.temperature <= 2.0:
             raise ValueError("generation settings are invalid")
+        if self.rate_limit_per_minute < 0:
+            raise ValueError("CLAUSEFORGE_RATE_LIMIT_PER_MINUTE may not be negative")
+        if self.exact_cache_capacity < 0:
+            raise ValueError("CLAUSEFORGE_EXACT_CACHE_CAPACITY may not be negative")
+
+    def backend_configuration_issues(self) -> tuple[str, ...]:
+        """Return backend-specific missing configuration without fallback."""
+        issues: list[str] = []
+        if self.model_provider == "transformer":
+            if self.model_path is None:
+                issues.append("MODEL_PATH is required for transformer")
+            if self.adapter_path is None:
+                issues.append("ADAPTER_PATH is required for transformer")
+            if self.tokenizer_path is None:
+                issues.append("TOKENIZER_PATH is required for transformer")
+        elif self.model_provider == "vllm":
+            if self.vllm_base_url is None:
+                issues.append("VLLM_BASE_URL is required for vllm")
+            if self.model_path is None:
+                issues.append("MODEL_PATH/model identity is required for vllm")
+        elif self.model_provider == "llamacpp":
+            if self.gguf_path is None:
+                issues.append("GGUF_PATH is required for llamacpp")
+            if self.llamacpp_base_url is None:
+                issues.append("LLAMACPP_BASE_URL is required for llamacpp")
+        return tuple(issues)
 
 
 def _optional_path(name: str) -> Path | None:
     value = os.getenv(name)
     return Path(value) if value else None
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    if value.casefold() not in {"true", "false", "1", "0"}:
+        raise ValueError(f"{name} must be true or false")
+    return value.casefold() in {"true", "1"}

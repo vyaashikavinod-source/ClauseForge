@@ -29,3 +29,15 @@ class InputTooLargeError(ServingError):
     status_code = 413
     code = "input_too_large"
     public_message = "The clause text exceeds the configured input limit."
+
+
+class ArtifactMismatchError(ServingError):
+    status_code = 409
+    code = "artifact_mismatch"
+    public_message = "The configured model artifact is incompatible."
+
+
+class ConfigurationError(ServingError):
+    status_code = 500
+    code = "configuration_error"
+    public_message = "The service configuration is invalid."

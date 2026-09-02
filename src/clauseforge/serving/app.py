@@ -12,6 +12,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from clauseforge.cache.exact import ExactMemoryCache, cache_key
 from clauseforge.config import Settings
 from clauseforge.logging import configure_logging
 from clauseforge.serving.constants import (
@@ -27,8 +28,11 @@ from clauseforge.serving.errors import (
     ProviderUnavailableError,
     ServingError,
 )
+from clauseforge.serving.metadata import build_metadata
+from clauseforge.serving.metrics import ServiceMetrics
 from clauseforge.serving.middleware import request_context_middleware
 from clauseforge.serving.providers.base import ClauseClassifierProvider
+from clauseforge.serving.rate_limit import MemoryRateLimiter
 from clauseforge.serving.schemas import (
     ClassificationRequest,
     ClassificationResponse,
@@ -37,6 +41,7 @@ from clauseforge.serving.schemas import (
     ProcessingMetadata,
     ReadyResponse,
 )
+from clauseforge.training.templates import PROMPT_TEMPLATE_VERSION
 
 LOGGER = logging.getLogger("clauseforge.serving")
 
@@ -88,6 +93,13 @@ def create_app(
     application.state.settings = active_settings
     application.state.provider = active_provider
     application.state.taxonomy = taxonomy
+    application.state.metrics = ServiceMetrics()
+    application.state.rate_limiter = MemoryRateLimiter(
+        active_settings.rate_limit_per_minute
+    )
+    application.state.exact_cache = ExactMemoryCache(
+        max(1, active_settings.exact_cache_capacity)
+    )
 
     @application.exception_handler(RequestValidationError)
     async def validation_handler(
@@ -101,6 +113,12 @@ def create_app(
     async def serving_error_handler(
         request: Request, exc: ServingError
     ) -> JSONResponse:
+        if isinstance(exc, InferenceTimeoutError):
+            application.state.metrics.timeout_count += 1
+        elif isinstance(exc, ProviderUnavailableError):
+            application.state.metrics.provider_unavailable_count += 1
+        elif isinstance(exc, InvalidModelOutputError):
+            application.state.metrics.taxonomy_invalid_count += 1
         LOGGER.warning(
             "controlled_error",
             extra={
@@ -135,6 +153,20 @@ def create_app(
     )
     async def health() -> HealthResponse:
         return HealthResponse()
+
+    @application.get("/version", summary="Safe application and build identity")
+    async def version() -> dict[str, object]:
+        return {
+            **build_metadata(),
+            "provider": active_provider.name,
+            "backend": active_provider.provider_type,
+        }
+
+    @application.get("/metrics", summary="Internal process-local metrics")
+    async def metrics() -> JSONResponse:
+        if not active_settings.metrics_enabled:
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+        return JSONResponse(content=application.state.metrics.snapshot())
 
     @application.get(
         "/ready",
@@ -179,13 +211,42 @@ def create_app(
         if not is_ready:
             raise ProviderUnavailableError
         started = time.perf_counter()
-        try:
-            result = await asyncio.wait_for(
-                active_provider.classify(payload.text),
-                timeout=active_settings.inference_timeout_seconds,
-            )
-        except TimeoutError as exc:
-            raise InferenceTimeoutError from exc
+        key = cache_key(
+            payload.text,
+            provider=active_provider.name,
+            model=active_provider.model_id,
+            model_revision="deployment-configured",
+            adapter=(
+                active_settings.adapter_path.name
+                if active_settings.adapter_path is not None
+                else None
+            ),
+            taxonomy_version=TAXONOMY_VERSION,
+            prompt_version=PROMPT_TEMPLATE_VERSION,
+            inference={
+                "max_new_tokens": active_settings.max_new_tokens,
+                "temperature": active_settings.temperature,
+            },
+        )
+        cache_enabled = active_settings.exact_cache_capacity > 0
+        result = application.state.exact_cache.get(key) if cache_enabled else None
+        cache_hit = result is not None
+        request.state.cache_hit = cache_hit
+        if cache_hit:
+            application.state.metrics.cache_hits += 1
+        else:
+            if cache_enabled:
+                application.state.metrics.cache_misses += 1
+            try:
+                result = await asyncio.wait_for(
+                    active_provider.classify(payload.text),
+                    timeout=active_settings.inference_timeout_seconds,
+                )
+            except TimeoutError as exc:
+                raise InferenceTimeoutError from exc
+            if cache_enabled:
+                application.state.exact_cache.put(key, result)
+        assert result is not None
         if result.category is None or result.category not in taxonomy:
             raise InvalidModelOutputError
         latency_ms = (time.perf_counter() - started) * 1000
@@ -203,6 +264,7 @@ def create_app(
                 score_availability=(
                     "available" if result.scores is not None else "unavailable"
                 ),
+                cache_hit=cache_hit,
             ),
             disclaimer=DISCLAIMER,
             scores=result.scores,
