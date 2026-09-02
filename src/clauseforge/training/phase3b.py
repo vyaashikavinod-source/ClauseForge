@@ -51,6 +51,9 @@ from clauseforge.training.trainer import (
 )
 
 SANITY_LABEL = "GPU SANITY RUN — NOT MODEL PERFORMANCE"
+CORRECTED_V2_PILOT_LABEL = (
+    "PHASE 3B V2 CORRECTED VALIDATION PILOT — NOT FINAL MODEL PERFORMANCE"
+)
 QWEN25_7B_ATTENTION_LORA_PARAMETERS_PER_RANK = 630_784
 
 
@@ -69,6 +72,28 @@ def expected_qwen_attention_trainable_parameters(rank: int) -> int:
     if rank <= 0:
         raise ValueError("rank must be positive")
     return QWEN25_7B_ATTENTION_LORA_PARAMETERS_PER_RANK * rank
+
+
+def scheduled_steps(max_steps: int, interval: int) -> tuple[int, ...]:
+    if min(max_steps, interval) <= 0:
+        raise ValueError("step schedule values must be positive")
+    return tuple(range(interval, max_steps + 1, interval))
+
+
+def planned_training_schedule(
+    example_count: int,
+    accumulation: int,
+    epochs: int,
+    max_steps: int | None,
+) -> tuple[int, int]:
+    if min(example_count, accumulation, epochs) <= 0:
+        raise ValueError("training schedule values must be positive")
+    configured_steps = math.ceil(example_count / accumulation) * epochs
+    total_steps = max_steps if max_steps is not None else configured_steps
+    if total_steps <= 0:
+        raise ValueError("max steps must be positive")
+    planned_epochs = max(epochs, math.ceil(total_steps * accumulation / example_count))
+    return total_steps, planned_epochs
 
 
 def interrupted_run_metadata(
@@ -143,6 +168,7 @@ def _checkpoint(
     optimizer: torch.optim.Optimizer,
     scheduler: Any,
     state: ResumeState,
+    metadata: dict[str, object] | None = None,
 ) -> Path:
     checkpoint = experiment_dir / f"checkpoint-{state.global_step}"
     save_adapter(model, checkpoint)
@@ -155,7 +181,47 @@ def _checkpoint(
         checkpoint / "training_state.pt",
     )
     write_json(checkpoint / "resume_state.json", asdict(state))
+    if metadata is not None:
+        write_json(
+            checkpoint / "checkpoint_metadata.json",
+            {**metadata, **asdict(state), "test_evaluated": False},
+        )
     return checkpoint
+
+
+def checkpoint_lineage_metadata(
+    config: TrainingConfig, subset_checksum: str
+) -> dict[str, object]:
+    return {
+        "experiment_id": config.experiment_id,
+        "target_representation": config.target_representation,
+        "target_representation_version": config.target_representation_version,
+        "prompt_template_version": config.prompt_template_version,
+        "taxonomy_version": TAXONOMY_VERSION,
+        "stable_id_map_checksum": stable_id_map_checksum(),
+        "pilot_subset_checksum": subset_checksum,
+        "lora_rank": config.lora.rank,
+        "lora_alpha": config.lora.alpha,
+        "target_modules": list(config.lora.target_modules),
+    }
+
+
+def select_best_validation_checkpoint(
+    candidates: list[dict[str, object]],
+) -> dict[str, object]:
+    """Select validation-only evidence with deterministic documented tie-breakers."""
+    if not candidates:
+        raise ValueError("checkpoint selection requires validation candidates")
+
+    def key(item: dict[str, object]) -> tuple[float, float, float, float, int]:
+        macro = _numeric_metric(item.get("macro_f1"), "macro_f1")
+        invalid = _numeric_metric(item.get("invalid_output_rate"), "invalid rate")
+        exact = _numeric_metric(item.get("exact_id_output_rate"), "exact ID rate")
+        loss = _numeric_metric(item.get("validation_loss"), "validation loss")
+        step = int(_numeric_metric(item.get("global_step"), "global step"))
+        return (-macro, invalid, -exact, loss, step)
+
+    return min(candidates, key=key)
 
 
 def _append_log(path: Path, event: dict[str, object]) -> None:
@@ -170,6 +236,7 @@ def _load_resume(
     expected_experiment_id: str,
     expected_run_mode: str,
     expected_subset_checksum: str,
+    expected_lineage: dict[str, object] | None = None,
 ) -> ResumeState:
     payload = torch.load(
         path / "training_state.pt", map_location="cpu", weights_only=True
@@ -182,9 +249,23 @@ def _load_resume(
         expected_run_mode,
         expected_subset_checksum,
     )
+    metadata_path = path / "checkpoint_metadata.json"
+    if expected_lineage is not None and metadata_path.is_file():
+        stored = json.loads(metadata_path.read_text(encoding="utf-8"))
+        validate_checkpoint_lineage(stored, expected_lineage)
     optimizer.load_state_dict(payload["optimizer"])
     scheduler.load_state_dict(payload["scheduler"])
     return state
+
+
+def validate_checkpoint_lineage(
+    stored: dict[str, object], expected: dict[str, object]
+) -> None:
+    mismatches = [
+        field for field, value in expected.items() if stored.get(field) != value
+    ]
+    if mismatches:
+        raise ValueError("checkpoint lineage is incompatible: " + ", ".join(mismatches))
 
 
 def validate_resume_compatibility(
@@ -256,6 +337,7 @@ def validation_metrics(
     predictions_path: Path | None = None,
     target_representation: TargetRepresentation = "canonical_question",
 ) -> dict[str, object]:
+    model.eval()
     predictions: list[str] = []
     expected: list[str] = []
     statuses: Counter[str] = Counter()
@@ -278,6 +360,10 @@ def validation_metrics(
     invalid_count = statuses["invalid"] + statuses["empty"] + statuses["malformed"]
     if predictions_path is not None:
         write_predictions(predictions_path, records)
+    generated_counts = [record.generated_token_count for record in records]
+    exact_id_outputs = sum(
+        record.status_reason == "exact_id_match" for record in records
+    )
     return {
         "selection_split": "validation",
         "selection_metric": "macro_f1",
@@ -286,16 +372,21 @@ def validation_metrics(
         "accuracy": metrics["accuracy"],
         "total": len(dataset.validation),
         "exact_outputs": statuses["exact"],
-        "exact_id_outputs": sum(
-            record.status_reason == "exact_id_match" for record in records
-        ),
+        "exact_id_outputs": exact_id_outputs,
+        "exact_id_output_rate": exact_id_outputs / len(records),
         "invalid_outputs": statuses["invalid"],
+        "invalid_output_count": invalid_count,
         "empty_outputs": statuses["empty"],
         "malformed_outputs": statuses["malformed"],
         "invalid_output_rate": invalid_count / len(dataset.validation),
         "max_new_tokens": max_new_tokens,
         "output_diagnostics": aggregate_diagnostics(records),
         "prediction_distribution": dict(Counter(predictions)),
+        "generated_token_statistics": {
+            "minimum": min(generated_counts),
+            "maximum": max(generated_counts),
+            "mean": sum(generated_counts) / len(generated_counts),
+        },
         "target_representation": target_representation,
         "stable_id_map_checksum": stable_id_map_checksum(),
         "test_evaluated": False,
@@ -521,6 +612,8 @@ def run_phase3b(
         subset_checksum = combined_selection_checksum(
             train_selection, validation_selection
         )
+        if config.target_representation == "category_id":
+            dataset.manifest["label"] = CORRECTED_V2_PILOT_LABEL
     experiment_dir = (
         config.output_dir / "pilot" / config.experiment_id
         if pilot
@@ -532,12 +625,17 @@ def run_phase3b(
     write_json(experiment_dir / "environment.json", environment_metadata())
     if pilot and train_selection is not None and validation_selection is not None:
         pilot_config = {
-            "label": PILOT_LABEL,
+            "label": (
+                CORRECTED_V2_PILOT_LABEL
+                if config.target_representation == "category_id"
+                else PILOT_LABEL
+            ),
             "train_examples": pilot_train_examples,
             "validation_examples": pilot_validation_examples,
             "seed": config.seed,
             "max_steps": max_steps,
-            "checkpoint_steps": 5,
+            "checkpoint_steps": config.optimization.save_steps,
+            "validation_steps": config.optimization.eval_steps,
             "validation_max_new_tokens": config.data.validation_max_new_tokens,
             "selection_checksum": subset_checksum,
             "target_representation": config.target_representation,
@@ -550,11 +648,17 @@ def run_phase3b(
         write_json(experiment_dir / "pilot_config.json", pilot_config)
         write_json(
             experiment_dir / "selected_train_examples.json",
-            train_selection.metadata(),
+            {
+                **train_selection.metadata(),
+                "label": pilot_config["label"],
+            },
         )
         write_json(
             experiment_dir / "selected_validation_examples.json",
-            validation_selection.metadata(),
+            {
+                **validation_selection.metadata(),
+                "label": pilot_config["label"],
+            },
         )
     seed_everything(config.seed)
     started = time.perf_counter()
@@ -571,10 +675,19 @@ def run_phase3b(
     total = sum(p.numel() for p in model.parameters())
     optimizer = _optimizer(model, config)
     accumulation = config.optimization.gradient_accumulation
-    total_steps = (
-        math.ceil(len(dataset.train) / accumulation) * config.optimization.epochs
+    total_steps, planned_epochs = planned_training_schedule(
+        len(dataset.train),
+        accumulation,
+        config.optimization.epochs,
+        max_steps,
     )
     scheduler = _scheduler(optimizer, total_steps, config)
+    checkpoint_schedule = set(
+        scheduled_steps(total_steps, config.optimization.save_steps)
+    )
+    validation_schedule = set(
+        scheduled_steps(total_steps, config.optimization.eval_steps)
+    )
     run_mode = "pilot" if pilot else "full"
     state = ResumeState(0, 0, 0, config.experiment_id, run_mode, subset_checksum)
     if resume_from_checkpoint is not None:
@@ -585,19 +698,28 @@ def run_phase3b(
             config.experiment_id,
             run_mode,
             subset_checksum,
+            checkpoint_lineage_metadata(config, subset_checksum),
         )
     losses: list[float] = []
     log_path = experiment_dir / "training_log.jsonl"
-    best_validation_macro_f1 = -1.0
+    validation_candidates: list[dict[str, object]] = []
     best_metadata_path = experiment_dir / "best_validation" / "selection_metadata.json"
     if resume_from_checkpoint is not None and best_metadata_path.is_file():
         previous_best = json.loads(best_metadata_path.read_text(encoding="utf-8"))
-        best_validation_macro_f1 = float(previous_best["macro_f1"])
+        required = {
+            "macro_f1",
+            "invalid_output_rate",
+            "exact_id_output_rate",
+            "validation_loss",
+            "global_step",
+        }
+        if required <= previous_best.keys():
+            validation_candidates.append(previous_best)
     model.train()
     optimizer.zero_grad()
     try:
         stop = False
-        for epoch in range(state.epoch, config.optimization.epochs):
+        for epoch in range(state.epoch, planned_epochs):
             for index, example in enumerate(dataset.train):
                 absolute = epoch * len(dataset.train) + index
                 if absolute < state.examples_seen:
@@ -611,7 +733,9 @@ def run_phase3b(
                 losses.append(float(output.loss.detach()))
                 examples_seen = absolute + 1
                 if examples_seen % accumulation == 0 or index + 1 == len(dataset.train):
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                    gradient_norm = float(
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                    )
                     optimizer.step()
                     scheduler.step()
                     optimizer.zero_grad()
@@ -623,22 +747,30 @@ def run_phase3b(
                         run_mode,
                         subset_checksum,
                     )
-                    checkpoint_steps = 5 if pilot else config.optimization.save_steps
-                    if state.global_step % checkpoint_steps == 0:
-                        _checkpoint(experiment_dir, model, optimizer, scheduler, state)
+                    if state.global_step in checkpoint_schedule:
+                        _checkpoint(
+                            experiment_dir,
+                            model,
+                            optimizer,
+                            scheduler,
+                            state,
+                            checkpoint_lineage_metadata(config, subset_checksum),
+                        )
                     _append_log(
                         log_path,
                         {
                             "event": "optimizer_step",
                             "global_step": state.global_step,
                             "examples_seen": state.examples_seen,
-                            "loss": losses[-1],
+                            "loss": sum(losses[-accumulation:])
+                            / len(losses[-accumulation:]),
                             "learning_rate": scheduler.get_last_lr()[0],
+                            "gradient_norm": gradient_norm,
                         },
                     )
                     if (
                         sanity_steps is None
-                        and state.global_step % config.optimization.eval_steps == 0
+                        and state.global_step in validation_schedule
                     ):
                         measured = validation_metrics(
                             model,
@@ -646,25 +778,52 @@ def run_phase3b(
                             dataset,
                             config.data.max_sequence_length,
                             config.data.validation_max_new_tokens,
+                            experiment_dir
+                            / f"validation_predictions_step-{state.global_step}.jsonl",
                             target_representation=config.target_representation,
                         )
+                        measured["validation_loss"] = validation_loss(
+                            model,
+                            tokenizer,
+                            dataset,
+                            config.data.max_sequence_length,
+                        )
                         measured["global_step"] = state.global_step
+                        measured["label"] = (
+                            CORRECTED_V2_PILOT_LABEL
+                            if pilot and config.target_representation == "category_id"
+                            else PILOT_LABEL
+                            if pilot
+                            else "PHASE 3B STAGE 1"
+                        )
+                        measured["category_coverage"] = (
+                            {
+                                **validation_selection.metadata(),
+                                "label": measured["label"],
+                            }
+                            if validation_selection is not None
+                            else None
+                        )
                         _append_log(log_path, {"event": "validation", **measured})
-                        score = _numeric_metric(measured["macro_f1"], "macro_f1")
-                        if score > best_validation_macro_f1:
-                            best_validation_macro_f1 = score
+                        validation_candidates.append(measured)
+                        selected = select_best_validation_checkpoint(
+                            validation_candidates
+                        )
+                        if selected is measured:
                             save_adapter(model, experiment_dir / "best_validation")
                             write_json(
                                 experiment_dir
                                 / "best_validation"
                                 / "selection_metadata.json",
-                                {
-                                    "split": "validation",
-                                    "macro_f1": score,
-                                    "global_step": state.global_step,
-                                    "test_evaluated": False,
-                                },
+                                {**selected, "split": "validation"},
                             )
+                        write_json(
+                            experiment_dir / "validation_metrics_by_checkpoint.json",
+                            {
+                                "checkpoints": validation_candidates,
+                                "test_evaluated": False,
+                            },
+                        )
                         model.train()
                     if sanity_steps is not None and state.global_step >= sanity_steps:
                         stop = True
@@ -682,13 +841,22 @@ def run_phase3b(
                 run_mode,
                 subset_checksum,
             )
-        checkpoint = _checkpoint(experiment_dir, model, optimizer, scheduler, state)
+        checkpoint = _checkpoint(
+            experiment_dir,
+            model,
+            optimizer,
+            scheduler,
+            state,
+            checkpoint_lineage_metadata(config, subset_checksum),
+        )
         runtime = time.perf_counter() - started
         adapter_dir = save_adapter(model, experiment_dir)
         training = {
             "label": (
                 SANITY_LABEL
                 if sanity_steps is not None
+                else CORRECTED_V2_PILOT_LABEL
+                if pilot and config.target_representation == "category_id"
                 else PILOT_LABEL
                 if pilot
                 else "PHASE 3B STAGE 1 TRAINING"
@@ -709,7 +877,16 @@ def run_phase3b(
             "test_evaluated": False,
             "pilot": pilot,
             "category_coverage": (
-                train_selection.metadata() if train_selection is not None else None
+                {
+                    **train_selection.metadata(),
+                    "label": (
+                        CORRECTED_V2_PILOT_LABEL
+                        if config.target_representation == "category_id"
+                        else PILOT_LABEL
+                    ),
+                }
+                if train_selection is not None
+                else None
             ),
         }
         write_json(
@@ -747,25 +924,39 @@ def run_phase3b(
             validation["validation_loss"] = validation_loss(
                 model, tokenizer, dataset, config.data.max_sequence_length
             )
-            validation["label"] = PILOT_LABEL if pilot else "PHASE 3B STAGE 1"
+            validation["label"] = (
+                CORRECTED_V2_PILOT_LABEL
+                if pilot and config.target_representation == "category_id"
+                else PILOT_LABEL
+                if pilot
+                else "PHASE 3B STAGE 1"
+            )
             validation["category_coverage"] = (
-                validation_selection.metadata()
+                {
+                    **validation_selection.metadata(),
+                    "label": validation["label"],
+                }
                 if validation_selection is not None
                 else None
             )
-        if sanity_steps is None:
-            score = _numeric_metric(validation["macro_f1"], "macro_f1")
-            if score > best_validation_macro_f1:
+        if sanity_steps is None and not any(
+            item.get("global_step") == state.global_step
+            for item in validation_candidates
+        ):
+            validation["global_step"] = state.global_step
+            validation_candidates.append(validation)
+            selected = select_best_validation_checkpoint(validation_candidates)
+            if selected is validation:
                 save_adapter(model, experiment_dir / "best_validation")
                 write_json(
                     experiment_dir / "best_validation" / "selection_metadata.json",
-                    {
-                        "split": "validation",
-                        "macro_f1": score,
-                        "global_step": state.global_step,
-                        "test_evaluated": False,
-                    },
+                    {**selected, "split": "validation"},
                 )
+        if sanity_steps is None:
+            write_json(
+                experiment_dir / "validation_metrics_by_checkpoint.json",
+                {"checkpoints": validation_candidates, "test_evaluated": False},
+            )
         write_json(experiment_dir / "environment.json", environment_metadata())
         write_json(experiment_dir / "validation_metrics.json", validation)
         return {

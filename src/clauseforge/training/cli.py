@@ -17,7 +17,7 @@ from clauseforge.training.environment import environment_metadata
 from clauseforge.training.lora import attach_lora
 from clauseforge.training.model import tiny_smoke_model
 from clauseforge.training.overfit import run_overfit_diagnostic
-from clauseforge.training.phase3b import run_phase3b
+from clauseforge.training.phase3b import CORRECTED_V2_PILOT_LABEL, run_phase3b
 from clauseforge.training.pilot import build_pilot_dataset
 from clauseforge.training.smoke import build_smoke_tokenizer
 from clauseforge.training.templates import render_example
@@ -91,6 +91,8 @@ def run(
                     seed=config.seed,
                 )
                 pilot_manifest = pilot_dataset.manifest
+                if config.target_representation == "category_id":
+                    pilot_manifest["label"] = CORRECTED_V2_PILOT_LABEL
             return {
                 "status": (
                     "phase3b-overfit-config-valid"

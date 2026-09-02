@@ -9,6 +9,11 @@ shown to generalize. Its 25-step T4 pilot produced accuracy and macro/weighted
 F1 of 0, 0 exact IDs, and invalid-output rate 1.0. This is diagnostic evidence,
 not final performance; the held-out test was untouched.
 
+After corrected sequence construction, an eight-example training-only overfit
+diagnostic reached 100% exact-ID memorization at step 20 and retained it through
+step 100. This supports learning capability only; corrected validation evidence
+has not yet been generated.
+
 ## Status and use
 
 ClauseForge has no selected final language-model adapter. The intended future
@@ -34,6 +39,7 @@ disclaimer are mandatory boundaries.
 
 ## Limitations and pending evaluation
 
-Output compliance is unresolved, rank selection is incomplete, checkpoint-25
-diagnosis awaits GPU access, and no final test, quantized artifact, latency, or
-throughput evidence exists. Performance claims must wait for the release gates.
+Corrected validation compliance is unresolved, rank selection is incomplete,
+and no final test, quantized artifact, latency, or throughput evidence exists.
+Training memorization is not generalization; performance claims must wait for
+the release gates.

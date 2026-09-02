@@ -18,6 +18,21 @@ duration, and generalization next. Memorization is not model quality.
 The equivalent dedicated overfit config is
 `training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_overfit.yaml`.
 
+The overfit run succeeded: all eight training IDs were exact by step 20 and
+stayed exact through step 100. The next experiment is:
+
+```bash
+python scripts/train_classifier.py \
+  --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8.yaml \
+  --data data/processed/cuad/1.0.0-run-a \
+  --pilot \
+  --pilot-train-examples 256 \
+  --pilot-validation-examples 128 \
+  --max-steps 100
+```
+
+The config validates and checkpoints at steps 20, 40, 60, 80, and 100.
+
 1. Obtain GPU access and preserve historical pilot artifacts.
 2. Run the bounded category-ID v2 validation pilot above with a new adapter.
 3. Inspect strict ID diagnostics and checkpoints; do not access test.

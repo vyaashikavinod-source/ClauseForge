@@ -15,10 +15,15 @@ from clauseforge.training.cli import build_parser
 from clauseforge.training.config import load_config
 from clauseforge.training.phase3b import (
     ResumeState,
+    checkpoint_lineage_metadata,
     configure_gradient_checkpointing,
     expected_qwen_attention_trainable_parameters,
     interrupted_run_metadata,
+    planned_training_schedule,
+    scheduled_steps,
+    select_best_validation_checkpoint,
     select_rank_winner,
+    validate_checkpoint_lineage,
 )
 from clauseforge.training.trainer import mask_prompt_tokens
 
@@ -133,3 +138,61 @@ def test_rank_winner_uses_validation_macro_f1_and_smaller_tie() -> None:
         select_rank_winner(
             [{"rank": 8, "split": "validation", "macro_f1": float("nan")}]
         )
+
+
+def _candidate(
+    step: int,
+    macro_f1: float,
+    invalid: float,
+    exact: float,
+    loss: float,
+) -> dict[str, object]:
+    return {
+        "global_step": step,
+        "macro_f1": macro_f1,
+        "invalid_output_rate": invalid,
+        "exact_id_output_rate": exact,
+        "validation_loss": loss,
+        "test_evaluated": False,
+    }
+
+
+def test_corrected_v2_pilot_cadence_and_configuration() -> None:
+    config = load_config(Path("training/configs/phase3b_v2/qwen25_7b_qlora_id_r8.yaml"))
+    assert scheduled_steps(100, config.optimization.save_steps) == (20, 40, 60, 80, 100)
+    assert scheduled_steps(100, config.optimization.eval_steps) == (20, 40, 60, 80, 100)
+    assert config.target_representation == "category_id"
+    assert config.lora.rank == 8 and config.lora.alpha == 16
+    assert config.optimization.gradient_accumulation == 16
+    assert planned_training_schedule(256, 16, 3, 100) == (100, 7)
+    lineage = checkpoint_lineage_metadata(config, "subset-checksum")
+    assert lineage["pilot_subset_checksum"] == "subset-checksum"
+    assert lineage["target_representation"] == "category_id"
+    assert lineage["prompt_template_version"] == "cuad-classification-id-v2"
+    assert lineage["stable_id_map_checksum"]
+    validate_checkpoint_lineage(lineage, lineage)
+    changed = {**lineage, "stable_id_map_checksum": "different"}
+    with pytest.raises(ValueError, match="stable_id_map_checksum"):
+        validate_checkpoint_lineage(changed, lineage)
+
+
+def test_best_checkpoint_uses_macro_f1_then_documented_ties() -> None:
+    lower_macro = _candidate(20, 0.1, 0.0, 1.0, 0.5)
+    best_macro = _candidate(40, 0.2, 0.9, 0.1, 2.0)
+    assert select_best_validation_checkpoint([lower_macro, best_macro]) is best_macro
+
+    high_invalid = _candidate(20, 0.2, 0.5, 0.8, 0.5)
+    low_invalid = _candidate(40, 0.2, 0.2, 0.1, 2.0)
+    assert select_best_validation_checkpoint([high_invalid, low_invalid]) is low_invalid
+
+    low_exact = _candidate(20, 0.2, 0.2, 0.2, 0.5)
+    high_exact = _candidate(40, 0.2, 0.2, 0.8, 2.0)
+    assert select_best_validation_checkpoint([low_exact, high_exact]) is high_exact
+
+    high_loss = _candidate(20, 0.2, 0.2, 0.8, 2.0)
+    low_loss = _candidate(40, 0.2, 0.2, 0.8, 1.0)
+    assert select_best_validation_checkpoint([high_loss, low_loss]) is low_loss
+
+    early = _candidate(20, 0.2, 0.2, 0.8, 1.0)
+    late = _candidate(40, 0.2, 0.2, 0.8, 1.0)
+    assert select_best_validation_checkpoint([late, early]) is early

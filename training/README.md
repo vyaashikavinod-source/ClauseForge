@@ -23,6 +23,13 @@ prompt encoder and slices at the exact input-token length. Qwen may use EOS as
 PAD; loss masking therefore follows the attention mask rather than masking all
 tokens whose ID equals PAD, so a real terminal EOS still contributes to loss.
 
+The T4 overfit diagnostic reached 8/8 exact training IDs at step 20 and retained
+perfect memorization through step 100; frozen parameters stayed unchanged and
+LoRA parameters updated from step 2. The corrected validation pilot is now the
+next experiment. It validates and checkpoints every 20 steps. Best checkpoint
+selection uses validation macro F1, then lower invalid rate, higher exact-ID
+rate, lower validation loss, and finally the earlier step.
+
 The completed 25-step canonical-target T4 pilot produced no exact taxonomy-valid
 outputs (128/128 unrelated). It is historical infrastructure evidence, not
 final performance or a model-failure conclusion. See
@@ -104,9 +111,10 @@ python scripts/train_classifier.py \
   --pilot
 ```
 
-The default pilot uses 512 deterministic stratified train examples and 256
-validation examples. Optional sample limits and `--max-steps` bound runtime.
-Checkpoints are written every five optimizer steps beneath
+The historical canonical pilot default used 512 deterministic train examples
+and 256 validation examples. The category-ID v2 pilot defaults to 256/128;
+explicit limits and `--max-steps` bound runtime. Its checkpoints are written
+every 20 optimizer steps beneath
 `checkpoints/phase3b/pilot/<experiment-id>/`; resume validates configuration,
 mode, and selected-example checksum.
 

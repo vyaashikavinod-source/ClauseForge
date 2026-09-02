@@ -7,13 +7,17 @@ validation loss 1.416373, accuracy/macro F1/weighted F1 0, exact IDs 0, and
 invalid-output rate 1.0 (3 commentary-wrapped, 8 malformed, 120 unrelated out
 of 128; categories can overlap). Test remained sealed. Phase 3B is not complete.
 
+The corrected train-only overfit diagnostic subsequently reached 8/8 exact IDs
+at step 20 and stayed exact through step 100. This proves memorization capability,
+not validation quality. The corrected 100-step validation pilot is next.
+
 | Component | Status | Evidence | Remaining work |
 |---|---|---|---|
 | Data pipeline | COMPLETE | Deterministic CUAD ingestion, segmentation, validation, manifests | Rebuild only for a new source version |
 | Classical baselines | VALIDATED | Held-out results and reproducible evaluation harness | Retain as fixed context |
 | Training infrastructure | COMPLETE | LoRA/QLoRA configs, checkpoints, resume, pilot mode | Execute longer GPU experiments |
 | GPU feasibility | VALIDATED | T4 load and real NF4 optimizer step | Obtain durable compute |
-| T4 pilot | PARTIAL | Category-ID v2: 25 steps, 0/128 exact, invalid rate 1.0 | Run tiny overfit diagnostic |
+| T4 pilot | PARTIAL | Overfit reached 8/8 exact at step 20; validation still pending | Run corrected 100-step validation pilot |
 | Checkpoint diagnostics | VALIDATED | Canonical pilot: 128/128 unrelated; test untouched | Validate category-ID outputs |
 | Serving/API | COMPLETE | Strict FastAPI boundary and offline tests | Validate with final model |
 | Safety harness | COMPLETE | Synthetic/offline robustness framework | Rerun on final model |

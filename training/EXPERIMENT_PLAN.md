@@ -14,6 +14,12 @@ rate 1.0. The next gate is an eight-example train-only memorization diagnostic.
 Failure to memorize blocks another pilot; successful memorization supports the
 pipeline's ability to learn but says nothing about generalization or final quality.
 
+The diagnostic succeeded: accuracy was 0 at step 10, reached 8/8 exact IDs at
+step 20, and remained 1.0 through step 100 (final loss about 0.91075). The next
+experiment is the corrected 256/128 validation pilot for 100 optimizer steps,
+with validation and checkpoints every 20 steps. Selection uses validation macro
+F1, invalid rate, exact-ID rate, validation loss, then the earlier step.
+
 The completed 25-step rank-8 canonical-target T4 pilot validated infrastructure
 but produced 0 exact canonical outputs (128/128 unrelated). That experiment is
 historical; the category-ID family starts with new adapters and identity.
@@ -77,8 +83,9 @@ lock.
 
 ## Bounded T4 pilot
 
-Before the longer-lived rank sweep, rank 8 may run a 512-train/256-validation
-pilot with seed 42 and five-step checkpoints. It reports genuine pilot training
+The historical v1 pilot used 512 train/256 validation and five-step checkpoints.
+The corrected category-ID v2 pilot uses 256 train/128 validation, 100 optimizer
+steps, and validation/checkpoints every 20 steps. It reports genuine pilot training
 and validation loss, accuracy, macro/weighted F1, invalid-output rate, resource
 use, adapter size, and category coverage. These validation pilot measurements
 remain separate from final rank selection and the Phase 2 held-out test.
