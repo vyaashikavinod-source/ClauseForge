@@ -1,0 +1,10 @@
+[
+  {"id":"demo-governing-law","text":"This sample agreement is governed by the fictional laws of North Harbor.","expected_demo_category":"Governing Law","notes":"Synthetic transport demonstration; not evaluation evidence."},
+  {"id":"demo-renewal","text":"After the first year, this sample renews for successive six-month periods unless notice is given.","expected_demo_category":"Renewal Term","notes":"Synthetic fixture; the mock provider is not expected to be accurate."},
+  {"id":"demo-termination","text":"Either sample party may end this arrangement for convenience on thirty days written notice.","expected_demo_category":"Termination For Convenience","notes":"Original synthetic wording."},
+  {"id":"demo-liability","text":"The fictional supplier's aggregate liability will not exceed ten thousand demo credits.","expected_demo_category":"Cap On Liability","notes":"Original synthetic wording."},
+  {"id":"demo-assignment","text":"Neither sample party may transfer this arrangement without prior written consent.","expected_demo_category":"Assignment","notes":"Original synthetic wording."},
+  {"id":"demo-insurance","text":"The fictional vendor will maintain commercial insurance during the sample term.","expected_demo_category":"Insurance","notes":"Original synthetic wording."},
+  {"id":"demo-exclusivity","text":"For the sample period, the distributor is the exclusive seller in North Harbor.","expected_demo_category":"Exclusivity","notes":"Original synthetic wording."},
+  {"id":"demo-license","text":"The creator grants a limited nonexclusive license to use the fictional materials.","expected_demo_category":"License Grant","notes":"Original synthetic wording."}
+]

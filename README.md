@@ -18,7 +18,8 @@ training infrastructure, but no production transformer model.
 
 **Phase 3B GPU feasibility is validated; the full Qwen rank ablation is pending.**
 
-**A bounded Tesla T4 pilot mode is supported but has not been run here.**
+**A bounded Tesla T4 pilot completed on external GPU compute; results are
+diagnostic and non-final.**
 
 **Quantization and production-serving preparation is implemented; no model has
 been quantized or deployed.**
@@ -77,9 +78,21 @@ model quality. Controlled rank-8/16/32/64 training remains to be run.
 
 The official one-step sanity run also completed on T4. Full 11,223-example
 training was manually interrupted due to free Colab runtime constraints, not
-OOM or model failure. Pilot mode uses deterministic 512-example train and
-256-example validation subsets, frequent resumable checkpoints, and never
-evaluates held-out test. Pilot results are explicitly non-final.
+OOM or model failure. Pilot mode defaults to deterministic 512-example train and
+256-example validation subsets, but the completed bounded run explicitly used
+256/128. It supports frequent resumable checkpoints and never evaluates held-out
+test. Pilot results are explicitly non-final.
+
+## Synthetic demo
+
+```bash
+python scripts/run_demo.py
+```
+
+The demo uses only original synthetic clauses and the deterministic mock backend.
+It demonstrates the API schema, provider abstraction, request correlation,
+taxonomy response, processing metadata, errors, and legal disclaimer—never model
+accuracy. See [`demo/README.md`](demo/README.md).
 
 ## Architecture direction
 
@@ -227,6 +240,12 @@ Use only public or explicitly approved synthetic data. Raw, interim, and
 processed data artifacts are ignored by Git except for directory markers and
 documentation. Never commit credentials, client information, proprietary data,
 model weights, or generated evaluation outputs.
+
+## Documentation
+
+Start with the [documentation index](docs/README.md), [project status](docs/project_status.md),
+[system overview](docs/system_overview.md), [pre-release model card](docs/model_card.md),
+and [handoff guide](docs/handoff.md).
 
 ## License
 

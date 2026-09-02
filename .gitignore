@@ -17,6 +17,10 @@ __pycache__/
 .test-tmp/
 .mypy_cache/
 .ruff_cache/
+.cache/huggingface/
+.huggingface/
+huggingface/
+hf_home/
 .coverage
 coverage.xml
 htmlcov/
@@ -53,6 +57,7 @@ eval/outputs/
 eval/results/
 eval/review/
 evaluation_outputs/
+benchmark_outputs/
 runs/
 wandb/
 mlruns/

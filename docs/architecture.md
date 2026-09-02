@@ -2,8 +2,8 @@
 
 This document distinguishes implemented foundations from planned system
 components. Phase 1 implements local CUAD preparation, and Phase 2 implements
-classical classification baselines and their evaluation harness. Fine-tuning,
-risk evaluation remains planned. Quantization and production-serving
+classical classification baselines and their evaluation harness. Production-scale
+fine-tuning and risk evaluation remain planned. Quantization and production-serving
 preparation are implemented; real artifact execution remains pending.
 
 ## Planned component boundaries
