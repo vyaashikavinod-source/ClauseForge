@@ -8,6 +8,12 @@
 
 **FINAL RELEASE: BLOCKED**
 
+**FRONTEND: IMPLEMENTED**
+
+The end-user interface is served at `/` by the existing FastAPI process. It is
+responsive, accessible, CPU/mock compatible, and separate from developer
+Swagger at `/docs`. It adds no model claims or server-side contract history.
+
 - Engineering platform: substantially complete; final artifact handoff is ready.
 - Current ML result: promising corrected rank-8 validation pilot, not final.
 - Final model: pending GPU compute, locked selection, one-time test, final

@@ -1,5 +1,31 @@
 # ClauseForge
 
+## Local frontend
+
+ClauseForge includes a polished end-user workspace hosted by the existing
+FastAPI application. It uses no separate frontend server and works with the
+CPU-only mock backend. The developer OpenAPI interface remains separate.
+
+Windows PowerShell:
+
+```powershell
+Set-Location -LiteralPath "C:\Users\hp\Desktop\clauseforge"
+$env:CLAUSEFORGE_ENVIRONMENT = "development"
+$env:CLAUSEFORGE_MODEL_BACKEND = "mock"
+$env:CLAUSEFORGE_DEVICE = "cpu"
+Remove-Item Env:MODEL_ARTIFACT_MANIFEST -ErrorAction SilentlyContinue
+.\.venv\Scripts\python.exe -m uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
+```
+
+- Frontend: <http://127.0.0.1:8000/>
+- API base: <http://127.0.0.1:8000>
+- Swagger/OpenAPI: <http://127.0.0.1:8000/docs>
+
+Mock mode is labeled **Development / Mock Model** and is not performance
+evidence. A future real backend uses the same interface and derives provider,
+artifact, and readiness identity from API responses; the frontend does not
+hard-code RC0 or rank-specific behavior.
+
 ## Final-model handoff status
 
 **ENGINEERING INFRASTRUCTURE: COMPLETE.**

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ClauseForge contract clause classification workspace">
+  <title>ClauseForge · Contract Clause Analysis</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="ClauseForge home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" role="img"><path d="M8 5.5h13.5L25 9v17.5H8z"/><path d="M21.5 5.5V9H25M12 14h9M12 18h7M12 22h9"/></svg>
+      </span>
+      <span><strong>ClauseForge</strong><small>Contract Intelligence</small></span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch color theme" title="Switch color theme">
+        <span aria-hidden="true">◐</span>
+      </button>
+      <div id="header-status" class="status-pill checking" role="status">
+        <span class="status-dot"></span><span>Checking system</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="workspace" class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">AI-assisted contract review</p>
+      <h1 id="page-title">Analyze a Contract Clause</h1>
+      <p>Classify clause language against the authoritative CUAD taxonomy. Review the result as decision support—not legal advice.</p>
+    </section>
+
+    <div class="workspace-grid">
+      <section class="card analysis-card" aria-labelledby="input-title">
+        <div class="card-heading">
+          <div><p class="step">01 · Clause input</p><h2 id="input-title">Paste clause text</h2></div>
+          <label class="file-button" for="text-file">Upload .txt</label>
+          <input id="text-file" type="file" accept=".txt,text/plain" hidden>
+        </div>
+        <label class="sr-only" for="clause-text">Contract clause text</label>
+        <textarea id="clause-text" maxlength="10000" aria-describedby="input-help character-count" placeholder="Example: This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware."></textarea>
+        <div class="input-meta">
+          <span id="input-help">Enter one clause at a time for the clearest result.</span>
+          <span id="character-count" aria-live="polite">0 / 10,000</span>
+        </div>
+        <div id="form-error" class="inline-error" role="alert" hidden></div>
+        <div class="button-row">
+          <button id="analyze-button" class="button primary" type="button" disabled>
+            <span class="button-label">Analyze Clause</span><span class="spinner" aria-hidden="true"></span>
+          </button>
+          <button id="clear-button" class="button secondary" type="button">Clear</button>
+        </div>
+
+        <div class="samples" aria-labelledby="samples-title">
+          <div class="section-heading"><h3 id="samples-title">Try a synthetic example</h3><span>Safe sample text</span></div>
+          <div id="sample-list" class="sample-list"></div>
+        </div>
+      </section>
+
+      <aside class="side-column" aria-label="Analysis information">
+        <section class="card result-card" aria-labelledby="result-title">
+          <p class="step">02 · Classification</p>
+          <div id="result-empty" class="result-state empty-state">
+            <div class="empty-icon" aria-hidden="true">⌁</div>
+            <h2 id="result-title">Ready for analysis</h2>
+            <p>Your classification result will appear here after you submit a clause.</p>
+          </div>
+          <div id="result-loading" class="result-state" aria-live="polite" hidden>
+            <div class="loading-bar"></div><div class="loading-line wide"></div><div class="loading-line"></div>
+            <p>Analyzing clause language…</p>
+          </div>
+          <div id="result-success" class="result-state" aria-live="polite" hidden>
+            <span class="success-label">Classification complete</span>
+            <p class="category-kicker">Predicted category</p>
+            <h2 id="category-name"></h2>
+            <p id="category-question" class="category-question"></p>
+            <dl class="result-meta">
+              <div><dt>Provider</dt><dd id="result-provider"></dd></div>
+              <div><dt>Processing</dt><dd id="result-latency"></dd></div>
+              <div><dt>Request ID</dt><dd id="result-request"></dd></div>
+            </dl>
+          </div>
+          <div id="result-error" class="result-state error-state" role="alert" hidden>
+            <span class="error-symbol" aria-hidden="true">!</span><h2 id="error-title">Analysis unavailable</h2><p id="error-message"></p>
+          </div>
+        </section>
+
+        <section class="card readiness-card" aria-labelledby="readiness-title">
+          <div class="section-heading"><h2 id="readiness-title">System status</h2><button id="refresh-status" class="text-button" type="button">Refresh</button></div>
+          <ul class="readiness-list">
+            <li><span>Application</span><strong id="status-application">Checking</strong></li>
+            <li><span>Model artifact</span><strong id="status-artifact">Checking</strong></li>
+            <li><span>Model backend</span><strong id="status-backend">Checking</strong></li>
+          </ul>
+          <div id="mock-notice" class="mock-notice" hidden><strong>Development / Mock Model</strong><span>Interface demonstration only—not model performance.</span></div>
+          <details><summary>System details</summary><dl class="system-details"><div><dt>Provider</dt><dd id="detail-provider">—</dd></div><div><dt>Backend</dt><dd id="detail-backend">—</dd></div><div><dt>Version</dt><dd id="detail-version">—</dd></div><div><dt>Build</dt><dd id="detail-build">Not supplied</dd></div></dl></details>
+        </section>
+      </aside>
+    </div>
+
+    <section class="lower-grid">
+      <section class="card history-card" aria-labelledby="history-title">
+        <div class="section-heading"><div><p class="step">This tab only</p><h2 id="history-title">Recent analyses</h2></div><button id="clear-history" class="text-button" type="button">Clear history</button></div>
+        <div id="history-empty" class="quiet-state">No analyses in this browser session.</div>
+        <ol id="history-list" class="history-list"></ol>
+      </section>
+      <section class="card about-card" aria-labelledby="about-title">
+        <p class="step">About</p><h2 id="about-title">Classification with clear boundaries</h2>
+        <p>ClauseForge provides AI-assisted contract clause classification and review support. Current backend identity and readiness are shown above.</p>
+        <p class="disclaimer">ClauseForge assists with contract review and classification. It does not provide legal advice.</p>
+        <a href="/docs">Developer API documentation <span aria-hidden="true">→</span></a>
+      </section>
+    </section>
+
+    <p class="privacy-notice">Contract text is processed for classification. Avoid submitting sensitive material unless your deployment is approved for it.</p>
+  </main>
+  <footer><span>ClauseForge</span><span>AI-assisted review · Human judgment required</span></footer>
+</body>
+</html>

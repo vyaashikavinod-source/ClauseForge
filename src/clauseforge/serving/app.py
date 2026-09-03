@@ -6,11 +6,13 @@ import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, cast
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from clauseforge.cache.exact import ExactMemoryCache, cache_key
 from clauseforge.config import Settings
@@ -41,10 +43,15 @@ from clauseforge.serving.schemas import (
     ProcessingMetadata,
     ReadyResponse,
 )
-from clauseforge.training.targets import UnknownTargetError, resolve_generated_target
+from clauseforge.training.targets import (
+    UnknownTargetError,
+    resolve_generated_target,
+    stable_id_map,
+)
 from clauseforge.training.templates import PROMPT_TEMPLATE_VERSION
 
 LOGGER = logging.getLogger("clauseforge.serving")
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
 def _request_id(request: Request) -> str:
@@ -101,6 +108,11 @@ def create_app(
     application.state.exact_cache = ExactMemoryCache(
         max(1, active_settings.exact_cache_capacity)
     )
+    application.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+    @application.get("/", include_in_schema=False)
+    async def frontend() -> FileResponse:
+        return FileResponse(FRONTEND_DIR / "index.html")
 
     @application.exception_handler(RequestValidationError)
     async def validation_handler(
@@ -161,6 +173,20 @@ def create_app(
             **build_metadata(),
             "provider": active_provider.name,
             "backend": active_provider.provider_type,
+        }
+
+    @application.get("/v1/taxonomy", summary="Safe category display metadata")
+    async def taxonomy_metadata() -> dict[str, object]:
+        return {
+            "taxonomy_version": TAXONOMY_VERSION,
+            "categories": [
+                {
+                    "category_id": item.category_id,
+                    "category_name": item.category_name,
+                    "canonical": item.canonical,
+                }
+                for item in stable_id_map()
+            ],
         }
 
     @application.get("/metrics", summary="Internal process-local metrics")
