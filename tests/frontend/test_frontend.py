@@ -15,10 +15,12 @@ def test_root_page_and_static_assets_load() -> None:
         page = client.get("/")
         css = client.get("/static/app.css")
         javascript = client.get("/static/app.js")
+        docs = client.get("/docs")
     assert page.status_code == css.status_code == javascript.status_code == 200
     assert "text/html" in page.headers["content-type"]
     assert "text/css" in css.headers["content-type"]
     assert "javascript" in javascript.headers["content-type"]
+    assert docs.status_code == 200
 
 
 def test_analyze_form_is_semantic_and_accessible() -> None:
@@ -80,7 +82,8 @@ def test_only_synthetic_samples_and_session_history() -> None:
     ):
         assert label in javascript
     assert "sessionStorage" in javascript
-    assert "localStorage" not in javascript
+    assert "localStorage" in javascript
+    assert "localStorage.setItem(THEME_KEY" in javascript
     assert "CUAD_v1" not in javascript
     assert "held-out" not in javascript.casefold()
 
@@ -95,7 +98,35 @@ def test_legal_and_privacy_boundaries_are_visible() -> None:
 
 def test_responsive_and_focus_styles_exist() -> None:
     css = (FRONTEND / "app.css").read_text(encoding="utf-8")
-    assert "@media (max-width: 850px)" in css
-    assert "@media (max-width: 520px)" in css
+    assert "@media(max-width:980px)" in css
+    assert "@media(max-width:700px)" in css
+    assert "@media(max-width:460px)" in css
     assert ":focus-visible" in css
     assert "prefers-reduced-motion" in css
+
+
+def test_premium_result_and_theme_contracts_are_present() -> None:
+    html = (FRONTEND / "index.html").read_text(encoding="utf-8")
+    javascript = (FRONTEND / "app.js").read_text(encoding="utf-8")
+    for element_id in (
+        "category-id",
+        "category-question",
+        "result-model-state",
+        "result-latency",
+        "result-request",
+    ):
+        assert f'id="{element_id}"' in html
+    assert "prefers-color-scheme: dark" in javascript
+    assert "category.category_id" in javascript
+    assert "Mock · demonstration only" in javascript
+
+
+def test_frontend_has_no_external_dependencies_or_decorative_emoji() -> None:
+    source = "\n".join(
+        (FRONTEND / name).read_text(encoding="utf-8")
+        for name in ("index.html", "app.css", "app.js")
+    )
+    assert "https://" not in source
+    assert "http://" not in source
+    for symbol in ("◐", "⌁", "⚖", "🔍", "✨"):
+        assert symbol not in source

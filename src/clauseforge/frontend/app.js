@@ -2,6 +2,7 @@
 
 const MAX_CHARACTERS = 10000;
 const HISTORY_KEY = "clauseforge-session-history-v1";
+const THEME_KEY = "clauseforge-theme-v1";
 const samples = [
   ["Governing law", "This Agreement is governed by the laws of the State of Delaware, without regard to conflict-of-law principles."],
   ["Termination", "Either party may terminate this Agreement for convenience upon sixty days' written notice to the other party."],
@@ -23,9 +24,10 @@ function formatCategory(canonical) {
   const known = taxonomyByCanonical.get(canonical);
   if (known) return known;
   const quoted = canonical.match(/[“"]([^”"]+)[”"]/);
-  return { category_name: quoted ? quoted[1] : "CUAD category", canonical };
+  return { category_id: "taxonomy-category", category_name: quoted ? quoted[1] : "CUAD category", canonical };
 }
 function providerLabel(provider, backend) { return backend === "mock" || provider === "mock-development" ? "Development / Mock Model" : provider || backend || "Configured model"; }
+function modelStateLabel(provider, backend) { return backend === "mock" || provider === "mock-development" ? "Mock · demonstration only" : "Configured inference backend"; }
 
 function updateInput() {
   const length = elements.text.value.length;
@@ -44,8 +46,10 @@ async function analyze() {
     if (!response.ok) throw apiError(response.status, data);
     const category = formatCategory(data.predicted_category);
     byId("category-name").textContent = category.category_name;
+    byId("category-id").textContent = category.category_id;
     byId("category-question").textContent = category.canonical;
     byId("result-provider").textContent = providerLabel(data.provider, data.processing?.provider_type);
+    byId("result-model-state").textContent = modelStateLabel(data.provider, data.processing?.provider_type);
     byId("result-latency").textContent = typeof data.processing?.latency_ms === "number" ? `${data.processing.latency_ms.toFixed(1)} ms` : "Completed";
     byId("result-request").textContent = data.request_id || "Not supplied";
     setVisible(elements.success); addHistory(text, category.category_name);
@@ -86,12 +90,23 @@ function history() { try { return JSON.parse(sessionStorage.getItem(HISTORY_KEY)
 function addHistory(text, category) { const items = history(); items.unshift({ preview: text.slice(0, 92), category, timestamp: new Date().toISOString() }); sessionStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 5))); renderHistory(); }
 function renderHistory() { const list = byId("history-list"); const items = history(); list.replaceChildren(); byId("history-empty").hidden = items.length > 0; items.forEach((item) => { const li = document.createElement("li"); li.className = "history-item"; const strong = document.createElement("strong"); strong.textContent = item.category; const preview = document.createElement("p"); preview.textContent = item.preview; const time = document.createElement("time"); time.dateTime = item.timestamp; time.textContent = new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); li.append(strong, preview, time); list.append(li); }); }
 
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const toggle = byId("theme-toggle");
+  if (toggle) toggle.setAttribute("aria-label", `Switch to ${theme === "dark" ? "light" : "dark"} theme`);
+}
+function initialTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  return stored === "light" || stored === "dark" ? stored : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function initialize() {
-  samples.forEach(([label, text]) => { const button = document.createElement("button"); button.type = "button"; button.className = "sample-chip"; button.textContent = label; button.addEventListener("click", () => { elements.text.value = text; updateInput(); elements.text.focus(); }); byId("sample-list").append(button); });
+  samples.forEach(([label, text]) => { const button = document.createElement("button"); button.type = "button"; button.className = "sample-chip"; button.textContent = label; button.addEventListener("click", () => { document.querySelectorAll(".sample-chip").forEach((chip) => chip.classList.remove("selected")); button.classList.add("selected"); elements.text.value = text; updateInput(); elements.text.focus(); }); byId("sample-list").append(button); });
   elements.text.addEventListener("input", updateInput); elements.analyze.addEventListener("click", analyze); elements.clear.addEventListener("click", () => { elements.text.value = ""; updateInput(); setVisible(elements.empty); elements.text.focus(); });
   byId("text-file").addEventListener("change", async (event) => { const file = event.target.files?.[0]; if (!file) return; if (file.size > 100000) { elements.error.textContent = "Text files must be 100 KB or smaller."; elements.error.hidden = false; return; } elements.text.value = (await file.text()).slice(0, MAX_CHARACTERS); updateInput(); });
   byId("refresh-status").addEventListener("click", refreshStatus); byId("clear-history").addEventListener("click", () => { sessionStorage.removeItem(HISTORY_KEY); renderHistory(); });
-  byId("theme-toggle").addEventListener("click", () => { const root = document.documentElement; root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; });
+  applyTheme(initialTheme());
+  byId("theme-toggle").addEventListener("click", () => { const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; localStorage.setItem(THEME_KEY, theme); applyTheme(theme); });
   updateInput(); renderHistory(); refreshStatus();
 }
 document.addEventListener("DOMContentLoaded", initialize);

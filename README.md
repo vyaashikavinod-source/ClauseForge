@@ -5,6 +5,11 @@
 ClauseForge includes a polished end-user workspace hosted by the existing
 FastAPI application. It uses no separate frontend server and works with the
 CPU-only mock backend. The developer OpenAPI interface remains separate.
+The responsive legal-tech interface uses self-contained HTML, CSS, and
+JavaScript with no frontend framework or external asset dependency. Its light
+and dark themes follow the operating-system preference initially; a manual
+theme choice is then retained in browser local storage. Analysis history stays
+limited to session storage.
 
 Windows PowerShell:
 
