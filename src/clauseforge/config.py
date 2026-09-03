@@ -39,6 +39,11 @@ class Settings:
     target_representation_version: str = "cuad-canonical-question-v1"
     prompt_template_version: str = "cuad-classification-v1"
     model_artifact_manifest: Path | None = None
+    artifact_id: str | None = None
+    checkpoint_step: int | None = None
+    candidate_status: str | None = None
+    base_revision: str | None = None
+    artifact_validation_error: str | None = None
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -103,8 +108,9 @@ class Settings:
 
         report = validate_manifest(self.model_artifact_manifest)
         if not report.valid:
-            raise ValueError(
-                "MODEL_ARTIFACT_MANIFEST is invalid: " + "; ".join(report.errors)
+            return replace(
+                self,
+                artifact_validation_error="; ".join(report.errors),
             )
         manifest = load_manifest(self.model_artifact_manifest)
         adapter = (
@@ -116,9 +122,14 @@ class Settings:
             self,
             model_path=Path(manifest.base_model),
             adapter_path=adapter,
+            tokenizer_path=Path(manifest.base_model),
             target_representation=manifest.target_representation,
             target_representation_version=manifest.target_representation_version,
             prompt_template_version=manifest.prompt_version,
+            artifact_id=manifest.artifact_id,
+            checkpoint_step=manifest.checkpoint_step,
+            candidate_status=manifest.release_status,
+            base_revision=manifest.base_revision,
         )
 
     def validate(self) -> None:
@@ -133,7 +144,13 @@ class Settings:
             raise ValueError(f"CLAUSEFORGE_LOG_LEVEL must be one of: {allowed}")
         if not 1 <= self.port <= 65535:
             raise ValueError("CLAUSEFORGE_PORT must be between 1 and 65535")
-        if self.model_provider not in {"mock", "transformer", "vllm", "llamacpp"}:
+        if self.model_provider not in {
+            "mock",
+            "real",
+            "transformer",
+            "vllm",
+            "llamacpp",
+        }:
             raise ValueError("CLAUSEFORGE_MODEL_PROVIDER/MODEL_BACKEND is invalid")
         if self.max_input_characters < 3:
             raise ValueError("CLAUSEFORGE_MAX_INPUT_CHARACTERS must be at least 3")
@@ -158,13 +175,11 @@ class Settings:
     def backend_configuration_issues(self) -> tuple[str, ...]:
         """Return backend-specific missing configuration without fallback."""
         issues: list[str] = []
-        if self.model_provider == "transformer":
+        if self.model_provider in {"real", "transformer"}:
             if self.model_path is None:
                 issues.append("MODEL_PATH is required for transformer")
             if self.adapter_path is None:
                 issues.append("ADAPTER_PATH is required for transformer")
-            if self.tokenizer_path is None:
-                issues.append("TOKENIZER_PATH is required for transformer")
         elif self.model_provider == "vllm":
             if self.vllm_base_url is None:
                 issues.append("VLLM_BASE_URL is required for vllm")

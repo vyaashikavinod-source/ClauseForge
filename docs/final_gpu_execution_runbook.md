@@ -269,3 +269,10 @@ Release is forbidden unless every status gate is complete.
   validated parent; do not register it.
 - Benchmark/container failure: retain failure evidence, keep gates blocked, fix
   the concrete defect, and rerun that gate.
+# Pre-final candidate serving
+
+Checkpoint 700 may be imported, validated, registered, activated, and served as
+a real trained candidate before final locking. This does not authorize held-out
+test evaluation, final safety/OOD, merge, quantization, final benchmarking, or
+deployment. Checkpoints 1400 and 2100 follow the identical validation-only
+comparison and artifact-activation path.

@@ -205,14 +205,24 @@ def create_app(
     async def ready() -> ReadyResponse | JSONResponse:
         is_ready, detail = active_provider.is_ready()
         artifact_configured = active_settings.model_artifact_manifest is not None
+        if active_settings.artifact_validation_error is not None:
+            is_ready = False
+            detail = "configured artifact manifest is invalid"
         response = ReadyResponse(
             status="ready" if is_ready else "unavailable",
             provider=active_provider.name,
             model_id=active_provider.model_id,
             detail=detail,
             model_artifact_configured=artifact_configured,
-            model_artifact_valid=artifact_configured,
+            model_artifact_valid=(
+                artifact_configured
+                and active_settings.artifact_validation_error is None
+            ),
             model_backend_ready=is_ready,
+            artifact_id=getattr(active_provider, "artifact_id", None),
+            checkpoint_step=getattr(active_provider, "checkpoint_step", None),
+            base_model=getattr(active_provider, "base_model", None),
+            candidate_status=getattr(active_provider, "candidate_status", None),
         )
         if is_ready:
             return response

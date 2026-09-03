@@ -20,9 +20,12 @@ def main(argv: list[str] | None = None) -> int:
     inspect.add_argument("artifact_id")
     validate = sub.add_parser("validate")
     validate.add_argument("manifest", type=Path)
+    register = sub.add_parser("register")
+    register.add_argument("manifest", type=Path)
     activate = sub.add_parser("activate")
     activate.add_argument("artifact_id")
     sub.add_parser("rollback")
+    sub.add_parser("active")
     promote = sub.add_parser("promote")
     promote.add_argument("artifact_id")
     promote.add_argument(
@@ -36,10 +39,14 @@ def main(argv: list[str] | None = None) -> int:
         result = registry.inspect(args.artifact_id).to_dict()
     elif args.command == "validate":
         result = asdict(validate_manifest(args.manifest))
+    elif args.command == "register":
+        result = {"registered_manifest": str(registry.register(args.manifest))}
     elif args.command == "activate":
         result = registry.activate(args.artifact_id).to_dict()
     elif args.command == "rollback":
         result = registry.rollback().to_dict()
+    elif args.command == "active":
+        result = registry.read_active().to_dict()
     else:
         result = registry.promote(args.artifact_id, args.status).to_dict()  # type: ignore[arg-type]
     print(json.dumps(result, indent=2, sort_keys=True))

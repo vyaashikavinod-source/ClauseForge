@@ -47,3 +47,44 @@ taxonomy-invalid rate; no numbers are generated without execution.
 Candidate acceptance settings in `configs/artifacts/candidate_acceptance.example.json`
 are configurable engineering gates, not production thresholds. Null criteria do
 not block RC0 merely because arbitrary thresholds have not been invented.
+
+## Hot-swappable real candidates
+
+Use `configs/artifacts/clauseforge-qwen25-7b-r8-step700.template.json` as the
+schema guide. Put the completed manifest beside the restored external
+checkpoint, set its relative adapter path, and replace all checksum/provenance
+placeholders. Validation checks safetensors, PEFT config, checkpoint metadata,
+optional resume state, Qwen revision, LoRA structure, prompt/target versions,
+stable-ID map, experiment identity, and checkpoint step—not the filename.
+
+```bash
+python scripts/import_model_artifact.py --adapter <RESTORED_CHECKPOINT_700> --manifest <MANIFEST_700>
+python scripts/validate_model_artifact.py --manifest <MANIFEST_700>
+python scripts/model_artifact_registry.py --registry <REGISTRY> validate <MANIFEST_700>
+python scripts/model_artifact_registry.py --registry <REGISTRY> register <MANIFEST_700>
+python scripts/model_artifact_registry.py --registry <REGISTRY> activate clauseforge-qwen25-7b-r8-step700
+python scripts/model_artifact_registry.py --registry <REGISTRY> inspect clauseforge-qwen25-7b-r8-step700
+python scripts/release_status.py --manifest <MANIFEST_700>
+```
+
+For 1400 or 2100, validate a new manifest, compare validation evidence,
+register it, then activate only if accepted. The pointer retains current and
+previous candidates, so rollback is immediate.
+
+```bash
+python scripts/compare_model_candidates.py --candidate-a <CURRENT_MANIFEST> --candidate-b <NEW_MANIFEST>
+python scripts/model_artifact_registry.py --registry <REGISTRY> activate <NEW_ARTIFACT_ID>
+python scripts/model_artifact_registry.py --registry <REGISTRY> rollback
+python scripts/model_artifact_registry.py --registry <REGISTRY> active
+```
+
+Comparison never reads test data. Ranking is macro F1, lower invalid-output
+rate, higher exact-ID rate, lower validation loss, then earlier checkpoint.
+Activation does not promote or final-lock a candidate.
+
+Real serving sets `MODEL_ARTIFACT_MANIFEST=<MANIFEST>`,
+`CLAUSEFORGE_MODEL_BACKEND=real`, and `CLAUSEFORGE_DEVICE=cuda`. It loads the
+pinned Qwen base in 4-bit NF4 with double quantization and FP16 compute, attaches
+the PEFT adapter, uses the manifest prompt, and accepts only an exact category
+ID. Failures never fall back to mock. `python scripts/smoke_test_active_model.py`
+uses synthetic clauses and labels results **NOT FINAL MODEL PERFORMANCE**.

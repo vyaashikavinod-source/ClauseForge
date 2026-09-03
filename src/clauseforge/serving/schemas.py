@@ -58,6 +58,10 @@ class ReadyResponse(BaseModel):
     model_artifact_configured: bool = False
     model_artifact_valid: bool = False
     model_backend_ready: bool = False
+    artifact_id: str | None = None
+    checkpoint_step: int | None = None
+    base_model: str | None = None
+    candidate_status: str | None = None
 
 
 class ErrorDetail(BaseModel):

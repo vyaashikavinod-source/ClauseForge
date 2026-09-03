@@ -47,4 +47,10 @@ def build_provider(
         settings.max_sequence_length,
         settings.target_representation,
         settings.target_representation_version,
+        settings.prompt_template_version,
+        settings.base_revision,
+        settings.max_new_tokens,
+        settings.artifact_id,
+        settings.checkpoint_step,
+        settings.candidate_status,
     )

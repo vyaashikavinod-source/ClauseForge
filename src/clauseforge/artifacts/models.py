@@ -32,6 +32,7 @@ class ValidationSummary:
     weighted_f1: float
     exact_id_rate: float
     invalid_output_rate: float
+    validation_loss: float | None
 
     @classmethod
     def from_dict(cls, value: dict[str, object]) -> ValidationSummary:
@@ -47,6 +48,11 @@ class ValidationSummary:
             weighted_f1=float(cast(float | str, value["weighted_f1"])),
             exact_id_rate=float(cast(float | str, value["exact_id_rate"])),
             invalid_output_rate=float(cast(float | str, value["invalid_output_rate"])),
+            validation_loss=(
+                None
+                if value.get("validation_loss") is None
+                else float(cast(float | str, value["validation_loss"]))
+            ),
         )
 
 
@@ -69,7 +75,13 @@ class ArtifactManifest:
     stable_id_map_checksum: str
     lora_rank: int
     lora_alpha: int
+    lora_dropout: float
     lora_targets: tuple[str, ...]
+    quantization_mode: str
+    quantization_type: str
+    double_quantization: bool
+    precision: str
+    checkpoint_step: int
     training_commit: str
     config_checksum: str
     validation_summary: ValidationSummary | None
@@ -146,7 +158,13 @@ class ArtifactManifest:
             stable_id_map_checksum=str(value["stable_id_map_checksum"]),
             lora_rank=int(cast(int | str, value["lora_rank"])),
             lora_alpha=int(cast(int | str, value["lora_alpha"])),
+            lora_dropout=float(cast(float | str, value["lora_dropout"])),
             lora_targets=tuple(str(item) for item in targets),
+            quantization_mode=str(value["quantization_mode"]),
+            quantization_type=str(value["quantization_type"]),
+            double_quantization=bool(value["double_quantization"]),
+            precision=str(value["precision"]),
+            checkpoint_step=int(cast(int | str, value["checkpoint_step"])),
             training_commit=str(value["training_commit"]),
             config_checksum=str(value["config_checksum"]),
             validation_summary=None

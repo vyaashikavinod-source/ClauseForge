@@ -5,6 +5,9 @@ python scripts/release_status.py [--json]
 python scripts/validate_model_artifact.py --manifest <MANIFEST>
 python scripts/model_artifact_registry.py activate <ARTIFACT_ID>
 python scripts/model_artifact_registry.py rollback
+python scripts/model_artifact_registry.py active
+python scripts/compare_model_candidates.py --candidate-a <CURRENT_MANIFEST> --candidate-b <NEW_MANIFEST>
+python scripts/smoke_test_active_model.py
 python scripts/train_classifier.py --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_full.yaml --data data/processed/cuad/1.0.0-run-a
 python scripts/train_classifier.py --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_full.yaml --data data/processed/cuad/1.0.0-run-a --resume-from-checkpoint <CHECKPOINT>
 python scripts/select_final_candidate.py --experiment-dir <DIR> --output <SELECTION_JSON>
@@ -17,3 +20,7 @@ python scripts/benchmark_serving.py --base-url <URL> --requests <N> --concurrenc
 python scripts/authorize_deployment.py --artifact-manifest <BUNDLE_MANIFEST> --authorize-deployment
 # Build/validate the deployment bundle per docs/final_gpu_execution_runbook.md.
 ```
+
+Real candidate startup requires `MODEL_ARTIFACT_MANIFEST=<MANIFEST>`,
+`CLAUSEFORGE_MODEL_BACKEND=real`, and `CLAUSEFORGE_DEVICE=cuda`. The registry
+preserves current and previous candidates; activation is not final promotion.

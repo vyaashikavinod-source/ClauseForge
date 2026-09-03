@@ -31,6 +31,29 @@ evidence. A future real backend uses the same interface and derives provider,
 artifact, and readiness identity from API responses; the frontend does not
 hard-code RC0 or rank-specific behavior.
 
+## Active trained model candidates
+
+ClauseForge can serve an external Qwen2.5-7B QLoRA adapter as an **active
+trained model candidate** without copying weights into Git. Checkpoint 700 is
+the current candidate identity; checkpoints 1400 and 2100 use the same manifest,
+registry, provider, API, and frontend path. Final selection is still pending.
+
+```powershell
+$env:MODEL_ARTIFACT_MANIFEST = "<ABSOLUTE_PATH_TO_CHECKPOINT_700_MANIFEST>"
+$env:CLAUSEFORGE_MODEL_BACKEND = "real"
+$env:CLAUSEFORGE_DEVICE = "cuda"
+.\.venv\Scripts\python.exe -m uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
+```
+
+```bash
+export MODEL_ARTIFACT_MANIFEST="<ABSOLUTE_PATH_TO_CHECKPOINT_700_MANIFEST>"
+export CLAUSEFORGE_MODEL_BACKEND=real
+export CLAUSEFORGE_DEVICE=cuda
+python -m uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
+```
+
+See `docs/model_artifact_pipeline.md` for the complete candidate workflow.
+
 ## Final-model handoff status
 
 **ENGINEERING INFRASTRUCTURE: COMPLETE.**
@@ -39,10 +62,10 @@ hard-code RC0 or rank-specific behavior.
 
 **FINAL RELEASE: BLOCKED.**
 
-The corrected rank-8 pilot is metadata-only RC0, labeled **PROVISIONAL MODEL
-CANDIDATE — VALIDATION ONLY — NOT FINAL RELEASE**. Its 256/128, 100-step result
-is documented in [the RC0 report](docs/release_candidate_rc0.md). The held-out
-test remains sealed. No final safety/OOD run, quantization, real benchmark, or
+Checkpoint 700 is the current real trained model candidate, but it is not final
+locked or released. The earlier metadata-only RC0 remains documented in
+[the RC0 report](docs/release_candidate_rc0.md). The held-out test remains
+sealed. No final safety/OOD run, merge, quantization, final benchmark, or
 deployment has occurred.
 
 The typed artifact pipeline validates identity, checksums, lineage, safe paths,

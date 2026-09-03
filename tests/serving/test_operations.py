@@ -29,7 +29,7 @@ def test_readiness_is_factually_blocked() -> None:
 def test_backend_environment_validation() -> None:
     assert Settings(model_provider="mock").backend_configuration_issues() == ()
     assert (
-        len(Settings(model_provider="transformer").backend_configuration_issues()) == 3
+        len(Settings(model_provider="transformer").backend_configuration_issues()) == 2
     )
     assert len(Settings(model_provider="vllm").backend_configuration_issues()) == 2
     assert len(Settings(model_provider="llamacpp").backend_configuration_issues()) == 2

@@ -204,7 +204,7 @@ def test_local_transformer_missing_weights_is_not_ready(tmp_path: Path) -> None:
     provider = LocalTransformerProvider(None, tmp_path, None, "cpu", 1024)
     ready, detail = provider.is_ready()
     assert ready is False
-    assert detail == "required local model artifacts are not configured"
+    assert detail == "real Qwen adapter serving requires CLAUSEFORGE_DEVICE=cuda"
 
 
 def test_mock_categories_are_authoritative() -> None:

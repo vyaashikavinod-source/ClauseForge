@@ -1,8 +1,8 @@
 # MODEL CARD — PRE-RELEASE / MODEL NOT FINALIZED
 
-## Current candidate
+## Historical provisional RC0
 
-RC0 is a provisional rank-8 validation-only candidate. Its corrected pilot
+RC0 was a provisional rank-8 validation-only candidate. Its corrected pilot
 reported validation accuracy about 0.4766, macro F1 about 0.4612, weighted F1
 about 0.4688, exact-ID rate about 0.8516, and invalid-output rate about 0.1484.
 These are not final metrics or comparisons against the held-out classical test
@@ -52,3 +52,11 @@ Corrected validation compliance is unresolved, rank selection is incomplete,
 and no final test, quantized artifact, latency, or throughput evidence exists.
 Training memorization is not generalization; performance claims must wait for
 the release gates.
+# Active candidate status
+
+The serving architecture can load checkpoint 700 as an **active trained model
+candidate — not final release**. Its category-ID output remains subject to exact
+taxonomy validation. This is not a claim of held-out test, final safety/OOD,
+production benchmark, or release performance.
+
+**FINAL MODEL SELECTION: PENDING. HELD-OUT TEST: UNTOUCHED. FINAL RELEASE: BLOCKED.**

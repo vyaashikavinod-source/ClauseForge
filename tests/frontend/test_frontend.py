@@ -71,6 +71,18 @@ def test_mock_mode_is_prominent_and_no_confidence_is_fabricated() -> None:
     assert "confidence" not in javascript.casefold()
 
 
+def test_frontend_model_state_is_dynamic_and_candidate_safe() -> None:
+    html = (FRONTEND / "index.html").read_text(encoding="utf-8")
+    javascript = (FRONTEND / "app.js").read_text(encoding="utf-8")
+    assert 'id="model-notice-title"' in html
+    assert 'id="model-notice-detail"' in html
+    assert "Active trained model" in javascript
+    assert "ready.checkpoint_step" in javascript
+    assert "ready.candidate_status" in javascript
+    assert "No mock fallback is active" in javascript
+    assert "production validated" not in javascript.casefold()
+
+
 def test_only_synthetic_samples_and_session_history() -> None:
     javascript = (FRONTEND / "app.js").read_text(encoding="utf-8")
     for label in (

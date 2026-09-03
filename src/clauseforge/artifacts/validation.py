@@ -88,6 +88,17 @@ def validate_manifest(
         errors.append("target/prompt versions are incompatible")
     if manifest.lora_rank <= 0 or manifest.lora_alpha <= 0 or not manifest.lora_targets:
         errors.append("LoRA metadata is incomplete")
+    if not 0.0 <= manifest.lora_dropout < 1.0:
+        errors.append("lora_dropout is invalid")
+    if manifest.checkpoint_step <= 0:
+        errors.append("checkpoint_step must be positive")
+    if (
+        manifest.quantization_mode != "4bit"
+        or manifest.quantization_type.casefold() != "nf4"
+        or not manifest.double_quantization
+        or manifest.precision.casefold() != "float16"
+    ):
+        errors.append("adapter serving configuration is incompatible")
     for checksum_name, checksum in (
         ("adapter_checksum", manifest.adapter_checksum),
         ("config_checksum", manifest.config_checksum),
@@ -131,3 +142,69 @@ def _validate_files(path: Path, manifest: ArtifactManifest, errors: list[str]) -
             and sha256_path(target) != manifest.adapter_checksum
         ):
             errors.append("adapter checksum mismatch")
+        elif target.is_dir():
+            _validate_adapter_metadata(target, manifest, errors)
+
+
+def _validate_adapter_metadata(
+    adapter: Path, manifest: ArtifactManifest, errors: list[str]
+) -> None:
+    """Validate structural checkpoint facts instead of trusting directory names."""
+    required = (
+        "adapter_model.safetensors",
+        "adapter_config.json",
+        "checkpoint_metadata.json",
+    )
+    for name in required:
+        if not (adapter / name).is_file():
+            errors.append(f"required adapter file missing: {name}")
+    try:
+        config = json.loads(
+            (adapter / "adapter_config.json").read_text(encoding="utf-8")
+        )
+        if int(config.get("r", -1)) != manifest.lora_rank:
+            errors.append("adapter_config rank mismatch")
+        if int(config.get("lora_alpha", -1)) != manifest.lora_alpha:
+            errors.append("adapter_config alpha mismatch")
+        targets = {str(item) for item in config.get("target_modules", [])}
+        if targets != set(manifest.lora_targets):
+            errors.append("adapter_config target_modules mismatch")
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        errors.append("adapter_config.json is invalid")
+    try:
+        metadata = json.loads(
+            (adapter / "checkpoint_metadata.json").read_text(encoding="utf-8")
+        )
+        checks = {
+            "global_step": manifest.checkpoint_step,
+            "experiment_id": manifest.adapter_experiment_id,
+            "prompt_template_version": manifest.prompt_version,
+            "target_representation": manifest.target_representation,
+            "target_representation_version": manifest.target_representation_version,
+            "stable_id_map_checksum": manifest.stable_id_map_checksum,
+            "lora_rank": manifest.lora_rank,
+            "lora_alpha": manifest.lora_alpha,
+            "target_modules": list(manifest.lora_targets),
+        }
+        for field, expected in checks.items():
+            actual = metadata.get(field)
+            if field == "target_modules":
+                if {str(item) for item in actual or []} != set(manifest.lora_targets):
+                    errors.append(f"checkpoint_metadata {field} mismatch")
+            elif actual != expected:
+                errors.append(f"checkpoint_metadata {field} mismatch")
+        if (
+            "base_revision" in metadata
+            and metadata["base_revision"] != manifest.base_revision
+        ):
+            errors.append("checkpoint_metadata base_revision mismatch")
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        errors.append("checkpoint_metadata.json is invalid")
+    resume = adapter / "resume_state.json"
+    if resume.is_file():
+        try:
+            state = json.loads(resume.read_text(encoding="utf-8"))
+            if int(state.get("global_step", -1)) != manifest.checkpoint_step:
+                errors.append("resume_state checkpoint step mismatch")
+        except (ValueError, TypeError, json.JSONDecodeError):
+            errors.append("resume_state.json is invalid")

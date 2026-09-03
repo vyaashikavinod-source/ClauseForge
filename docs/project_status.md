@@ -15,7 +15,7 @@ responsive, accessible, CPU/mock compatible, and separate from developer
 Swagger at `/docs`. It adds no model claims or server-side contract history.
 
 - Engineering platform: substantially complete; final artifact handoff is ready.
-- Current ML result: promising corrected rank-8 validation pilot, not final.
+- Current candidate: real trained checkpoint 700, not final locked or released.
 - Final model: pending GPU compute, locked selection, one-time test, final
   safety/OOD, quantization, benchmark, and deployment authorization.
 
@@ -62,3 +62,11 @@ Repository structure: `src/clauseforge/` contains the package; `scripts/` holds
 explicit CLIs; `training/` contains versioned experiment configuration; `tests/`
 is CPU/offline; `demo/` is synthetic; `docs/` is the handoff set; generated
 data, evaluations, checkpoints, and artifacts remain ignored.
+# Active serving candidate
+
+ClauseForge supports a real trained, hot-swappable model candidate through the
+existing manifest/provider architecture. Checkpoint 700 is the current candidate
+identity; future 1400/2100 candidates use validation, comparison, and activation
+without application changes.
+
+**FINAL MODEL SELECTION: PENDING. HELD-OUT TEST: UNTOUCHED. FINAL RELEASE: BLOCKED.**

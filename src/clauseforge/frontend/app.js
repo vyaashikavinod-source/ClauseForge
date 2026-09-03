@@ -26,8 +26,8 @@ function formatCategory(canonical) {
   const quoted = canonical.match(/[“"]([^”"]+)[”"]/);
   return { category_id: "taxonomy-category", category_name: quoted ? quoted[1] : "CUAD category", canonical };
 }
-function providerLabel(provider, backend) { return backend === "mock" || provider === "mock-development" ? "Development / Mock Model" : provider || backend || "Configured model"; }
-function modelStateLabel(provider, backend) { return backend === "mock" || provider === "mock-development" ? "Mock · demonstration only" : "Configured inference backend"; }
+function providerLabel(provider, backend, modelId) { return backend === "mock" || provider === "mock-development" ? "Development / Mock Model" : modelId ? `${modelId.split("/").pop()} + LoRA` : provider || backend || "Configured model"; }
+function modelStateLabel(provider, backend) { return backend === "mock" || provider === "mock-development" ? "Mock · demonstration only" : "Active trained model candidate"; }
 
 function updateInput() {
   const length = elements.text.value.length;
@@ -48,7 +48,7 @@ async function analyze() {
     byId("category-name").textContent = category.category_name;
     byId("category-id").textContent = category.category_id;
     byId("category-question").textContent = category.canonical;
-    byId("result-provider").textContent = providerLabel(data.provider, data.processing?.provider_type);
+    byId("result-provider").textContent = providerLabel(data.provider, data.processing?.provider_type, data.model_id);
     byId("result-model-state").textContent = modelStateLabel(data.provider, data.processing?.provider_type);
     byId("result-latency").textContent = typeof data.processing?.latency_ms === "number" ? `${data.processing.latency_ms.toFixed(1)} ms` : "Completed";
     byId("result-request").textContent = data.request_id || "Not supplied";
@@ -78,8 +78,11 @@ async function refreshStatus() {
     byId("status-artifact").textContent = !ready.model_artifact_configured ? "Not configured" : ready.model_artifact_valid ? "Valid" : "Invalid artifact";
     setStatus("status-backend", ready.model_backend_ready, "Ready", "Unavailable");
     byId("detail-provider").textContent = ready.provider || version.provider || "Not supplied"; byId("detail-backend").textContent = version.backend || "Not supplied"; byId("detail-version").textContent = version.application_version || "Not supplied"; byId("detail-build").textContent = version.build_commit || "Not supplied";
-    const mock = version.backend === "mock" || ready.provider === "mock-development"; byId("mock-notice").hidden = !mock;
-    pill.className = ready.model_backend_ready ? "status-pill" : "status-pill unavailable"; pill.lastElementChild.textContent = mock ? "Mock system ready" : ready.model_backend_ready ? "System ready" : "Backend unavailable";
+    const mock = version.backend === "mock" || ready.provider === "mock-development";
+    const notice = byId("model-notice"); notice.hidden = false;
+    byId("model-notice-title").textContent = mock ? "Development / Mock Model" : ready.model_backend_ready ? "Active trained model" : "Real model unavailable";
+    byId("model-notice-detail").textContent = mock ? "Interface demonstration only—not model performance." : ready.model_backend_ready ? `Checkpoint ${ready.checkpoint_step} · ${ready.candidate_status}. Final model selection and release validation are pending.` : "Configured real-model mode failed closed. No mock fallback is active.";
+    pill.className = ready.model_backend_ready ? "status-pill" : "status-pill unavailable"; pill.lastElementChild.textContent = mock ? "Mock system ready" : ready.model_backend_ready ? "Trained candidate ready" : "Backend unavailable";
   } catch (_) {
     ["status-application", "status-artifact", "status-backend"].forEach((id) => { byId(id).textContent = "Unavailable"; }); pill.className = "status-pill unavailable"; pill.lastElementChild.textContent = "System unavailable";
   }
