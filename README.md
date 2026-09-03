@@ -1,11 +1,30 @@
 # ClauseForge
 
+## Final-model handoff status
+
+**INFRASTRUCTURE READY FOR FINAL MODEL HANDOFF.**
+
+**FINAL MODEL RELEASE BLOCKED BY GPU TRAINING/EVALUATION.**
+
+The corrected rank-8 pilot is metadata-only RC0, labeled **PROVISIONAL MODEL
+CANDIDATE — VALIDATION ONLY — NOT FINAL RELEASE**. Its 256/128, 100-step result
+is documented in [the RC0 report](docs/release_candidate_rc0.md). The held-out
+test remains sealed. No final safety/OOD run, quantization, real benchmark, or
+deployment has occurred.
+
+The typed artifact pipeline validates identity, checksums, lineage, safe paths,
+lifecycle gates, active-model switching, rollback, final locking, and one-time
+test state offline. Runtime artifacts remain ignored. Set
+`MODEL_ARTIFACT_MANIFEST=/path/to/model_artifact.json` for explicit activation;
+invalid manifests fail startup without fallback. The mock demo remains
+model-free and never claims to use RC0.
+
 ## Phase 3B v2 category-ID experiments
 
 The completed 25-step T4 canonical-question pilot is historical infrastructure
 evidence: it checkpointed successfully but produced 0 taxonomy-valid outputs
-(128/128 unrelated). It is not final model performance. The untrained v2 family
-targets one of 41 stable IDs (`cuad-category-id-v1`) with prompt
+(128/128 unrelated). It is not final model performance. The v2 family targets
+one of 41 stable IDs (`cuad-category-id-v1`) with prompt
 `cuad-classification-id-v2`; canonical CUAD questions remain authoritative.
 
 **Status: In Development**
@@ -44,8 +63,9 @@ historical evidence, not final performance or a conclusion that the model
 failed. See
 [Phase 3B output diagnostics](docs/phase3b_output_diagnostics.md).
 
-The new category-ID v2 family has not yet been trained. Final adapter selection
-and model quality remain pending; held-out test remains sealed.
+The corrected category-ID v2 rank-8 pilot has now produced promising validation
+evidence. Final adapter selection and model quality remain pending; held-out
+test remains sealed.
 
 ## Docker quickstart and operations
 

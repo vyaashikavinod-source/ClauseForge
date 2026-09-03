@@ -1,5 +1,29 @@
 # Deployment guide
 
+## Manifest-driven model swap and rollback
+
+Set `MODEL_ARTIFACT_MANIFEST` to one validated external artifact manifest.
+Startup rejects invalid checksums, incompatible taxonomy/prompt metadata, and
+unsafe paths; there is no fallback. A future final adapter needs configuration
+and manifest changes, not a serving-code rewrite.
+
+The local registry stores manifests under ignored `artifacts/registry`.
+`activate` writes a checksum-bound relative JSON pointer and preserves the
+previous identity; `rollback` validates and restores it. JSON is used instead
+of symlinks for portability. This is local state, not distributed orchestration.
+
+```bash
+python scripts/model_artifact_registry.py list
+python scripts/model_artifact_registry.py inspect ARTIFACT_ID
+python scripts/model_artifact_registry.py validate /path/to/manifest.json
+python scripts/model_artifact_registry.py activate ARTIFACT_ID
+python scripts/model_artifact_registry.py rollback
+```
+
+A future bundle contains `model_manifest.json`, `deployment_manifest.json`,
+`checksums.json`, `config/`, and `docs/`. Binaries remain external.
+Release also requires a real artifact-bound benchmark and container smoke test.
+
 ## CPU mock validation
 
 Run `docker compose up --build`. The default image contains application code and
@@ -35,4 +59,3 @@ release/
   docs/          # source-controlled runbook and deployment guide
   checksums/     # generated release checksums
 ```
-

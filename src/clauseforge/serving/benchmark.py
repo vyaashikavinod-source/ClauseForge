@@ -35,6 +35,9 @@ def summarize(
     backend: str,
     is_mock: bool,
     concurrency: int,
+    artifact_id: str | None = None,
+    quantization: str | None = None,
+    hardware: str | None = None,
 ) -> dict[str, object]:
     if not observations or runtime <= 0:
         raise ValueError("benchmark needs observations and positive runtime")
@@ -47,6 +50,9 @@ def summarize(
         "provider": provider,
         "model": model,
         "backend": backend,
+        "artifact_id": artifact_id,
+        "quantization": quantization,
+        "hardware": hardware,
         "is_mock": is_mock,
         "request_count": count,
         "concurrency": concurrency,
@@ -54,6 +60,8 @@ def summarize(
         "failed_responses": sum(not x.success for x in observations),
         "timeouts": sum(x.timeout for x in observations),
         "taxonomy_invalid_outputs": sum(x.taxonomy_invalid for x in observations),
+        "taxonomy_invalid_rate": sum(x.taxonomy_invalid for x in observations) / count,
+        "failure_rate": sum(not x.success for x in observations) / count,
         "p50_latency_ms": percentile(latencies, 0.5),
         "p95_latency_ms": percentile(latencies, 0.95),
         "p99_latency_ms": percentile(latencies, 0.99),

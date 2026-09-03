@@ -1,18 +1,27 @@
 # MODEL CARD — PRE-RELEASE / MODEL NOT FINALIZED
 
+## Current candidate
+
+RC0 is a provisional rank-8 validation-only candidate. Its corrected pilot
+reported validation accuracy about 0.4766, macro F1 about 0.4612, weighted F1
+about 0.4688, exact-ID rate about 0.8516, and invalid-output rate about 0.1484.
+These are not final metrics or comparisons against the held-out classical test
+baseline. Test, final safety/OOD, quantization, benchmark, and deployment are
+pending.
+
 ## Phase 3B experiment families
 
 Historical adapters target full canonical questions under
 `cuad-canonical-question-v1`. Phase 3B v2 targets exact stable IDs under
-`cuad-category-id-v1` and must use `cuad-classification-id-v2`. It is not yet
-shown to generalize. Its 25-step T4 pilot produced accuracy and macro/weighted
+`cuad-category-id-v1` and must use `cuad-classification-id-v2`. Its earlier
+25-step T4 pilot produced accuracy and macro/weighted
 F1 of 0, 0 exact IDs, and invalid-output rate 1.0. This is diagnostic evidence,
 not final performance; the held-out test was untouched.
 
 After corrected sequence construction, an eight-example training-only overfit
 diagnostic reached 100% exact-ID memorization at step 20 and retained it through
-step 100. This supports learning capability only; corrected validation evidence
-has not yet been generated.
+step 100. The corrected 100-step validation pilot then produced the provisional
+RC0 metrics above; larger/full training and final selection remain pending.
 
 ## Status and use
 

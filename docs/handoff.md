@@ -1,5 +1,14 @@
 # ClauseForge handoff
 
+## Current boundary
+
+Infrastructure is ready for an external adapter import, but final release is
+blocked by GPU training and evaluation. RC0 is metadata-only and provisional.
+Continue rank 8 first, validate it, lock a candidate, and only then authorize
+the one-time held-out test. Mock and pilot results are not production evidence.
+See [the artifact pipeline](model_artifact_pipeline.md) and
+[RC0 report](release_candidate_rc0.md).
+
 ClauseForge delivers reproducible data/baseline/training infrastructure,
 GPU-feasibility evidence, checkpoint diagnostics, strict serving and safety
 boundaries, OOD preparation, quantization plans, Docker/CI, observability, and
@@ -25,10 +34,9 @@ measure the held-out test or final model quality. Resume GPU work exactly throug
 item in [the release checklist](release_checklist.md), immutable manifests and
 checksums, and explicit authorization.
 
-Remaining GPU/model work: checkpoint-25 diagnosis, target-representation
-decision, bounded pilot, adequate full training, rank selection, model lock,
-one-time test, final safety/OOD evaluation, merge, quantization, validation, and
-real serving benchmarks.
+Remaining GPU/model work: larger/full corrected rank-8 training, validation
+selection, optional rank-16 only if justified, model lock, one-time test, final
+safety/OOD evaluation, merge, quantization, validation, and real benchmarks.
 
 API demo: call `/health`, `/ready`, `/version`, then:
 

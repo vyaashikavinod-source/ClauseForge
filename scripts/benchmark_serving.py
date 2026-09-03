@@ -20,6 +20,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--provider", default="unknown")
     parser.add_argument("--model", default="unknown")
     parser.add_argument("--backend", default="unknown")
+    parser.add_argument("--artifact-id")
+    parser.add_argument("--quantization")
+    parser.add_argument("--hardware")
     parser.add_argument("--development", action="store_true")
     args = parser.parse_args(argv)
     started = time.monotonic()
@@ -36,6 +39,9 @@ def main(argv: list[str] | None = None) -> int:
         backend=args.backend,
         is_mock=args.development,
         concurrency=args.concurrency,
+        artifact_id=args.artifact_id,
+        quantization=args.quantization,
+        hardware=args.hardware,
     )
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0

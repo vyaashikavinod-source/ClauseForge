@@ -26,7 +26,12 @@ def require_awq() -> None:
         )
 
 
-def awq_plan(config: QuantizationConfig) -> dict[str, object]:
+def awq_plan(
+    config: QuantizationConfig,
+    *,
+    parent_artifact_id: str | None = None,
+    parent_artifact_checksum: str | None = None,
+) -> dict[str, object]:
     config.validate()
     if config.method != "awq":
         raise ValueError("AWQ plan requires method=awq")
@@ -35,6 +40,8 @@ def awq_plan(config: QuantizationConfig) -> dict[str, object]:
         "configuration": config.to_dict(),
         "executed": False,
         "requirements": ["final merged model", "AutoAWQ", "CUDA GPU"],
+        "parent_artifact_id": parent_artifact_id,
+        "parent_artifact_checksum": parent_artifact_checksum,
     }
 
 

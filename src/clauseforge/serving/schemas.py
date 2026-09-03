@@ -54,6 +54,10 @@ class ReadyResponse(BaseModel):
     provider: str
     model_id: str
     detail: str | None = None
+    application_ready: bool = True
+    model_artifact_configured: bool = False
+    model_artifact_valid: bool = False
+    model_backend_ready: bool = False
 
 
 class ErrorDetail(BaseModel):

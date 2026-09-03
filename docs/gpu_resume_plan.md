@@ -1,5 +1,14 @@
 # GPU resume plan
 
+## Compressed strategy for limited compute
+
+The memorization diagnostic and corrected 100-step validation pilot completed.
+Continue rank 8 first: run larger/full corrected v2 training, evaluate
+validation, and lock rank 8 if it satisfies predeclared engineering criteria.
+Try rank 16 only if rank 8 clearly plateaus or misses those criteria. Avoid a
+broad rank sweep unless durable compute is available. This does not change
+seeds, lineage, strict-ID evaluation, or the sealed-test policy.
+
 Do not run another normal pilot yet. First run this GPU-only memorization test:
 
 ```bash

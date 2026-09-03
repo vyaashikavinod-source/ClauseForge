@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 _ALLOWED_ENVIRONMENTS = frozenset({"development", "test", "staging", "production"})
@@ -38,6 +38,7 @@ class Settings:
     target_representation: str = "canonical_question"
     target_representation_version: str = "cuad-canonical-question-v1"
     prompt_template_version: str = "cuad-classification-v1"
+    model_artifact_manifest: Path | None = None
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -88,9 +89,37 @@ class Settings:
             prompt_template_version=os.getenv(
                 "CLAUSEFORGE_PROMPT_TEMPLATE_VERSION", "cuad-classification-v1"
             ),
+            model_artifact_manifest=_optional_path("MODEL_ARTIFACT_MANIFEST"),
         )
+        settings = settings._with_artifact_manifest()
         settings.validate()
         return settings
+
+    def _with_artifact_manifest(self) -> Settings:
+        """Resolve explicit model metadata without any silent fallback."""
+        if self.model_artifact_manifest is None:
+            return self
+        from clauseforge.artifacts.validation import load_manifest, validate_manifest
+
+        report = validate_manifest(self.model_artifact_manifest)
+        if not report.valid:
+            raise ValueError(
+                "MODEL_ARTIFACT_MANIFEST is invalid: " + "; ".join(report.errors)
+            )
+        manifest = load_manifest(self.model_artifact_manifest)
+        adapter = (
+            (self.model_artifact_manifest.parent / manifest.adapter_path).resolve()
+            if manifest.adapter_path is not None
+            else None
+        )
+        return replace(
+            self,
+            model_path=Path(manifest.base_model),
+            adapter_path=adapter,
+            target_representation=manifest.target_representation,
+            target_representation_version=manifest.target_representation_version,
+            prompt_template_version=manifest.prompt_version,
+        )
 
     def validate(self) -> None:
         """Raise `ValueError` when a setting is unsupported."""

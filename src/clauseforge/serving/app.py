@@ -178,11 +178,15 @@ def create_app(
     )
     async def ready() -> ReadyResponse | JSONResponse:
         is_ready, detail = active_provider.is_ready()
+        artifact_configured = active_settings.model_artifact_manifest is not None
         response = ReadyResponse(
             status="ready" if is_ready else "unavailable",
             provider=active_provider.name,
             model_id=active_provider.model_id,
             detail=detail,
+            model_artifact_configured=artifact_configured,
+            model_artifact_valid=artifact_configured,
+            model_backend_ready=is_ready,
         )
         if is_ready:
             return response

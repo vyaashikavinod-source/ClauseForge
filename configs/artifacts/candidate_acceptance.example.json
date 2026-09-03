@@ -1,0 +1,7 @@
+{
+  "label": "CONFIGURABLE ENGINEERING GATES — NOT PRODUCTION THRESHOLDS",
+  "maximum_invalid_output_rate": null,
+  "minimum_exact_id_rate": null,
+  "minimum_validation_macro_f1": null,
+  "notes": "Set before a future validation-selection run. Null criteria do not block RC0."
+}
