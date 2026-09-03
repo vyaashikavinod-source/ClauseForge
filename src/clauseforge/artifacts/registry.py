@@ -129,6 +129,15 @@ class ArtifactRegistry:
         report = validate_manifest(manifest_path)
         if not report.valid:
             raise ValueError("cannot activate invalid artifact")
+        manifest = load_manifest(manifest_path)
+        if (
+            manifest.artifact_type == "adapter"
+            and manifest.release_status == "release_candidate"
+            and manifest.validation_summary is None
+        ):
+            raise ValueError(
+                "cannot activate trained candidate without validation evidence"
+            )
         previous = self.read_active() if self.active_path.exists() else None
         pointer = ActiveModelPointer(
             "clauseforge-active-model-v1",

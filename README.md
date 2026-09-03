@@ -53,6 +53,10 @@ python -m uvicorn clauseforge.serving.app:app --host 127.0.0.1 --port 8000
 ```
 
 See `docs/model_artifact_pipeline.md` for the complete candidate workflow.
+Candidate manifests are generated generically from persisted checkpoint lineage
+with `scripts/create_model_candidate.py`; checkpoint numbers are never encoded
+in source code. Validation evidence is attached separately and is mandatory
+before comparison or activation.
 
 ## Final-model handoff status
 

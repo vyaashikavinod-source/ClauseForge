@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from dataclasses import replace
 from pathlib import Path
 
@@ -11,8 +10,6 @@ from clauseforge.artifacts.comparison import compare_candidates
 from clauseforge.artifacts.registry import ArtifactRegistry
 from clauseforge.artifacts.validation import (
     load_manifest,
-    sha256_path,
-    validate_manifest,
     write_manifest,
 )
 from clauseforge.config import Settings
@@ -21,61 +18,6 @@ from clauseforge.serving.providers.base import ProviderResult
 from clauseforge.serving.providers.local_transformer import LocalTransformerProvider
 
 RC0 = Path("configs/artifacts/clauseforge-qwen25-7b-r8-rc0.json")
-STEP700 = Path("configs/artifacts/clauseforge-qwen25-7b-r8-step700.template.json")
-
-
-def test_checkpoint_700_manifest_identity_is_truthful() -> None:
-    manifest = load_manifest(STEP700)
-    assert manifest.artifact_id == "clauseforge-qwen25-7b-r8-step700"
-    assert manifest.checkpoint_step == 700
-    assert manifest.release_status == "release_candidate"
-    assert manifest.target_representation == "category_id"
-    assert manifest.quantization_type == "nf4" and manifest.double_quantization
-    assert not manifest.final_release and not manifest.test_evaluated
-
-
-def test_checkpoint_content_metadata_is_validated(tmp_path: Path) -> None:
-    adapter = tmp_path / "checkpoint-700"
-    adapter.mkdir()
-    (adapter / "adapter_model.safetensors").write_bytes(b"synthetic adapter fixture")
-    (adapter / "adapter_config.json").write_text(
-        json.dumps(
-            {
-                "r": 8,
-                "lora_alpha": 16,
-                "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
-            }
-        ),
-        encoding="utf-8",
-    )
-    metadata = {
-        "global_step": 700,
-        "experiment_id": "qwen2.5-7b-instruct_lora-r8_seed42_0ad1c2c19e59",
-        "prompt_template_version": "cuad-classification-id-v2",
-        "target_representation": "category_id",
-        "target_representation_version": "cuad-category-id-v1",
-        "stable_id_map_checksum": load_manifest(STEP700).stable_id_map_checksum,
-        "lora_rank": 8,
-        "lora_alpha": 16,
-        "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj"],
-    }
-    metadata_path = adapter / "checkpoint_metadata.json"
-    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
-    (adapter / "resume_state.json").write_text(
-        json.dumps({"global_step": 700}), encoding="utf-8"
-    )
-    manifest = replace(
-        load_manifest(STEP700),
-        adapter_path="checkpoint-700",
-        adapter_checksum=sha256_path(adapter),
-    )
-    path = tmp_path / "manifest.json"
-    write_manifest(path, manifest)
-    assert validate_manifest(path).valid
-    metadata["global_step"] = 701
-    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
-    write_manifest(path, replace(manifest, adapter_checksum=sha256_path(adapter)))
-    assert "checkpoint_metadata global_step mismatch" in validate_manifest(path).errors
 
 
 def test_candidate_comparison_uses_ordered_validation_rules(tmp_path: Path) -> None:

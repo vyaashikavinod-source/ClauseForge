@@ -50,14 +50,17 @@ not block RC0 merely because arbitrary thresholds have not been invented.
 
 ## Hot-swappable real candidates
 
-Use `configs/artifacts/clauseforge-qwen25-7b-r8-step700.template.json` as the
-schema guide. Put the completed manifest beside the restored external
-checkpoint, set its relative adapter path, and replace all checksum/provenance
-placeholders. Validation checks safetensors, PEFT config, checkpoint metadata,
+Use `scripts/create_model_candidate.py` for every compatible restored
+checkpoint; no checkpoint-specific source or template is needed. Put the output
+manifest beside the external checkpoint. The command derives the adapter path
+and checksum and cross-checks persisted lineage. Validation checks safetensors,
+PEFT config, checkpoint metadata,
 optional resume state, Qwen revision, LoRA structure, prompt/target versions,
 stable-ID map, experiment identity, and checkpoint step—not the filename.
 
 ```bash
+python scripts/create_model_candidate.py --checkpoint <RESTORED_CHECKPOINT> --artifact-id <ARTIFACT_ID> --output <CANDIDATE_MANIFEST> --training-commit <HISTORICAL_TRAINING_COMMIT>
+python scripts/attach_candidate_validation.py --manifest <CANDIDATE_MANIFEST> --validation-evidence <VALIDATION_JSON> --output <VALIDATED_MANIFEST>
 python scripts/import_model_artifact.py --adapter <RESTORED_CHECKPOINT_700> --manifest <MANIFEST_700>
 python scripts/validate_model_artifact.py --manifest <MANIFEST_700>
 python scripts/model_artifact_registry.py --registry <REGISTRY> validate <MANIFEST_700>
@@ -66,6 +69,13 @@ python scripts/model_artifact_registry.py --registry <REGISTRY> activate clausef
 python scripts/model_artifact_registry.py --registry <REGISTRY> inspect clauseforge-qwen25-7b-r8-step700
 python scripts/release_status.py --manifest <MANIFEST_700>
 ```
+
+Creation accepts checkpoint 700, 800, 1400, 2100, or any later compatible
+checkpoint without code changes. If checkpoint metadata has no validation
+summary, creation intentionally leaves `validation_summary` null. The separate
+attachment command accepts validation split evidence only, requires the same
+checkpoint step, and never accepts held-out test evidence. A trained candidate
+without attached validation evidence cannot be compared or activated.
 
 For 1400 or 2100, validate a new manifest, compare validation evidence,
 register it, then activate only if accepted. The pointer retains current and

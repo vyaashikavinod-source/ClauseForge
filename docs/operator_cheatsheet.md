@@ -6,6 +6,8 @@ python scripts/validate_model_artifact.py --manifest <MANIFEST>
 python scripts/model_artifact_registry.py activate <ARTIFACT_ID>
 python scripts/model_artifact_registry.py rollback
 python scripts/model_artifact_registry.py active
+python scripts/create_model_candidate.py --checkpoint <CHECKPOINT> --artifact-id <ID> --output <MANIFEST> --training-commit <COMMIT>
+python scripts/attach_candidate_validation.py --manifest <MANIFEST> --validation-evidence <VALIDATION_JSON> --output <VALIDATED_MANIFEST>
 python scripts/compare_model_candidates.py --candidate-a <CURRENT_MANIFEST> --candidate-b <NEW_MANIFEST>
 python scripts/smoke_test_active_model.py
 python scripts/train_classifier.py --config training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_full.yaml --data data/processed/cuad/1.0.0-run-a
