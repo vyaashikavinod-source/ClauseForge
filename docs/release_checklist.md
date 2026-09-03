@@ -24,3 +24,8 @@
 
 Unchecked items are current blockers. This checklist must not be auto-completed
 from infrastructure-only or mock-backend evidence.
+
+Use `python scripts/release_status.py` for reasons and exact next actions. The
+operator records deployment authorization separately with
+`scripts/authorize_deployment.py --authorize-deployment`; it fails closed until
+all preceding gates are evidenced.

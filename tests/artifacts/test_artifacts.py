@@ -115,7 +115,8 @@ def test_final_lock_and_one_time_test_gate(tmp_path: Path) -> None:
     lock = lock_final_model(manifest, validation, lock_path, "2026-09-02T00:00:00Z")
     assert not lock.test_evaluated
     assert validate_final_lock(lock_path, manifest) == lock
-    assert authorize_test_once(lock_path).test_evaluated
+    authorization = authorize_test_once(lock_path)
+    assert authorization.test_authorized and not authorization.test_evaluated
     with pytest.raises(ValueError, match="already"):
         authorize_test_once(lock_path)
     write_manifest(manifest, replace(candidate, config_checksum="1" * 64))

@@ -1,0 +1,18 @@
+{
+  "artifact_id": "<FINAL_ARTIFACT_ID>",
+  "base_model": "Qwen/Qwen2.5-7B-Instruct",
+  "base_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+  "benchmark_summary": null,
+  "deployment_bundle_checksum": null,
+  "git_commit": "<LOCKED_GIT_COMMIT>",
+  "ood_summary": null,
+  "prompt_version": "cuad-classification-id-v2",
+  "quantization": null,
+  "release_id": "<FINAL_RELEASE_ID>",
+  "release_timestamp": null,
+  "safety_summary": null,
+  "schema_version": "clauseforge-final-release-v1",
+  "target_version": "cuad-category-id-v1",
+  "taxonomy_version": "cuad-v1-41",
+  "test_metrics": null
+}

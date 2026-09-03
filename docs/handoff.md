@@ -2,12 +2,20 @@
 
 ## Current boundary
 
+**ENGINEERING INFRASTRUCTURE: COMPLETE**
+
+**FINAL MODEL EXECUTION: PENDING GPU COMPUTE**
+
+**FINAL RELEASE: BLOCKED**
+
 Infrastructure is ready for an external adapter import, but final release is
 blocked by GPU training and evaluation. RC0 is metadata-only and provisional.
 Continue rank 8 first, validate it, lock a candidate, and only then authorize
 the one-time held-out test. Mock and pilot results are not production evidence.
 See [the artifact pipeline](model_artifact_pipeline.md) and
 [RC0 report](release_candidate_rc0.md).
+Use [the GPU runbook](final_gpu_execution_runbook.md), the short
+[operator cheat sheet](operator_cheatsheet.md), and `scripts/release_status.py`.
 
 ClauseForge delivers reproducible data/baseline/training infrastructure,
 GPU-feasibility evidence, checkpoint diagnostics, strict serving and safety

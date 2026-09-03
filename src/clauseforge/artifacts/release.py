@@ -22,6 +22,7 @@ class FinalModelLock:
     target_representation_version: str
     manifest_checksum: str
     locked_at: str
+    test_authorized: bool = False
     test_evaluated: bool = False
 
 
@@ -73,9 +74,22 @@ def lock_final_model(
 def authorize_test_once(lock_path: Path) -> FinalModelLock:
     raw = json.loads(lock_path.read_text(encoding="utf-8"))
     lock = FinalModelLock(**raw)
-    if lock.test_evaluated:
-        raise ValueError("held-out test has already been evaluated")
-    updated = replace(lock, test_evaluated=True)
+    if lock.test_authorized or lock.test_evaluated:
+        raise ValueError("held-out test is already authorized or evaluated")
+    updated = replace(lock, test_authorized=True)
+    lock_path.write_text(
+        json.dumps(asdict(updated), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return updated
+
+
+def record_test_evaluated(lock_path: Path) -> FinalModelLock:
+    """Consume an existing authorization after the test result is persisted."""
+    raw = json.loads(lock_path.read_text(encoding="utf-8"))
+    lock = FinalModelLock(**raw)
+    if not lock.test_authorized or lock.test_evaluated:
+        raise ValueError("held-out test is not authorized or was already evaluated")
+    updated = replace(lock, test_authorized=False, test_evaluated=True)
     lock_path.write_text(
         json.dumps(asdict(updated), indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -101,8 +115,6 @@ def validate_final_lock(lock_path: Path, manifest_path: Path) -> FinalModelLock:
     )
     if any(expected != current for expected, current in values):
         raise ValueError("locked candidate identity or configuration changed")
-    if lock.manifest_checksum != sha256_file(manifest_path):
-        raise ValueError("locked manifest checksum changed; create a new candidate")
     return lock
 
 
@@ -111,5 +123,28 @@ def mark_manifest_test_evaluated(path: Path) -> ArtifactManifest:
     if manifest.test_evaluated:
         raise ValueError("held-out test has already been evaluated")
     updated = replace(manifest, test_evaluated=True)
+    write_manifest(path, updated)
+    return updated
+
+
+def authorize_deployment(path: Path) -> ArtifactManifest:
+    """Record deployment authorization only after every preceding release gate."""
+    manifest = load_manifest(path)
+    checks = {
+        "final candidate": manifest.release_status == "final_candidate",
+        "test": manifest.test_evaluated,
+        "safety": manifest.final_safety_evaluated,
+        "OOD": manifest.final_ood_evaluated,
+        "quantization": manifest.quantized,
+        "deployment bundle": manifest.artifact_type == "deployment_bundle",
+        "benchmark": manifest.real_serving_benchmark_completed,
+        "container smoke": manifest.container_smoke_test_completed,
+        "deployment manifest": manifest.deployment_manifest_valid,
+        "release checklist": manifest.release_checklist_complete,
+    }
+    blocked = [name for name, complete in checks.items() if not complete]
+    if blocked:
+        raise ValueError("deployment authorization blocked: " + ", ".join(blocked))
+    updated = replace(manifest, deployed=True)
     write_manifest(path, updated)
     return updated

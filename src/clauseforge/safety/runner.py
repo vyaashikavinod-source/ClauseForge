@@ -11,9 +11,11 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from clauseforge.config import Settings
 from clauseforge.safety.dataset import load_paraphrase_pairs, load_safety_cases
 from clauseforge.safety.providers import ClassicalRuleProvider
 from clauseforge.serving.constants import CUAD_TAXONOMY, DISCLAIMER, TAXONOMY_VERSION
+from clauseforge.serving.dependencies import build_provider as build_serving_provider
 from clauseforge.serving.providers.base import ClauseClassifierProvider
 from clauseforge.serving.providers.mock import MockDevelopmentProvider
 from clauseforge.serving.schemas import ClassificationRequest
@@ -159,12 +161,19 @@ def build_provider(name: str) -> ClauseClassifierProvider:
         return MockDevelopmentProvider(CUAD_TAXONOMY)
     if name == "classical":
         return ClassicalRuleProvider(CUAD_TAXONOMY)
+    if name == "configured":
+        settings = Settings.from_env()
+        if settings.model_provider == "mock":
+            raise ValueError("configured final safety refuses the mock backend")
+        return build_serving_provider(settings, CUAD_TAXONOMY)
     raise ValueError(f"unsupported safety provider: {name}")
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", choices=("mock", "classical"), required=True)
+    parser.add_argument(
+        "--provider", choices=("mock", "classical", "configured"), required=True
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     summary = asyncio.run(evaluate(build_provider(args.provider), args.output))

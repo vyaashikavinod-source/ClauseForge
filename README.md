@@ -2,9 +2,11 @@
 
 ## Final-model handoff status
 
-**INFRASTRUCTURE READY FOR FINAL MODEL HANDOFF.**
+**ENGINEERING INFRASTRUCTURE: COMPLETE.**
 
-**FINAL MODEL RELEASE BLOCKED BY GPU TRAINING/EVALUATION.**
+**FINAL MODEL EXECUTION: PENDING GPU COMPUTE.**
+
+**FINAL RELEASE: BLOCKED.**
 
 The corrected rank-8 pilot is metadata-only RC0, labeled **PROVISIONAL MODEL
 CANDIDATE — VALIDATION ONLY — NOT FINAL RELEASE**. Its 256/128, 100-step result
@@ -18,6 +20,11 @@ test state offline. Runtime artifacts remain ignored. Set
 `MODEL_ARTIFACT_MANIFEST=/path/to/model_artifact.json` for explicit activation;
 invalid manifests fail startup without fallback. The mock demo remains
 model-free and never claims to use RC0.
+
+The authoritative future procedure is the
+[final GPU execution runbook](docs/final_gpu_execution_runbook.md). Operators
+can run `python scripts/release_status.py` for one complete local gate report;
+the deterministic [RC0 snapshot](docs/rc0_release_status.md) remains blocked.
 
 ## Phase 3B v2 category-ID experiments
 

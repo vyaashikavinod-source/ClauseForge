@@ -2,10 +2,20 @@
 
 ## Current handoff status
 
+**ENGINEERING INFRASTRUCTURE: COMPLETE**
+
+**FINAL MODEL EXECUTION: PENDING GPU COMPUTE**
+
+**FINAL RELEASE: BLOCKED**
+
 - Engineering platform: substantially complete; final artifact handoff is ready.
 - Current ML result: promising corrected rank-8 validation pilot, not final.
 - Final model: pending GPU compute, locked selection, one-time test, final
   safety/OOD, quantization, benchmark, and deployment authorization.
+
+No further major CPU infrastructure is planned. Continue through
+[the authoritative GPU runbook](final_gpu_execution_runbook.md); only concrete
+defects should reopen infrastructure work.
 
 The 25-step T4 canonical-target pilot completed as infrastructure evidence but
 returned no exact canonical validation outputs. That family is historical. The

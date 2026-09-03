@@ -64,7 +64,10 @@ def validate_parent_lineage(child: ArtifactManifest, parent_path: Path) -> None:
 
 
 def final_validation_plan(
-    manifest_path: Path, *, authorize_test: bool = False
+    manifest_path: Path,
+    *,
+    authorize_test: bool = False,
+    lock_path: Path | None = None,
 ) -> dict[str, object]:
     report = validate_manifest(manifest_path)
     if not report.valid:
@@ -72,15 +75,23 @@ def final_validation_plan(
     manifest = load_manifest(manifest_path)
     if manifest.release_status != "final_candidate":
         raise ValueError("final validation requires a locked final_candidate")
+    test_step = "held_out_test_blocked"
+    if authorize_test:
+        if lock_path is None:
+            raise ValueError("authorized test requires a final lock")
+        from clauseforge.artifacts.release import validate_final_lock
+
+        lock = validate_final_lock(lock_path, manifest_path)
+        if not lock.test_authorized or lock.test_evaluated or manifest.test_evaluated:
+            raise ValueError("held-out test is not authorized or was already evaluated")
+        test_step = "held_out_test_once"
     return {
         "artifact_id": manifest.artifact_id,
         "executed": False,
         "test_authorized": authorize_test,
         "steps": [
             "validate_artifact",
-            "held_out_test_once"
-            if authorize_test and not manifest.test_evaluated
-            else "held_out_test_blocked",
+            test_step,
             "final_safety_harness",
             "final_edgar_ood",
             "build_final_evaluation_bundle",
