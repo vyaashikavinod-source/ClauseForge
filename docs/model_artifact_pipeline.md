@@ -52,8 +52,9 @@ not block RC0 merely because arbitrary thresholds have not been invented.
 
 Use `scripts/create_model_candidate.py` for every compatible restored
 checkpoint; no checkpoint-specific source or template is needed. Put the output
-manifest beside the external checkpoint. The command derives the adapter path
-and checksum and cross-checks persisted lineage. Validation checks safetensors,
+manifest at the operator-selected path. The command stores the resolved external
+adapter path, derives its checksum, and cross-checks persisted lineage. Paths
+are never exposed by readiness or classification responses. Validation checks safetensors,
 PEFT config, checkpoint metadata,
 optional resume state, Qwen revision, LoRA structure, prompt/target versions,
 stable-ID map, experiment identity, and checkpoint step—not the filename.

@@ -132,3 +132,14 @@ It analyzes train (11,223 examples) and validation (1,324) only. At the planned
 are 62/126/251/617. No example is truncated in either split, so every category
 has a zero truncation count and there is no disproportionately affected
 category. The test split was not tokenized or used to choose the limit.
+## Validation-only checkpoint evidence
+
+`scripts/evaluate_phase3b_checkpoint.py` evaluates an arbitrary compatible
+checkpoint on the deterministic validation split when invoked without
+`--pilot`. It never loads the held-out test split and performs no optimizer or
+weight update. The output directory contains `validation_diagnostics.json` and
+`validation_predictions.jsonl`. The diagnostics artifact includes checkpoint
+and experiment lineage, validation loss and classification metrics, exact-ID
+and invalid-output counts/rates, prediction distribution, category coverage,
+and `test_evaluated=false`; it can be passed directly to
+`scripts/attach_candidate_validation.py`.

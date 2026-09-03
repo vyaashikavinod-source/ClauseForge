@@ -93,7 +93,7 @@ def test_generic_checkpoint_candidate_creation(tmp_path: Path, step: int) -> Non
         "a" * 40,
     )
     assert manifest.checkpoint_step == step
-    assert manifest.adapter_path == f"checkpoint-{step}"
+    assert manifest.adapter_path == str(checkpoint.resolve())
     assert manifest.adapter_checksum
     assert manifest.validation_summary is None
     assert not manifest.test_evaluated
@@ -141,6 +141,11 @@ def test_validation_evidence_is_separate_and_required_for_activation(
                 "split": "validation",
                 "test_evaluated": False,
                 "global_step": 800,
+                "experiment_id": "qwen2.5-7b-instruct_lora-r8_seed42_0ad1c2c19e59",
+                "prompt_version": "cuad-classification-id-v2",
+                "target_representation": "category_id",
+                "target_representation_version": "cuad-category-id-v1",
+                "stable_id_map_checksum": stable_id_map_checksum(),
                 "train_examples": 1000,
                 "validation_examples": 128,
                 "optimizer_steps": 800,
@@ -160,6 +165,10 @@ def test_validation_evidence_is_separate_and_required_for_activation(
     assert updated.validation_summary.macro_f1 == 0.48
     assert updated.validation_selection_completed
     assert not updated.test_evaluated
+    validated_registry = ArtifactRegistry(tmp_path / "validated-registry")
+    validated_registry.register(manifest_path)
+    active = validated_registry.activate("candidate-800")
+    assert active.current_artifact_id == "candidate-800"
 
 
 def test_test_split_evidence_is_rejected(tmp_path: Path) -> None:

@@ -406,6 +406,39 @@ def validation_loss(
     return sum(losses) / len(losses)
 
 
+def validation_evidence_metadata(
+    config: TrainingConfig,
+    resume_metadata: dict[str, object],
+    category_targets: list[str],
+    *,
+    training_examples: int,
+    total_supported_categories: int,
+) -> dict[str, object]:
+    """Build auditable validation-only lineage fields without metric invention."""
+    checkpoint_step = int(cast(int | str, resume_metadata["global_step"]))
+    category_counts = Counter(category_targets)
+    return {
+        "label": "VALIDATION ONLY — NOT FINAL MODEL PERFORMANCE",
+        "checkpoint_step": checkpoint_step,
+        "split": "validation",
+        "total_examples": len(category_targets),
+        "training_examples": training_examples,
+        "optimizer_steps": checkpoint_step,
+        "examples_seen": int(cast(int | str, resume_metadata["examples_seen"])),
+        "experiment_id": resume_metadata["experiment_id"],
+        "prompt_version": config.prompt_template_version,
+        "target_representation": config.target_representation,
+        "target_representation_version": config.target_representation_version,
+        "stable_id_map_checksum": stable_id_map_checksum(),
+        "category_coverage": {
+            "categories_present": len(category_counts),
+            "total_supported_categories": total_supported_categories,
+            "examples_per_category": dict(sorted(category_counts.items())),
+        },
+        "test_evaluated": False,
+    }
+
+
 def evaluate_phase3b_checkpoint(
     config: TrainingConfig,
     data_dir: Path,
@@ -538,9 +571,22 @@ def evaluate_phase3b_checkpoint(
         predictions_path,
         config.target_representation,
     )
+    metrics["validation_loss"] = validation_loss(
+        model, tokenizer, dataset, config.data.max_sequence_length
+    )
+    evidence = validation_evidence_metadata(
+        config,
+        resume_metadata,
+        [item.target_label for item in dataset.validation],
+        training_examples=len(source_dataset.train),
+        total_supported_categories=len(dataset.taxonomy),
+    )
     metrics.update(
         {
+            **evidence,
             "checkpoint_id": checkpoint.name,
+            "exact_id_count": metrics["exact_id_outputs"],
+            "exact_id_rate": metrics["exact_id_output_rate"],
             "pilot": pilot,
             "prediction_artifact": predictions_path.name,
             "prompt_template_version": config.prompt_template_version,

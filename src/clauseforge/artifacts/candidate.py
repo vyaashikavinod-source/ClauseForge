@@ -30,12 +30,7 @@ def create_candidate_manifest(
         raise ValueError("checkpoint must be an existing directory")
     if not artifact_id.strip() or not training_commit.strip():
         raise ValueError("artifact ID and historical training commit are required")
-    try:
-        adapter_path = checkpoint.relative_to(output.parent).as_posix()
-    except ValueError as exc:
-        raise ValueError(
-            "checkpoint must be contained by the manifest directory"
-        ) from exc
+    adapter_path = str(checkpoint)
 
     metadata = _object(checkpoint / "checkpoint_metadata.json")
     resume = _object(checkpoint / "resume_state.json")
@@ -108,10 +103,6 @@ def create_candidate_manifest(
         _expect(
             (checkpoint / name).is_file(), f"required checkpoint file missing: {name}"
         )
-    required = {
-        f"{adapter_path}/{name}": sha256_file(checkpoint / name)
-        for name in required_names
-    }
     base_model = str(model["name"])
     adapter_base = adapter.get("base_model_name_or_path")
     if adapter_base is not None:
@@ -165,7 +156,7 @@ def create_candidate_manifest(
             "Held-out test, final safety/OOD, merge, quantization, and release "
             "are not run",
         ),
-        required_files=required,
+        required_files={},
     )
     write_manifest(output, manifest)
     return manifest
@@ -176,8 +167,6 @@ def attach_validation_evidence(
 ) -> ArtifactManifest:
     from clauseforge.artifacts.validation import load_manifest, validate_manifest
 
-    if output.resolve().parent != manifest_path.resolve().parent:
-        raise ValueError("updated manifest must remain beside its checkpoint")
     report = validate_manifest(manifest_path)
     if not report.valid:
         raise ValueError("candidate manifest is invalid: " + "; ".join(report.errors))
@@ -195,11 +184,26 @@ def attach_validation_evidence(
     _expect(
         evidence_step == manifest.checkpoint_step, "validation checkpoint step mismatch"
     )
+    lineage = {
+        "experiment_id": manifest.adapter_experiment_id,
+        "prompt_version": manifest.prompt_version,
+        "target_representation": manifest.target_representation,
+        "target_representation_version": manifest.target_representation_version,
+        "stable_id_map_checksum": manifest.stable_id_map_checksum,
+    }
+    for field, expected in lineage.items():
+        _expect(evidence.get(field) == expected, f"validation {field} mismatch")
+    train_examples = evidence.get("train_examples")
+    if train_examples is None:
+        train_examples = evidence.get("training_examples")
+    validation_examples = evidence.get("validation_examples")
+    if validation_examples is None:
+        validation_examples = evidence.get("total_examples")
     summary = ValidationSummary(
         label=str(evidence["label"]),
         split="validation",
-        train_examples=int(cast(int | str, evidence["train_examples"])),
-        validation_examples=int(cast(int | str, evidence["validation_examples"])),
+        train_examples=int(cast(int | str, train_examples)),
+        validation_examples=int(cast(int | str, validation_examples)),
         optimizer_steps=int(cast(int | str, evidence["optimizer_steps"])),
         examples_seen=int(cast(int | str, evidence["examples_seen"])),
         accuracy=float(cast(float | str, evidence["accuracy"])),

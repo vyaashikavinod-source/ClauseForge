@@ -27,6 +27,7 @@ from clauseforge.training.overfit import (
     overfit_prediction_record,
     select_overfit_examples,
 )
+from clauseforge.training.phase3b import validation_evidence_metadata
 from clauseforge.training.smoke import build_smoke_tokenizer
 from clauseforge.training.targets import stable_id_map
 from clauseforge.training.templates import TrainingExample, render_example
@@ -230,3 +231,29 @@ def test_validation_debug_cli_is_bounded_and_validation_only() -> None:
     )
     assert args.pilot and args.debug_validation_examples == 4
     assert not hasattr(args, "test_examples")
+
+
+def test_checkpoint_validation_evidence_has_complete_safe_lineage() -> None:
+    config = load_config(
+        Path("training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_full.yaml")
+    )
+    evidence = validation_evidence_metadata(
+        config,
+        {
+            "global_step": 800,
+            "examples_seen": 12800,
+            "experiment_id": config.experiment_id,
+        },
+        ["governing_law", "governing_law", "audit_rights"],
+        training_examples=11223,
+        total_supported_categories=41,
+    )
+    assert evidence["checkpoint_step"] == 800
+    assert evidence["split"] == "validation"
+    assert evidence["total_examples"] == 3
+    assert evidence["test_evaluated"] is False
+    assert evidence["prompt_version"] == "cuad-classification-id-v2"
+    assert evidence["target_representation"] == "category_id"
+    coverage = cast(dict[str, object], evidence["category_coverage"])
+    assert coverage["categories_present"] == 2
+    assert evidence["stable_id_map_checksum"]

@@ -132,9 +132,17 @@ def _validate_files(path: Path, manifest: ArtifactManifest, errors: list[str]) -
             errors.append(f"checksum mismatch: {relative}")
     if manifest.adapter_path:
         candidate = Path(manifest.adapter_path)
-        target = (root / candidate).resolve()
-        if candidate.is_absolute() or (target != root and root not in target.parents):
-            errors.append("adapter_path must be relative to the manifest")
+        target = (
+            candidate.resolve()
+            if candidate.is_absolute()
+            else (root / candidate).resolve()
+        )
+        if (
+            not candidate.is_absolute()
+            and target != root
+            and root not in target.parents
+        ):
+            errors.append("relative adapter_path escapes the manifest directory")
         elif not target.exists():
             errors.append("adapter_path does not exist")
         elif (
