@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import subprocess
+import tarfile
 from dataclasses import replace
 from pathlib import Path
 
@@ -25,6 +26,12 @@ from clauseforge.evaluation.locked_test import (
     evaluate_locked_test,
     verify_authorization,
 )
+from clauseforge.release.final_checks import (
+    CanonicalProvider,
+    check_identity,
+    validate_check,
+)
+from clauseforge.release.handoff import prepare, write_once
 from clauseforge.release.status import build_release_status
 from clauseforge.serving.providers.base import ProviderResult
 from clauseforge.training.targets import stable_id_map
@@ -342,6 +349,11 @@ def test_final_bundle_preserves_exception(
     def offline_run(args: list[str], *, check: bool, shell: bool) -> None:
         assert check and not shell
         calls.append(args)
+        if len(calls) > 1:
+            kind = "safety" if len(calls) == 2 else "ood"
+            result.write_text(
+                json.dumps(_check_report(path, output, kind)), encoding="utf-8"
+            )
 
     monkeypatch.setattr("scripts.run_final_validation.subprocess.run", offline_run)
     bundle = path.parent / "bundle.json"
@@ -599,6 +611,8 @@ def test_orchestrator_failure_does_not_consume_test(
     command.write_text('["offline-fixture"]', encoding="utf-8")
     report = path.parent / "report.json"
     report.write_text("bad json" if failure == "json" else "{}", encoding="utf-8")
+    environment = path.parent / "environment.json"
+    environment.write_text('{"synthetic": true}', encoding="utf-8")
 
     def fake_run(args: list[str], *, check: bool, shell: bool) -> None:
         if failure == "command":
@@ -613,7 +627,7 @@ def test_orchestrator_failure_does_not_consume_test(
         "--authorize-held-out-test",
         "--execute",
         "--environment-report",
-        str(report),
+        str(environment),
         "--output-bundle",
         str(path.parent / "bundle.json"),
     ]
@@ -625,3 +639,212 @@ def test_orchestrator_failure_does_not_consume_test(
         final_validation_main(args)
     assert not load_manifest(path).test_evaluated
     assert verify_authorization(lock, path)[0].test_authorized
+
+
+def _check_report(path: Path, lock: Path, kind: str) -> dict[str, object]:
+    return {
+        **check_identity(lock, path),
+        "kind": kind,
+        "schema_version": "clauseforge-locked-release-check-v1",
+        "is_mock": False,
+        "passed": True,
+        "provider_safety_failure_count": 0,
+        "paraphrase_disagreement_count": 0,
+        "case_count": 1,
+        "record_count": 1,
+        "processing_failures": 0,
+        "ground_truth_metrics_available": False,
+    }
+
+
+def test_canonical_check_adapter_is_strict() -> None:
+    provider = CanonicalProvider(OfflineTestProvider())
+    assert (
+        asyncio.run(provider.classify("synthetic held-out 1")).category
+        == stable_id_map()[0].canonical
+    )
+    assert asyncio.run(provider.classify("synthetic held-out 2")).category is None
+
+
+def test_release_checks_reject_failed_or_wrong_identity(
+    candidate: tuple[Path, Path, Path],
+) -> None:
+    path, report, lock = candidate
+    lock_final_model(
+        path,
+        report,
+        lock,
+        "now",
+        incomplete_training_selection_reason=REASON,
+        selected_artifact_id="selected-800",
+    )
+    evidence = _check_report(path, lock, "safety")
+    evidence["provider_safety_failure_count"] = 1
+    with pytest.raises(ValueError, match="completion gate"):
+        validate_check(evidence, "safety", lock, path)
+    evidence["artifact_id"] = "other"
+    with pytest.raises(ValueError, match="identity"):
+        validate_check(evidence, "safety", lock, path)
+
+
+def test_resume_never_runs_test_command(
+    candidate: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path, evidence, lock = candidate
+    lock_final_model(
+        path,
+        evidence,
+        lock,
+        "now",
+        incomplete_training_selection_reason=REASON,
+        selected_artifact_id="selected-800",
+    )
+    authorize_test_once(lock)
+    test_report = path.parent / "test-report.json"
+    _test_evidence(path, lock, test_report, monkeypatch)
+    record_test_evaluated(lock)
+    mark_manifest_test_evaluated(path)
+    env = path.parent / "env.json"
+    env.write_text('{"synthetic":true}', encoding="utf-8")
+    args = [
+        "--artifact-manifest",
+        str(path),
+        "--lock",
+        str(lock),
+        "--resume-after-test",
+        "--execute",
+        "--environment-report",
+        str(env),
+        "--output-bundle",
+        str(path.parent / "final.json"),
+    ]
+    for kind in ("test", "safety", "ood"):
+        cmd = path.parent / f"{kind}-command.json"
+        cmd.write_text(json.dumps([kind]), encoding="utf-8")
+        report = test_report if kind == "test" else path.parent / f"{kind}.json"
+        if kind != "test":
+            report.write_text(
+                json.dumps(_check_report(path, lock, kind)), encoding="utf-8"
+            )
+        args.extend(
+            [f"--{kind}-command-json", str(cmd), f"--{kind}-report", str(report)]
+        )
+    calls: list[list[str]] = []
+
+    def fake_run(argv: list[str], *, check: bool, shell: bool) -> None:
+        assert argv != ["test"]
+        calls.append(argv)
+
+    monkeypatch.setattr("scripts.run_final_validation.subprocess.run", fake_run)
+    assert final_validation_main(args) == 0
+    assert calls == [["safety"], ["ood"]]
+    assert final_validation_main(args) == 0
+    assert len(calls) == 2
+
+
+def test_handoff_idempotent_and_fail_closed(
+    candidate: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path, evidence, lock = candidate
+    checkpoint = path.parent / "checkpoint-800"
+    # Only persisted synthetic metadata; no dataset reads.
+    (checkpoint / "resume_state.json").write_text(
+        '{"global_step":800}', encoding="utf-8"
+    )
+    # Adding resume metadata changes the fixture directory checksum.
+    write_manifest(
+        path, replace(load_manifest(path), adapter_checksum=sha256_path(checkpoint))
+    )
+    (path.parent / "experiment_config.json").write_text("{}", encoding="utf-8")
+    edgar = path.parent / "edgar.jsonl"
+    edgar.write_text("synthetic file presence only", encoding="utf-8")
+    monkeypatch.setattr("clauseforge.release.handoff.ARTIFACT", "selected-800")
+    output = path.parent / "handoff"
+    registry = path.parent / "registry"
+    result = prepare(
+        checkpoint,
+        path,
+        registry,
+        lock,
+        evidence,
+        path.parent,
+        edgar,
+        output,
+        initialize_reason=REASON,
+        authorize=True,
+    )
+    original = lock.read_bytes()
+    assert (
+        prepare(checkpoint, path, registry, lock, evidence, path.parent, edgar, output)
+        == result
+    )
+    assert lock.read_bytes() == original
+    next_argv = result["next_argv"]
+    assert isinstance(next_argv, list)
+    assert "--authorize-held-out-test" in next_argv
+    lock.with_name(lock.name + ".held-out-attempt.json").write_text(
+        "{}", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="unconsumed"):
+        prepare(checkpoint, path, registry, lock, evidence, path.parent, edgar, output)
+    with pytest.raises(ValueError, match="missing"):
+        prepare(
+            checkpoint,
+            path,
+            registry,
+            lock,
+            evidence,
+            path.parent,
+            path.parent / "missing-edgar",
+            output,
+        )
+
+
+def test_write_once_rejects_changed_prepared_command(tmp_path: Path) -> None:
+    target = tmp_path / "command.json"
+    write_once(target, ["first"])
+    write_once(target, ["first"])
+    with pytest.raises(ValueError, match="differs"):
+        write_once(target, ["second"])
+
+
+def test_evidence_snapshot_excludes_weights_and_secrets(
+    candidate: tuple[Path, Path, Path],
+) -> None:
+    from scripts.preserve_release_evidence import preserve
+
+    path, report, lock = candidate
+    lock_final_model(
+        path,
+        report,
+        lock,
+        "now",
+        incomplete_training_selection_reason=REASON,
+        selected_artifact_id="selected-800",
+    )
+    evidence = path.parent / "evidence"
+    evidence.mkdir()
+    (evidence / "environment.json").write_text('{"synthetic":true}', encoding="utf-8")
+    (evidence / ".env").write_text("not for archive", encoding="utf-8")
+    (evidence / "weights.bin").write_bytes(b"not for archive")
+    output = path.parent / "evidence.tar.gz"
+    preserve(path, lock, evidence, output)
+    with tarfile.open(output) as archive:
+        names = archive.getnames()
+    assert set(names) == {
+        "checksums.json",
+        "artifact_manifest.json",
+        "final_lock.json",
+        "evidence/environment.json",
+    }
+    with pytest.raises(FileExistsError):
+        preserve(path, lock, evidence, output)
+    from clauseforge.artifacts.archive import restore_release_evidence
+
+    restored = path.parent / "restored-evidence"
+    restore_release_evidence(output, restored)
+    restore_release_evidence(output, restored)
+    assert (restored / "final_lock.json").read_bytes() == lock.read_bytes()
+    (restored / "final_lock.json").write_text("newer state", encoding="utf-8")
+    with pytest.raises(ValueError, match="refusing overwrite"):
+        restore_release_evidence(output, restored)

@@ -39,8 +39,12 @@ The mock backend validates transport and operations, not model performance.
 - llama.cpp: mount a checksum-validated GGUF read-only and configure the external
   server URL.
 
-GPU images, orchestration, final adapters, real AWQ/GGUF artifacts, and serving
-benchmarks are pending. The standard image is deliberately CPU/slim and performs
+GPU image build verification, final artifacts, real AWQ/GGUF artifacts, and serving
+benchmarks are pending. `Dockerfile.gpu` and `docker-compose.release.yml` now provide
+an explicit source-prepared real-adapter smoke profile; they are not build or
+deployment evidence. Follow `docs/gpu_release_handoff.md` for its required pinned
+bitsandbytes version, read-only artifact mounts, and isolated smoke checks.
+The standard image is deliberately CPU/slim and performs
 no download or fallback. Keep CORS off unless a reviewed browser client needs it.
 
 Build metadata is injected with `CLAUSEFORGE_BUILD_COMMIT` and

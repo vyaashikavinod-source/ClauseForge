@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+ARG BNB_VERSION
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HOME=/tmp/huggingface
+WORKDIR /app
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+RUN test -n "$BNB_VERSION" && pip install --no-cache-dir . "bitsandbytes==$BNB_VERSION"
+RUN addgroup --system clauseforge && adduser --system --ingroup clauseforge clauseforge
+USER clauseforge
+EXPOSE 8000
+ENTRYPOINT ["uvicorn", "clauseforge.serving.app:app"]
+CMD ["--host", "0.0.0.0", "--port", "8000"]

@@ -142,3 +142,59 @@ def _validate_member(member: tarfile.TarInfo) -> None:
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def restore_release_evidence(archive_path: Path, output: Path) -> dict[str, object]:
+    """Verify the entire snapshot before writing; never replace newer state."""
+    with tarfile.open(archive_path, "r:gz") as archive:
+        members = archive.getmembers()
+        for member in members:
+            _validate_member(member)
+        names = [member.name for member in members]
+        if len(names) != len(set(names)):
+            raise ValueError("duplicate evidence archive entries")
+        stream = archive.extractfile("checksums.json")
+        if stream is None:
+            raise ValueError("missing evidence checksum index")
+        index = json.loads(stream.read())
+        if (
+            not isinstance(index, dict)
+            or index.get("schema_version") != "clauseforge-release-evidence-backup-v1"
+        ):
+            raise ValueError("invalid evidence snapshot")
+        files = index.get("files")
+        if not isinstance(files, dict) or set(names) != {*files, "checksums.json"}:
+            raise ValueError("evidence archive inventory mismatch")
+        payloads: dict[Path, bytes] = {}
+        for name, checksum in files.items():
+            content = archive.extractfile(str(name))
+            if content is None:
+                raise ValueError("missing evidence file")
+            payload = content.read()
+            if hashlib.sha256(payload).hexdigest() != checksum:
+                raise ValueError(f"evidence checksum mismatch: {name}")
+            target = output / str(name)
+            if output.resolve() not in target.resolve().parents or target.is_symlink():
+                raise ValueError("unsafe evidence restore path")
+            if target.exists() and (
+                not target.is_file() or target.read_bytes() != payload
+            ):
+                raise ValueError(
+                    f"existing evidence differs; refusing overwrite: {name}"
+                )
+            payloads[target] = payload
+        for target, payload in payloads.items():
+            if not target.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with target.open("xb") as destination:
+                    destination.write(payload)
+    from clauseforge.artifacts.release import validate_final_lock
+
+    lock = validate_final_lock(
+        output / "final_lock.json", output / "artifact_manifest.json"
+    )
+    if lock.artifact_id != index.get(
+        "artifact_id"
+    ) or lock.selection_checksum != index.get("selection_checksum"):
+        raise ValueError("restored evidence identity mismatch")
+    return index

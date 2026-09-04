@@ -29,10 +29,26 @@ REPORT_SCHEMA = "clauseforge-held-out-final-test-v1"
 
 
 def validate_test_report(
-    report: dict[str, object], lock_path: Path, manifest_path: Path
+    report: dict[str, object],
+    lock_path: Path,
+    manifest_path: Path,
+    *,
+    completed: bool = False,
 ) -> None:
     """Check successful-command evidence before the orchestrator consumes state."""
-    lock, manifest = verify_authorization(lock_path, manifest_path)
+    if completed:
+        lock = validate_final_lock(lock_path, manifest_path)
+        manifest = load_manifest(manifest_path)
+        if (
+            not lock.test_evaluated
+            or lock.test_authorized
+            or not manifest.test_evaluated
+        ):
+            raise ValueError("completed test state is inconsistent; do not rerun")
+        if not validate_manifest(manifest_path).valid:
+            raise ValueError("completed test artifact is invalid")
+    else:
+        lock, manifest = verify_authorization(lock_path, manifest_path)
     expected = {
         "schema_version": REPORT_SCHEMA,
         "label": "HELD-OUT FINAL TEST",

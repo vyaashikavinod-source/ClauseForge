@@ -41,8 +41,46 @@ def assess_readiness(
     *,
     deployment_manifest: Path | None = None,
     quantization_manifest: Path | None = None,
+    lock_path: Path | None = None,
 ) -> ReadinessReport:
     settings.validate()
+    if settings.model_artifact_manifest is not None:
+        from clauseforge.artifacts.validation import validate_manifest
+        from clauseforge.release.status import build_release_status
+
+        state = build_release_status(
+            settings.model_artifact_manifest, lock_path=lock_path
+        )
+        artifact = validate_manifest(settings.model_artifact_manifest)
+        checks = tuple(
+            ReadinessCheck(
+                gate.name, "ready" if gate.complete else "blocked", gate.reason
+            )
+            for gate in state.gates
+        )
+        return ReadinessReport(
+            __version__,
+            (
+                ReadinessCheck(
+                    "artifact_files",
+                    "ready" if artifact.valid else "blocked",
+                    "; ".join(artifact.errors) or "checksums verified",
+                ),
+                ReadinessCheck(
+                    "real_backend",
+                    "blocked" if settings.model_provider == "mock" else "ready",
+                    settings.model_provider,
+                ),
+            ),
+            checks,
+            (),
+            (),
+            "ready"
+            if state.release_allowed
+            and artifact.valid
+            and settings.model_provider != "mock"
+            else "blocked",
+        )
     backend_issues = settings.backend_configuration_issues()
     infrastructure = (
         ReadinessCheck("application_metadata", "ready", f"version {__version__}"),

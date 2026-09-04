@@ -17,6 +17,7 @@ from clauseforge.artifacts.release import (
 from clauseforge.artifacts.validation import load_manifest, write_manifest
 from clauseforge.artifacts.workflows import final_validation_plan
 from clauseforge.evaluation.locked_test import validate_test_report
+from clauseforge.release.final_checks import validate_bundle, validate_check
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,6 +26,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--lock", type=Path)
     parser.add_argument("--authorize-held-out-test", action="store_true")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--resume-after-test", action="store_true")
     parser.add_argument("--test-command-json", type=Path)
     parser.add_argument("--safety-command-json", type=Path)
     parser.add_argument("--ood-command-json", type=Path)
@@ -34,6 +36,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--environment-report", type=Path)
     parser.add_argument("--output-bundle", type=Path)
     args = parser.parse_args(argv)
+    if args.resume_after_test and args.authorize_held_out_test:
+        raise ValueError("resume must not reauthorize or execute the test")
+    if args.resume_after_test:
+        if args.lock is None or args.test_report is None:
+            raise ValueError("resume requires lock and completed test evidence")
+        validate_test_report(
+            json.loads(args.test_report.read_text(encoding="utf-8")),
+            args.lock,
+            args.artifact_manifest,
+            completed=True,
+        )
     plan = final_validation_plan(
         args.artifact_manifest,
         authorize_test=args.authorize_held_out_test,
@@ -53,7 +66,9 @@ def main(argv: list[str] | None = None) -> int:
         args.environment_report,
         args.output_bundle,
     )
-    if not args.authorize_held_out_test or any(value is None for value in required):
+    if not (args.authorize_held_out_test or args.resume_after_test) or any(
+        value is None for value in required
+    ):
         raise ValueError(
             "execution requires authorization, lock, commands, reports, "
             "environment, and output"
@@ -61,6 +76,26 @@ def main(argv: list[str] | None = None) -> int:
     assert args.lock is not None and args.output_bundle is not None
     commands = (args.test_command_json, args.safety_command_json, args.ood_command_json)
     reports = (args.test_report, args.safety_report, args.ood_report)
+    # Preflight every command/environment before spending the one-time test.
+    for command_path in commands:
+        command = json.loads(command_path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(command, list)
+            or not command
+            or not all(isinstance(item, str) for item in command)
+        ):
+            raise ValueError("execution commands must be non-empty JSON string arrays")
+    environment = json.loads(args.environment_report.read_text(encoding="utf-8"))
+    if not isinstance(environment, dict) or not environment:
+        raise ValueError("environment report must be a nonempty JSON object")
+    if args.output_bundle.exists():
+        validate_bundle(
+            json.loads(args.output_bundle.read_text(encoding="utf-8")),
+            args.lock,
+            args.artifact_manifest,
+        )
+        print(args.output_bundle)
+        return 0
     results: list[dict[str, object]] = []
     for command_path, report_path in zip(commands, reports, strict=True):
         assert command_path is not None and report_path is not None
@@ -73,21 +108,30 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(
                 "each execution command must be a non-empty JSON string array"
             )
-        subprocess.run(command, check=True, shell=False)
+        if not (args.resume_after_test and not results):
+            subprocess.run(command, check=True, shell=False)
         result = json.loads(report_path.read_text(encoding="utf-8"))
         if not isinstance(result, dict):
             raise ValueError("final validation report must be a JSON object")
         results.append(result)
         manifest = load_manifest(args.artifact_manifest)
         if len(results) == 1:
-            validate_test_report(result, args.lock, args.artifact_manifest)
-            record_test_evaluated(args.lock)
-            mark_manifest_test_evaluated(args.artifact_manifest)
+            validate_test_report(
+                result,
+                args.lock,
+                args.artifact_manifest,
+                completed=args.resume_after_test,
+            )
+            if not args.resume_after_test:
+                record_test_evaluated(args.lock)
+                mark_manifest_test_evaluated(args.artifact_manifest)
         elif len(results) == 2:
+            validate_check(result, "safety", args.lock, args.artifact_manifest)
             write_manifest(
                 args.artifact_manifest, replace(manifest, final_safety_evaluated=True)
             )
         else:
+            validate_check(result, "ood", args.lock, args.artifact_manifest)
             write_manifest(
                 args.artifact_manifest, replace(manifest, final_ood_evaluated=True)
             )
@@ -115,6 +159,7 @@ def main(argv: list[str] | None = None) -> int:
         ).incomplete_training_selection_reason,
     )
     args.output_bundle.parent.mkdir(parents=True, exist_ok=True)
+    validate_bundle(asdict(bundle), args.lock, args.artifact_manifest)
     args.output_bundle.write_text(
         json.dumps(asdict(bundle), indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

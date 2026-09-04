@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+      args:
+        BNB_VERSION: ${BNB_VERSION:?Set the bitsandbytes version from the proven GPU environment}
+    gpus: all
+    environment:
+      CLAUSEFORGE_ENVIRONMENT: production
+      CLAUSEFORGE_MODEL_BACKEND: transformer
+      CLAUSEFORGE_DEVICE: cuda
+      MODEL_ARTIFACT_MANIFEST: ${MODEL_ARTIFACT_MANIFEST:?Set the validated absolute manifest path}
+      CLAUSEFORGE_MAX_NEW_TOKENS: "24"
+      CLAUSEFORGE_METRICS_ENABLED: "true"
+      CLAUSEFORGE_RATE_LIMIT_PER_MINUTE: "8"
+      CLAUSEFORGE_EXACT_CACHE_CAPACITY: "32"
+    volumes:
+      - type: bind
+        source: ${RELEASE_ROOT:?Set the restored artifact root}
+        target: ${RELEASE_ROOT:?Preserve original absolute adapter paths}
+        read_only: true
+    ports:
+      - "127.0.0.1:8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      start_period: 600s
+      retries: 3
