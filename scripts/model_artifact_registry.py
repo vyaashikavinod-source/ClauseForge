@@ -28,6 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("active")
     promote = sub.add_parser("promote")
     promote.add_argument("artifact_id")
+    promote.add_argument("--lock", type=Path)
     promote.add_argument(
         "status", choices=["release_candidate", "final_candidate", "released"]
     )
@@ -48,7 +49,9 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "active":
         result = registry.read_active().to_dict()
     else:
-        result = registry.promote(args.artifact_id, args.status).to_dict()  # type: ignore[arg-type]
+        result = registry.promote(
+            args.artifact_id, args.status, lock_path=args.lock
+        ).to_dict()  # type: ignore[arg-type]
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

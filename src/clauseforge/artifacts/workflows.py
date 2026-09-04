@@ -73,14 +73,17 @@ def final_validation_plan(
     if not report.valid:
         raise ValueError("artifact validation failed: " + "; ".join(report.errors))
     manifest = load_manifest(manifest_path)
-    if manifest.release_status != "final_candidate":
+    from clauseforge.artifacts.release import validate_final_lock
+
+    lock = validate_final_lock(lock_path, manifest_path) if lock_path else None
+    if manifest.release_status != "final_candidate" and not (
+        manifest.release_status == "release_candidate" and lock is not None
+    ):
         raise ValueError("final validation requires a locked final_candidate")
     test_step = "held_out_test_blocked"
     if authorize_test:
         if lock_path is None:
             raise ValueError("authorized test requires a final lock")
-        from clauseforge.artifacts.release import validate_final_lock
-
         lock = validate_final_lock(lock_path, manifest_path)
         if not lock.test_authorized or lock.test_evaluated or manifest.test_evaluated:
             raise ValueError("held-out test is not authorized or was already evaluated")
@@ -89,6 +92,9 @@ def final_validation_plan(
         "artifact_id": manifest.artifact_id,
         "executed": False,
         "test_authorized": authorize_test,
+        "incomplete_training_selection_reason": (
+            lock.incomplete_training_selection_reason if lock else None
+        ),
         "steps": [
             "validate_artifact",
             test_step,

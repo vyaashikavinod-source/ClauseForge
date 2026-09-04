@@ -12,6 +12,7 @@ from clauseforge.artifacts.release import (
     FinalEvaluationBundle,
     mark_manifest_test_evaluated,
     record_test_evaluated,
+    validate_final_lock,
 )
 from clauseforge.artifacts.validation import load_manifest, write_manifest
 from clauseforge.artifacts.workflows import final_validation_plan
@@ -107,6 +108,9 @@ def main(argv: list[str] | None = None) -> int:
         results[2],
         environment,
         manifest.known_limitations,
+        incomplete_training_selection_reason=validate_final_lock(
+            args.lock, args.artifact_manifest
+        ).incomplete_training_selection_reason,
     )
     args.output_bundle.parent.mkdir(parents=True, exist_ok=True)
     args.output_bundle.write_text(

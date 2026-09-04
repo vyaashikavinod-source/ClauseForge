@@ -28,6 +28,7 @@ class ReleaseStatusReport:
     gates: tuple[GateStatus, ...]
     release_allowed: bool
     label: str = "FINAL RELEASE STATUS — NO PERFORMANCE INFERENCE"
+    incomplete_training_selection_reason: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -54,13 +55,15 @@ def build_release_status(
         )
     manifest = load_manifest(manifest_path)
     locked = False
+    selection_reason = None
     if lock_path is not None and lock_path.is_file():
         try:
-            validate_final_lock(lock_path, manifest_path)
+            lock = validate_final_lock(lock_path, manifest_path)
         except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
             locked = False
         else:
             locked = True
+            selection_reason = lock.incomplete_training_selection_reason
     gates = _manifest_gates(manifest, locked)
     return ReleaseStatusReport(
         manifest.artifact_id,
@@ -68,6 +71,7 @@ def build_release_status(
         True,
         gates,
         all(gate.complete for gate in gates) and manifest.release_status == "released",
+        incomplete_training_selection_reason=selection_reason,
     )
 
 
@@ -173,6 +177,8 @@ def human_status(report: ReleaseStatusReport) -> str:
         f"candidate: {report.active_candidate}",
         f"lifecycle: {report.candidate_lifecycle_state}",
         f"artifact_valid: {str(report.artifact_manifest_valid).lower()}",
+        "incomplete_training_selection_reason: "
+        f"{report.incomplete_training_selection_reason}",
     ]
     for gate in report.gates:
         lines.extend(

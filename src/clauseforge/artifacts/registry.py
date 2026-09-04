@@ -7,6 +7,11 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from clauseforge.artifacts.models import ArtifactManifest, ReleaseStatus
+from clauseforge.artifacts.release import (
+    FinalModelLock,
+    approved_incomplete_selection,
+    validate_final_lock,
+)
 from clauseforge.artifacts.validation import (
     load_manifest,
     validate_manifest,
@@ -49,14 +54,20 @@ class ActiveModelPointer:
         }
 
 
-def promotion_gates(manifest: ArtifactManifest, target: ReleaseStatus) -> GateReport:
+def promotion_gates(
+    manifest: ArtifactManifest,
+    target: ReleaseStatus,
+    *,
+    lock: FinalModelLock | None = None,
+) -> GateReport:
     expected = _TRANSITIONS.get(manifest.release_status)
     blocked: list[str] = []
     if expected != target:
         blocked.append(f"invalid transition {manifest.release_status}->{target}")
     if target == "final_candidate":
         checks = {
-            "full training completed": manifest.full_training_completed,
+            "full training completed": manifest.full_training_completed
+            or (lock is not None and approved_incomplete_selection(lock, manifest)),
             "model config locked": bool(manifest.config_checksum),
             "validation selection completed": manifest.validation_selection_completed,
             "held-out test evaluated once": manifest.test_evaluated,
@@ -107,13 +118,20 @@ class ArtifactRegistry:
     def inspect(self, artifact_id: str) -> ArtifactManifest:
         return load_manifest(self.manifests / f"{artifact_id}.json")
 
-    def promote(self, artifact_id: str, target: ReleaseStatus) -> ArtifactManifest:
+    def promote(
+        self,
+        artifact_id: str,
+        target: ReleaseStatus,
+        *,
+        lock_path: Path | None = None,
+    ) -> ArtifactManifest:
         path = self.manifests / f"{artifact_id}.json"
         report = validate_manifest(path)
         if not report.valid:
             raise ValueError("promotion blocked: artifact or lineage is invalid")
         manifest = load_manifest(path)
-        gates = promotion_gates(manifest, target)
+        lock = validate_final_lock(lock_path, path) if lock_path is not None else None
+        gates = promotion_gates(manifest, target, lock=lock)
         if not gates.allowed:
             raise ValueError("promotion blocked: " + "; ".join(gates.blocking_gates))
         promoted = replace(

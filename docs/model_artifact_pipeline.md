@@ -99,3 +99,49 @@ pinned Qwen base in 4-bit NF4 with double quantization and FP16 compute, attache
 the PEFT adapter, uses the manifest prompt, and accepts only an exact category
 ID. Failures never fall back to mock. `python scripts/smoke_test_active_model.py`
 uses synthetic clauses and labels results **NOT FINAL MODEL PERFORMANCE**.
+## Intentionally selected incomplete training
+
+An operator may select a validated checkpoint before the configured training
+trajectory ends. This does **not** set `full_training_completed=true`.
+`lock_final_model.py --allow-incomplete-training-selection REASON` is explicit
+release authorization, not an automatic inference from incomplete training.
+It also requires `--selected-artifact-id` matching the manifest, a
+`release_candidate`, completed validation selection, validation-only evidence
+matching its metrics and lineage, no prior test evaluation, and successful
+artifact/file/checksum validation. Use the active registry manifest, not a
+newly reconstructed manifest. Preserve the evidence and lock with the model.
+
+The lock records the operator reason, original training-completion flag,
+checkpoint step, adapter checksum, original manifest checksum, validation-report
+checksum, and a selection fingerprint covering identity/configuration and
+validation evidence. Only subsequent release-result/status fields are excluded
+from the fingerprint. Existing locks cannot be overwritten to reset test state.
+Old fully-trained locks remain readable; normal fully-trained locking needs no
+exception. No artifact-manifest schema or historical training field is changed.
+
+For checkpoint 800 in the GPU runtime, set `VALIDATION_REPORT` to its existing
+machine-readable validation evidence (do not regenerate it merely for locking):
+
+```bash
+python scripts/lock_final_model.py \
+  --artifact-manifest /content/ClauseForge/artifacts/registry/manifests/clauseforge-qwen25-r8-step800-recovery-v1.json \
+  --validation-report "$VALIDATION_REPORT" \
+  --output /content/ClauseForge/artifacts/final/checkpoint-800-lock.json \
+  --selected-artifact-id clauseforge-qwen25-r8-step800-recovery-v1 \
+  --allow-incomplete-training-selection "Intentionally selected checkpoint 800 using validation-only evidence before completion of the configured three-epoch trajectory"
+```
+
+The lock does not authorize or execute the test. Use the existing explicit
+one-time authorization workflow next. A locked `release_candidate` can enter
+final validation without prematurely becoming `final_candidate`; otherwise
+promotion's test/safety/OOD prerequisites would create a circular dependency.
+Authorization/consumption remains one-time. The reason is retained in the
+final-evaluation bundle and `release_status.py --lock ...` output.
+
+For later promotion, pass `--lock` to `model_artifact_registry.py ... promote
+ARTIFACT_ID final_candidate --lock LOCK_PATH`. The validated, identity-matching
+lock satisfies only the training-completion prerequisite. Without it incomplete
+training still blocks promotion. Test, safety, OOD, and every subsequent
+quantization, benchmark, container, deployment, and release gate remain required.
+The exception is bound to the selected artifact, not a blanket authorization
+for other checkpoints or derived artifacts.
