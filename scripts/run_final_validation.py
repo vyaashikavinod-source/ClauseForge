@@ -16,6 +16,7 @@ from clauseforge.artifacts.release import (
 )
 from clauseforge.artifacts.validation import load_manifest, write_manifest
 from clauseforge.artifacts.workflows import final_validation_plan
+from clauseforge.evaluation.locked_test import validate_test_report
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -79,6 +80,7 @@ def main(argv: list[str] | None = None) -> int:
         results.append(result)
         manifest = load_manifest(args.artifact_manifest)
         if len(results) == 1:
+            validate_test_report(result, args.lock, args.artifact_manifest)
             record_test_evaluated(args.lock)
             mark_manifest_test_evaluated(args.artifact_manifest)
         elif len(results) == 2:
