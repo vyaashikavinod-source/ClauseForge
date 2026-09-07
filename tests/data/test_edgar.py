@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import urllib.error
 from datetime import UTC, datetime
@@ -7,7 +8,9 @@ from pathlib import Path
 from typing import ClassVar, cast
 
 import pytest
+from scripts.run_edgar_ood import run as run_edgar_ood
 
+from clauseforge.config import Settings
 from clauseforge.data.edgar import (
     EdgarClient,
     RateLimiter,
@@ -22,6 +25,7 @@ from clauseforge.data.edgar import (
     validate_ood,
 )
 from clauseforge.evaluation.ood import summarize_ood_predictions
+from clauseforge.serving.providers.base import ProviderResult
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 
@@ -251,4 +255,50 @@ def test_ood_metrics_never_claim_accuracy() -> None:
     assert result["taxonomy_valid_output_rate"] == pytest.approx(2 / 3)
     assert result["processing_failures"] == 1
     assert result["ground_truth_metrics_available"] is False
+    assert "accuracy" not in result and "f1" not in result
+
+
+class CategoryIdOodProvider:
+    name = "category-id-fixture"
+    model_id = "offline-fixture"
+    provider_type = "transformer"
+    is_mock = False
+
+    async def classify(self, text: str) -> ProviderResult:
+        category = "governing_law" if "law" in text else "invalid_id"
+        return ProviderResult(category, category, None)
+
+    async def close(self) -> None:
+        return None
+
+
+def test_edgar_summary_uses_category_id_output_space(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "segments.jsonl"
+    source.write_text(
+        "\n".join(
+            json.dumps({"segment_id": str(index), "text": text})
+            for index, text in enumerate(("governing law clause", "unknown clause"))
+        ),
+        encoding="utf-8",
+    )
+    settings = Settings(
+        model_provider="transformer",
+        model_artifact_manifest=tmp_path / "fixture-manifest.json",
+        target_representation="category_id",
+        target_representation_version="cuad-category-id-v1",
+        prompt_template_version="cuad-classification-id-v2",
+    )
+    monkeypatch.setattr("scripts.run_edgar_ood.Settings.from_env", lambda: settings)
+    monkeypatch.setattr(
+        "scripts.run_edgar_ood.build_provider",
+        lambda *args: CategoryIdOodProvider(),
+    )
+    result = asyncio.run(run_edgar_ood(source, tmp_path / "output"))
+    assert result["prediction_distribution"] == {"governing_law": 1}
+    assert result["taxonomy_valid_output_rate"] == 0.5
+    assert result["invalid_output_rate"] == 0.5
+    assert result["ground_truth_metrics_available"] is False
+    assert result["target_representation"] == "category_id"
     assert "accuracy" not in result and "f1" not in result

@@ -103,8 +103,9 @@ PY
 
 The test writes evidence only; the orchestrator validates it before consuming
 authorization. Safety/OOD checks then use the same locked real transformer.
-Exact category IDs are translated back to canonical taxonomy for these existing
-harnesses; malformed IDs are never accepted. Safety requires zero adversarial
+The safety and OOD harnesses derive the valid model-facing taxonomy from the
+artifact target representation; category IDs remain IDs and malformed IDs are
+never accepted. Safety requires zero adversarial
 failures and zero paraphrase disagreements. OOD requires nonempty input and no
 processing failures, but makes no accuracy claim on unlabeled data. A failing
 safety report remains evidence of failure, not a completed release gate.

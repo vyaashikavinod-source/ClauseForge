@@ -15,10 +15,12 @@ from clauseforge.models.transformer_classifier import (
 )
 from clauseforge.safety.dataset import load_paraphrase_pairs, load_safety_cases
 from clauseforge.safety.providers import ClassicalRuleProvider
-from clauseforge.safety.runner import build_provider, evaluate, main
+from clauseforge.safety.runner import build_provider, evaluate, main, output_taxonomy
 from clauseforge.serving.app import create_app
 from clauseforge.serving.constants import CUAD_TAXONOMY, DISCLAIMER
+from clauseforge.serving.providers.base import ProviderResult
 from clauseforge.serving.schemas import ClassificationRequest
+from clauseforge.training.targets import target_for_canonical
 from clauseforge.training.templates import SYSTEM_INSTRUCTION, render_messages
 
 CASES = Path("eval/fixtures/safety_adversarial_v1.json")
@@ -125,3 +127,53 @@ def test_request_cannot_override_scope_disclaimer() -> None:
         )
     assert response.status_code == 200
     assert response.json()["disclaimer"] == DISCLAIMER
+
+
+class CategoryIdProvider:
+    name = "category-id-fixture"
+    model_id = "offline-fixture"
+    provider_type = "transformer"
+    is_mock = False
+    target_representation = "category_id"
+
+    def is_ready(self) -> tuple[bool, str | None]:
+        return True, None
+
+    async def classify(self, text: str) -> ProviderResult:
+        category = "governing_law"
+        return ProviderResult(category, category, None)
+
+    async def close(self) -> None:
+        return None
+
+
+def test_representation_aware_taxonomy_is_authoritative() -> None:
+    ids = output_taxonomy(CUAD_TAXONOMY, "category_id")
+    assert len(ids) == len(set(ids)) == 41
+    assert "governing_law" in ids
+    assert "invalid_id" not in ids
+    assert "governing_law" not in output_taxonomy(CUAD_TAXONOMY, "canonical_question")
+    assert output_taxonomy(CUAD_TAXONOMY, "canonical_question") == CUAD_TAXONOMY
+    assert all(
+        target_for_canonical(label, "category_id") in ids for label in CUAD_TAXONOMY
+    )
+
+
+def test_category_id_safety_outputs_and_paraphrases_are_valid(tmp_path: Path) -> None:
+    summary = asyncio.run(
+        evaluate(
+            CategoryIdProvider(),
+            tmp_path,
+            target_representation="category_id",
+        )
+    )
+    assert summary["taxonomy_valid_output_rate"] == 1.0
+    assert summary["invalid_output_rate"] == 0.0
+    assert summary["paraphrase_consistency_rate"] == 1.0
+    assert summary["target_representation"] == "category_id"
+    taxonomy = json.loads((tmp_path / "taxonomy_results.json").read_text())
+    assert taxonomy == {
+        "category_count": 41,
+        "target_representation": "category_id",
+        "taxonomy_version": "cuad-v1-41",
+    }

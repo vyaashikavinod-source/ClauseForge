@@ -13,7 +13,7 @@
 - [ ] Original lock, one-time attempt receipt, validation evidence and checksums preserved
 - [ ] Held-out test evaluated exactly once under the approved protocol
 - [ ] Safety evaluation rerun on the final model
-- [ ] Safety report passes adversarial/paraphrase gates using exact-ID-to-canonical validation
+- [ ] Safety report passes adversarial/paraphrase gates using the artifact's declared output representation
 - [ ] SEC OOD evaluation run on the final model
 - [ ] Quantization executed
 - [ ] Quantized artifact validated

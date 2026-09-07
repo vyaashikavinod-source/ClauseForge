@@ -11,6 +11,8 @@ class ClassicalRuleProvider:
     model_id = "phase2-keyword-rules-equal-priors"
     provider_type = "mock"
     is_mock = True
+    target_representation = "canonical_question"
+    target_representation_version = "cuad-canonical-question-v1"
 
     def __init__(self, taxonomy: tuple[str, ...]) -> None:
         self._classifier = KeywordRuleClassifier()

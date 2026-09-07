@@ -26,11 +26,7 @@ from clauseforge.evaluation.locked_test import (
     evaluate_locked_test,
     verify_authorization,
 )
-from clauseforge.release.final_checks import (
-    CanonicalProvider,
-    check_identity,
-    validate_check,
-)
+from clauseforge.release.final_checks import check_identity, validate_check
 from clauseforge.release.handoff import prepare, write_once
 from clauseforge.release.status import build_release_status
 from clauseforge.serving.providers.base import ProviderResult
@@ -655,15 +651,6 @@ def _check_report(path: Path, lock: Path, kind: str) -> dict[str, object]:
         "processing_failures": 0,
         "ground_truth_metrics_available": False,
     }
-
-
-def test_canonical_check_adapter_is_strict() -> None:
-    provider = CanonicalProvider(OfflineTestProvider())
-    assert (
-        asyncio.run(provider.classify("synthetic held-out 1")).category
-        == stable_id_map()[0].canonical
-    )
-    assert asyncio.run(provider.classify("synthetic held-out 2")).category is None
 
 
 def test_release_checks_reject_failed_or_wrong_identity(

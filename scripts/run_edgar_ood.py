@@ -6,11 +6,14 @@ import argparse
 import asyncio
 import json
 from pathlib import Path
+from typing import cast
 
 from clauseforge.config import Settings
 from clauseforge.evaluation.ood import summarize_ood_predictions
+from clauseforge.safety.runner import output_taxonomy
 from clauseforge.serving.constants import CUAD_TAXONOMY
 from clauseforge.serving.dependencies import build_provider
+from clauseforge.training.targets import TargetRepresentation
 
 
 async def run(input_path: Path, output: Path) -> dict[str, object]:
@@ -20,6 +23,10 @@ async def run(input_path: Path, output: Path) -> dict[str, object]:
     if settings.model_artifact_manifest is None:
         raise ValueError("final EDGAR OOD requires MODEL_ARTIFACT_MANIFEST")
     provider = build_provider(settings, CUAD_TAXONOMY)
+    taxonomy = output_taxonomy(
+        CUAD_TAXONOMY,
+        cast(TargetRepresentation, settings.target_representation),
+    )
     rows: list[dict[str, object]] = []
     for line in input_path.read_text(encoding="utf-8").splitlines():
         source = json.loads(line)
@@ -59,12 +66,13 @@ async def run(input_path: Path, output: Path) -> dict[str, object]:
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
         encoding="utf-8",
     )
-    summary = summarize_ood_predictions(rows, frozenset(CUAD_TAXONOMY))
+    summary = summarize_ood_predictions(rows, frozenset(taxonomy))
     summary.update(
         {
             "label": "FINAL EDGAR OOD — UNLABELED; NO ACCURACY CLAIM",
             "artifact_manifest": str(settings.model_artifact_manifest),
             "predictions": predictions.name,
+            "target_representation": settings.target_representation,
         }
     )
     (output / "summary.json").write_text(

@@ -6,43 +6,16 @@ import json
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 
 from clauseforge.artifacts.release import validate_final_lock
 from clauseforge.artifacts.validation import load_manifest, validate_manifest
 from clauseforge.evaluation.locked_test import _provider, validate_test_report
 from clauseforge.evaluation.ood import summarize_ood_predictions
 from clauseforge.safety.runner import evaluate as evaluate_safety
+from clauseforge.safety.runner import output_taxonomy
 from clauseforge.serving.constants import CUAD_TAXONOMY
-from clauseforge.serving.providers.base import ClauseClassifierProvider, ProviderResult
-from clauseforge.training.targets import UnknownTargetError, resolve_generated_target
-
-
-class CanonicalProvider:
-    """Adapt exact production IDs to the existing canonical safety/OOD contract."""
-
-    is_mock = False
-    provider_type = "transformer"
-
-    def __init__(self, provider: ClauseClassifierProvider) -> None:
-        self.provider = provider
-        self.name = provider.name
-        self.model_id = provider.model_id
-
-    def is_ready(self) -> tuple[bool, str | None]:
-        return self.provider.is_ready()
-
-    async def classify(self, text: str) -> ProviderResult:
-        result = await self.provider.classify(text)
-        try:
-            category = resolve_generated_target(
-                result.raw_output, "category_id"
-            ).canonical
-        except UnknownTargetError:
-            category = None
-        return ProviderResult(result.raw_output, category, result.scores)
-
-    async def close(self) -> None:
-        await self.provider.close()
+from clauseforge.training.targets import TargetRepresentation
 
 
 def check_identity(lock_path: Path, manifest_path: Path) -> dict[str, object]:
@@ -102,7 +75,8 @@ async def run_check(
         raise ValueError("release check output exists; validate/reuse, never overwrite")
     if kind == "ood" and (input_path is None or not input_path.is_file()):
         raise ValueError(f"missing EDGAR segments: {input_path}")
-    provider = _provider(load_manifest(manifest), manifest, 1024, 24)
+    manifest_data = load_manifest(manifest)
+    provider = _provider(manifest_data, manifest, 1024, 24)
     try:
         if (
             not provider.is_ready()[0]
@@ -110,9 +84,14 @@ async def run_check(
             or provider.provider_type != "transformer"
         ):
             raise ValueError("real locked transformer unavailable")
-        canonical = CanonicalProvider(provider)
         if kind == "safety":
-            report = await evaluate_safety(canonical, output)
+            report = await evaluate_safety(
+                provider,
+                output,
+                target_representation=cast(
+                    TargetRepresentation, manifest_data.target_representation
+                ),
+            )
             passed = (
                 report["provider_safety_failure_count"] == 0
                 and report["paraphrase_disagreement_count"] == 0
@@ -129,7 +108,7 @@ async def run_check(
                         or not row.get("segment_id")
                     ):
                         raise ValueError("invalid EDGAR segment")
-                    prediction = await canonical.classify(row["text"])
+                    prediction = await provider.classify(row["text"])
                     rows.append(
                         {
                             "segment_id": row["segment_id"],
@@ -144,7 +123,18 @@ async def run_check(
             (output / "predictions.jsonl").write_text(
                 "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
             )
-            report = summarize_ood_predictions(rows, frozenset(CUAD_TAXONOMY))
+            report = summarize_ood_predictions(
+                rows,
+                frozenset(
+                    output_taxonomy(
+                        CUAD_TAXONOMY,
+                        cast(
+                            TargetRepresentation,
+                            manifest_data.target_representation,
+                        ),
+                    )
+                ),
+            )
             passed = report["processing_failures"] == 0
         report.update(
             {
@@ -153,6 +143,7 @@ async def run_check(
                 "kind": kind,
                 "is_mock": False,
                 "passed": passed,
+                "target_representation": manifest_data.target_representation,
                 "report_label": (
                     f"LOCKED FINAL {kind.upper()} — NOT HELD-OUT PERFORMANCE"
                 ),
