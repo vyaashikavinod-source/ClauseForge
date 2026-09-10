@@ -20,7 +20,7 @@ dependencies = [
     "fastapi==0.141.1",
     "peft==0.20.0",
     "PyYAML==6.0.2",
-    "torch==2.8.0",
+    "torch==2.13.0",
     "transformers==5.16.1",
     "uvicorn==0.52.4",
 ]
