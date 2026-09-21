@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import json
 from dataclasses import replace
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import cast
 
 import pytest
@@ -86,6 +86,16 @@ def test_historical_diagnostics_only_field_is_evaluation_compatible() -> None:
     assert not report.blocking_differences
     assert report.training_subset_match and report.validation_subset_match
     assert not report.evaluation_override
+
+
+def test_experiment_id_normalizes_platform_path_spelling() -> None:
+    config = load_config(CONFIG)
+    windows_spelling = replace(
+        config,
+        output_dir=cast(Path, PureWindowsPath(r"checkpoints\phase3b")),
+    )
+    assert config.experiment_id == windows_spelling.experiment_id
+    assert config.experiment_id.endswith("2fb2d147fc8e")
 
 
 def test_model_revision_rank_and_targets_block_evaluation() -> None:

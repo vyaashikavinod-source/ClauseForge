@@ -149,7 +149,7 @@ class TrainingConfig:
         # Historical checkpoints were identified with Windows path separators.
         # Normalize to that persisted spelling on every platform so a Linux
         # evaluator can verify their immutable lineage.
-        identity["output_dir"] = str(self.output_dir).replace("/", "\\\\")
+        identity["output_dir"] = self.output_dir.as_posix().replace("/", "\\")
         encoded = json.dumps(identity, sort_keys=True).encode()
         digest = hashlib.sha256(encoded).hexdigest()[:12]
         short_name = self.model.name.rsplit("/", 1)[-1].lower().replace("_", "-")
