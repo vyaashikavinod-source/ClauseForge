@@ -67,11 +67,11 @@ def test_tokenization_analysis_reports_truncation() -> None:
     assert report.truncation_by_category["B"]["truncated"] == 1
 
 
-def test_real_dataset_isolation_and_taxonomy() -> None:
-    dataset = build_training_dataset(Path("data/processed/cuad/1.0.0-run-a"))
+def test_processed_fixture_isolation_and_taxonomy(processed_cuad_dir: Path) -> None:
+    dataset = build_training_dataset(processed_cuad_dir)
     assert len(dataset.taxonomy) == 41
-    assert len(dataset.train) == 11223
-    assert len(dataset.validation) == 1324
+    assert len(dataset.train) == 533
+    assert len(dataset.validation) == 287
     assert {x.contract_id for x in dataset.train}.isdisjoint(
         {x.contract_id for x in dataset.validation}
     )

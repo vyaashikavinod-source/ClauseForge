@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from clauseforge.training.cli import main
 
 
-def test_cli_dry_run(capsys: object) -> None:
+def test_cli_dry_run(capsys: object, processed_cuad_dir: Path) -> None:
     assert (
         main(
             [
                 "--config",
                 "training/configs/smoke.yaml",
                 "--data",
-                "data/processed/cuad/1.0.0-run-a",
+                str(processed_cuad_dir),
                 "--dry-run",
             ]
         )

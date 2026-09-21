@@ -121,12 +121,14 @@ def test_target_truncation_fails_before_training() -> None:
         build_training_batch(example, tokenizer, 1)
 
 
-def test_overfit_selection_is_diverse_train_only_and_deterministic() -> None:
+def test_overfit_selection_is_diverse_train_only_and_deterministic(
+    processed_cuad_dir: Path,
+) -> None:
     config = load_config(
         Path("training/configs/phase3b_v2/qwen25_7b_qlora_id_r8_overfit.yaml")
     )
     dataset = build_training_dataset(
-        Path("data/processed/cuad/1.0.0-run-a"),
+        processed_cuad_dir,
         max_validation_examples=1,
         target_representation=config.target_representation,
         target_representation_version=config.target_representation_version,

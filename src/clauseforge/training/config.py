@@ -140,12 +140,17 @@ class TrainingConfig:
 
     def to_dict(self) -> dict[str, object]:
         value = asdict(self)
-        value["output_dir"] = str(self.output_dir)
+        value["output_dir"] = self.output_dir.as_posix()
         return value
 
     @property
     def experiment_id(self) -> str:
-        encoded = json.dumps(self.to_dict(), sort_keys=True).encode()
+        identity = self.to_dict()
+        # Historical checkpoints were identified with Windows path separators.
+        # Normalize to that persisted spelling on every platform so a Linux
+        # evaluator can verify their immutable lineage.
+        identity["output_dir"] = str(self.output_dir).replace("/", "\\\\")
+        encoded = json.dumps(identity, sort_keys=True).encode()
         digest = hashlib.sha256(encoded).hexdigest()[:12]
         short_name = self.model.name.rsplit("/", 1)[-1].lower().replace("_", "-")
         return f"{short_name}_lora-r{self.lora.rank}_seed{self.seed}_{digest}"

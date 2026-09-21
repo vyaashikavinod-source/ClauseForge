@@ -39,10 +39,10 @@ def test_stable_ids_are_unique_reversible_and_checksummed() -> None:
     )
 
 
-def test_v2_dataset_uses_ids_and_never_loads_test() -> None:
+def test_v2_dataset_uses_ids_and_never_loads_test(processed_cuad_dir: Path) -> None:
     config = load_config(CONFIG)
     dataset = build_training_dataset(
-        Path("data/processed/cuad/1.0.0-run-a"),
+        processed_cuad_dir,
         max_train_examples=3,
         max_validation_examples=2,
         target_representation=config.target_representation,
@@ -111,9 +111,11 @@ class _Tokenizer:
         return {"input_ids": values, "attention_mask": torch.ones_like(values)}
 
 
-def test_assistant_only_masking_still_applies_to_id_target() -> None:
+def test_assistant_only_masking_still_applies_to_id_target(
+    processed_cuad_dir: Path,
+) -> None:
     dataset = build_training_dataset(
-        Path("data/processed/cuad/1.0.0-run-a"),
+        processed_cuad_dir,
         max_train_examples=1,
         max_validation_examples=1,
         target_representation="category_id",

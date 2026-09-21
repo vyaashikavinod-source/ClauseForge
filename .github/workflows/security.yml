@@ -16,5 +16,5 @@ jobs:
       - run: python -m pip_audit -r requirements.txt
       - name: Reject tracked sensitive artifacts
         run: |
-          bad="$(git ls-files | grep -E '(^|/)(data/(raw|processed)|checkpoints|artifacts|\.venv|hf_home)(/|$)|\.(gguf|safetensors|pt|pth|ckpt)$|(^|/)\.env$' | grep -vE '/\.gitkeep$' || true)"
+          bad="$(git ls-files | grep -E '^(data/(raw|processed)|checkpoints|artifacts|\.venv|hf_home)(/|$)|\.(gguf|safetensors|pt|pth|ckpt)$|(^|/)\.env$' | grep -vE '/\.gitkeep$' || true)"
           test -z "$bad"

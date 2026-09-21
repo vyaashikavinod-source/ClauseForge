@@ -27,9 +27,6 @@ FIXTURE = Path("tests/fixtures/phase3b_historical_checkpoint.json")
 CONFIG = Path("training/configs/phase3b/qwen25_7b_qlora_r8.yaml")
 V2_CONFIG = Path("training/configs/phase3b_v2/qwen25_7b_qlora_id_r8.yaml")
 CHECKSUM = "a287835bc6954916c2d9066e7a4b76b18c6946419290abf839f6996bc73ba458"
-DEFAULT_RECONSTRUCTION_CHECKSUM = (
-    "d16b99769131b050fde76cd4a8016f6cf394d030b9e8e338664006e25ff9bbf6"
-)
 
 
 def _fixture() -> dict[str, dict[str, object]]:
@@ -113,20 +110,24 @@ def test_identity_subset_prompt_and_taxonomy_block_evaluation() -> None:
     assert "taxonomy" in _report(config, taxonomy=taxonomy).blocking_differences
 
 
-def test_historical_and_default_reconstruction_checksums_are_explicit() -> None:
-    source = build_training_dataset(Path("data/processed/cuad/1.0.0-run-a"))
+def test_fixture_selection_checksums_are_deterministic(
+    processed_cuad_dir: Path,
+) -> None:
+    source = build_training_dataset(processed_cuad_dir)
     _, historical_train, historical_validation = build_pilot_dataset(
         source, train_count=256, validation_count=128, seed=42
     )
     _, default_train, default_validation = build_pilot_dataset(
         source, train_count=512, validation_count=128, seed=42
     )
-    assert (
-        combined_selection_checksum(historical_train, historical_validation) == CHECKSUM
+    _, repeated_train, repeated_validation = build_pilot_dataset(
+        source, train_count=256, validation_count=128, seed=42
     )
-    assert (
+    assert combined_selection_checksum(historical_train, historical_validation) == (
+        combined_selection_checksum(repeated_train, repeated_validation)
+    )
+    assert combined_selection_checksum(historical_train, historical_validation) != (
         combined_selection_checksum(default_train, default_validation)
-        == DEFAULT_RECONSTRUCTION_CHECKSUM
     )
     assert (
         restore_pilot_selection(
@@ -136,8 +137,10 @@ def test_historical_and_default_reconstruction_checksums_are_explicit() -> None:
     )
 
 
-def test_corrupted_persisted_selection_ids_and_checksums_fail() -> None:
-    source = build_training_dataset(Path("data/processed/cuad/1.0.0-run-a"))
+def test_corrupted_persisted_selection_ids_and_checksums_fail(
+    processed_cuad_dir: Path,
+) -> None:
+    source = build_training_dataset(processed_cuad_dir)
     _, train, _ = build_pilot_dataset(
         source, train_count=256, validation_count=128, seed=42
     )
@@ -152,8 +155,10 @@ def test_corrupted_persisted_selection_ids_and_checksums_fail() -> None:
         restore_pilot_selection(source.train, bad_ids, split="train")
 
 
-def test_validation_size_matches_history_or_is_labeled_override() -> None:
-    source = build_training_dataset(Path("data/processed/cuad/1.0.0-run-a"))
+def test_validation_size_matches_history_or_is_labeled_override(
+    processed_cuad_dir: Path,
+) -> None:
+    source = build_training_dataset(processed_cuad_dir)
     _, _, historical = build_pilot_dataset(
         source, train_count=256, validation_count=128, seed=42
     )

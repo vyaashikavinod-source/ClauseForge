@@ -43,28 +43,28 @@ def test_pilot_selection_rejects_wrong_split_and_oversize() -> None:
         stratified_selection(_examples("train"), count=21, seed=42, split="train")
 
 
-def test_real_pilot_uses_train_and_validation_only() -> None:
-    source = build_training_dataset(Path("data/processed/cuad/1.0.0-run-a"))
+def test_real_pilot_uses_train_and_validation_only(processed_cuad_dir: Path) -> None:
+    source = build_training_dataset(processed_cuad_dir)
     pilot, train, validation = build_pilot_dataset(source)
     assert len(pilot.train) == 512 and len(pilot.validation) == 256
     assert all(item.split == "train" for item in pilot.train)
     assert all(item.split == "validation" for item in pilot.validation)
     assert train.covered_category_count == 41
     assert (
-        validation.covered_category_count == validation.supported_category_count == 40
+        validation.covered_category_count == validation.supported_category_count == 41
     )
     assert train.metadata()["test_examples_selected"] == 0
     assert validation.metadata()["test_examples_selected"] == 0
     assert "test" not in {item.split for item in pilot.train + pilot.validation}
 
 
-def test_pilot_cli_and_offline_metadata() -> None:
+def test_pilot_cli_and_offline_metadata(processed_cuad_dir: Path) -> None:
     args = build_parser().parse_args(
         [
             "--config",
             "training/configs/phase3b/qwen25_7b_qlora_r8.yaml",
             "--data",
-            "data/processed/cuad/1.0.0-run-a",
+            str(processed_cuad_dir),
             "--pilot",
             "--pilot-train-examples",
             "512",
@@ -76,7 +76,7 @@ def test_pilot_cli_and_offline_metadata() -> None:
     )
     assert args.pilot and args.max_steps == 12
     config = load_config(args.config)
-    result = run(config, args.data, dry_run=True, pilot=True)
+    result = run(config, Path(args.data), dry_run=True, pilot=True)
     assert result["status"] == "phase3b-pilot-config-valid"
     manifest = result["dataset_manifest"]
     assert isinstance(manifest, dict) and manifest["label"] == PILOT_LABEL
