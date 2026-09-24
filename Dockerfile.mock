@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/src \
+    CLAUSEFORGE_ENVIRONMENT=production \
+    CLAUSEFORGE_MODEL_BACKEND=mock \
+    CLAUSEFORGE_DEVICE=cpu \
+    CLAUSEFORGE_METRICS_ENABLED=false
+
+WORKDIR /app
+
+COPY requirements.mock.txt ./
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r requirements.mock.txt
+
+# The mock application imports directly from the source package. Its frontend
+# and taxonomy are package files under this tree; no model artifacts are copied.
+COPY src ./src
+
+RUN addgroup --system clauseforge \
+    && adduser --system --ingroup clauseforge clauseforge
+USER clauseforge
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+
+ENTRYPOINT ["uvicorn", "clauseforge.serving.app:app"]
+CMD ["--host", "0.0.0.0", "--port", "8000"]

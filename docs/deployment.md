@@ -30,6 +30,33 @@ Run `docker compose up --build`. The default image contains application code and
 Python dependencies only: no datasets, credentials, adapters, or model weights.
 The mock backend validates transport and operations, not model performance.
 
+## Railway portfolio/demo deployment
+
+Build the dedicated lightweight service image with:
+
+```bash
+docker build -f Dockerfile.mock -t clauseforge-mock .
+```
+
+Railway should use `Dockerfile.mock`, expose port `8000`, and set:
+
+```text
+CLAUSEFORGE_ENVIRONMENT=production
+CLAUSEFORGE_MODEL_BACKEND=mock
+CLAUSEFORGE_DEVICE=cpu
+CLAUSEFORGE_METRICS_ENABLED=false
+```
+
+The image runs `uvicorn clauseforge.serving.app:app --host 0.0.0.0 --port 8000`.
+It serves the existing frontend at `/` and retains `/health`, `/ready`,
+`/version`, `/v1/taxonomy`, `/v1/classify`, and `/docs`. Its health check uses
+the stdlib against `http://127.0.0.1:8000/health`.
+
+This is a deterministic `mock-development` portfolio/demo only. It contains no
+model weights and excludes Torch, Transformers, PEFT, GPU, training, and
+evaluation dependencies; it is not trained-model performance or production
+readiness evidence.
+
 ## Future model backends
 
 - Transformer: mount immutable model, tokenizer, and adapter directories and set

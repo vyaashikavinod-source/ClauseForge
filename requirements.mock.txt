@@ -1,0 +1,5 @@
+# Minimal runtime for the Railway portfolio/demo image. This deliberately does
+# not install the transformer, adapter, training, or evaluation stacks.
+fastapi==0.141.1
+PyYAML==6.0.2
+uvicorn==0.52.4

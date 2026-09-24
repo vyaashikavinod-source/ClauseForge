@@ -31,6 +31,27 @@ evidence. A future real backend uses the same interface and derives provider,
 artifact, and readiness identity from API responses; the frontend does not
 hard-code RC0 or rank-specific behavior.
 
+## Railway portfolio/demo image
+
+`Dockerfile.mock` is the deliberately lightweight image for a single Railway
+portfolio/demo service. It serves this same FastAPI frontend at `/` and the API
+on port `8000`, using only the deterministic `mock-development` provider. It
+does not install model weights or the Torch, Transformers, PEFT, GPU, training,
+or evaluation stacks.
+
+Configure the Railway service with the Dockerfile path `Dockerfile.mock` and
+these environment variables:
+
+```text
+CLAUSEFORGE_ENVIRONMENT=production
+CLAUSEFORGE_MODEL_BACKEND=mock
+CLAUSEFORGE_DEVICE=cpu
+CLAUSEFORGE_METRICS_ENABLED=false
+```
+
+This is a deterministic mock/demo deployment, not trained-model performance
+evidence. Final trained-model release remains pending.
+
 ## Active trained model candidates
 
 ClauseForge can serve an external Qwen2.5-7B QLoRA adapter as an **active
