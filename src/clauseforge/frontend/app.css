@@ -33,3 +33,5 @@ body:before{opacity:.68;background:radial-gradient(circle at 78% 3%,#326c6a1a,tr
 .capability-strip:has(#evaluation-results){padding:1.25rem;transform:none}
 #evaluation-results td,.capability-strip th{padding:.7rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
 .capability-strip:has(#evaluation-results) table{width:100%;border-collapse:collapse;font-size:.85rem}
+
+[hidden]{display:none!important}.intro{grid-template-columns:1fr}.intro-copy{max-width:760px}.evaluation-page{padding-block:2.5rem}.evaluation-card{padding:clamp(1rem,3vw,2rem);overflow-x:auto}.evaluation-card table{width:100%;min-width:720px;border-collapse:collapse}.evaluation-card th,.evaluation-card td{text-align:left;padding:1rem .75rem;border-bottom:1px solid var(--line);font-size:.82rem}.evaluation-card h2{margin-top:0}.evaluation-card>p{color:var(--muted);font-size:.85rem}

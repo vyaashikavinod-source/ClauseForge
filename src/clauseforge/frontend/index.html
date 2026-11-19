@@ -16,7 +16,7 @@
       <span><strong>ClauseForge</strong><small>Contract Intelligence Workspace</small></span>
     </a>
     <nav class="primary-nav" aria-label="Primary navigation">
-      <a class="active" href="#workspace">Analyze</a><a href="#history">History</a><a href="#system">System</a><a href="/docs">API Docs</a>
+      <a class="active" href="#workspace">Analyze</a><a href="#evaluation">Evaluation</a><a href="#history">History</a><a href="#system">System</a><a href="/docs">API Docs</a>
     </nav>
     <div class="header-actions">
       <button id="theme-toggle" class="icon-button" type="button" aria-label="Switch color theme" title="Switch color theme">
@@ -36,16 +36,7 @@
         <p>Classify contract clauses against the authoritative CUAD taxonomy and surface structured review context.</p>
         <p class="hero-disclaimer">Decision support for informed review. Not legal advice.</p>
       </div>
-      <section class="capability-strip" aria-label="Measured evaluation results" style="display:block;overflow-x:auto">
-        <h2>Held-out evaluation</h2>
-        <p id="evaluation-status">Loading recorded evaluation results. The interface demo uses a mock provider.</p>
-        <table><thead><tr><th>Model</th><th>N</th><th>Accuracy</th><th>Macro F1</th><th>p50 latency</th><th>Cost / 1k clauses</th></tr></thead><tbody id="evaluation-results">
-          <tr><td>Zero-shot frontier</td><td colspan="5">Not run — API access required</td></tr>
-          <tr><td>Qwen2.5-1.5B QLoRA</td><td colspan="5">Loading recorded pilot result</td></tr>
-          <tr><td>Quantized adapter</td><td colspan="5">Loading recorded serving result</td></tr>
-        </tbody></table>
-        <p>Same frozen clauses, same prompt and scorer. Missing measurements remain unavailable.</p>
-      </section>
+
     </section>
 
     <div class="workspace-grid">
@@ -138,6 +129,18 @@
     </section>
 
     <p class="privacy-notice">Contract text is processed for classification. Avoid submitting sensitive material unless your deployment is approved for it.</p>
+  </main>
+  <main id="evaluation" class="page-shell evaluation-page" hidden>
+      <section class="card evaluation-card" aria-label="Measured evaluation results">
+        <h2>Held-out evaluation</h2>
+        <p id="evaluation-status">Loading recorded evaluation results. The interface demo uses a mock provider.</p>
+        <table><thead><tr><th>Model</th><th>N</th><th>Accuracy</th><th>Macro F1</th><th>p50 latency</th><th>Cost / 1k clauses</th></tr></thead><tbody id="evaluation-results">
+          <tr><td>Zero-shot frontier</td><td colspan="5">Not run — API access required</td></tr>
+          <tr><td>Qwen2.5-1.5B QLoRA</td><td colspan="5">Loading recorded pilot result</td></tr>
+          <tr><td>Quantized adapter</td><td colspan="5">Loading recorded serving result</td></tr>
+        </tbody></table>
+        <p>Same frozen clauses, same prompt and scorer. Missing measurements remain unavailable.</p>
+      </section>
   </main>
   <footer><span>ClauseForge</span><span>AI-assisted review · Human judgment required</span></footer>
 </body>

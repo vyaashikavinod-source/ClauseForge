@@ -134,3 +134,16 @@ async function loadEvaluationEvidence() {
   } catch (_) { /* Preserve explicit pending states when evidence is unavailable. */ }
 }
 document.addEventListener('DOMContentLoaded', loadEvaluationEvidence);
+
+function syncWorkspaceView() {
+  const evaluation = window.location.hash === '#evaluation';
+  document.getElementById('workspace').hidden = evaluation;
+  document.getElementById('evaluation').hidden = !evaluation;
+  document.querySelectorAll('.primary-nav a').forEach(link => {
+    const active = evaluation ? link.getAttribute('href') === '#evaluation' : link.getAttribute('href') === (window.location.hash || '#workspace');
+    link.classList.toggle('active', active);
+    if (active) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+  });
+}
+window.addEventListener('hashchange', syncWorkspaceView);
+document.addEventListener('DOMContentLoaded', syncWorkspaceView);
