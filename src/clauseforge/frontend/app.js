@@ -113,3 +113,24 @@ function initialize() {
   updateInput(); renderHistory(); refreshStatus();
 }
 document.addEventListener("DOMContentLoaded", initialize);
+
+async function loadEvaluationEvidence() {
+  try {
+    const response = await fetch('/static/evaluation.json');
+    if (!response.ok) return;
+    const evidence = await response.json();
+    const status = document.getElementById('evaluation-status');
+    if (!status) return;
+    status.textContent = evidence.status_message || 'Recorded evaluation results';
+    if (!evidence.runs?.length) return;
+    const body = document.getElementById('evaluation-results');
+    body.replaceChildren();
+    for (const run of evidence.runs) {
+      const row = document.createElement('tr');
+      const values = [run.model, run.metrics.sample_size, `${(run.metrics.accuracy * 100).toFixed(1)}%`, run.metrics.macro_f1_all_categories.toFixed(3), `${run.latency_median_seconds.toFixed(3)} s`, run.cost_per_1000_clauses_usd === null ? 'Unavailable' : `$${run.cost_per_1000_clauses_usd.toFixed(3)}`];
+      for (const value of values) { const cell = document.createElement('td'); cell.textContent = String(value); row.append(cell); }
+      body.append(row);
+    }
+  } catch (_) { /* Preserve explicit pending states when evidence is unavailable. */ }
+}
+document.addEventListener('DOMContentLoaded', loadEvaluationEvidence);

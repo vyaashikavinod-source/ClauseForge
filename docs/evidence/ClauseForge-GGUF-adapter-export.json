@@ -1,0 +1,10 @@
+{
+  "artifact": "F16 GGUF LoRA adapter",
+  "source_safetensors_sha256": "2a93cec21c4b2695108514f709fe5c298b64a27606900bfce98d5c4721aed211",
+  "file": ".local\\colab\\pilot\\adapter-f16.gguf",
+  "size_bytes": 4373888,
+  "sha256": "e60c991d247dd2faaca8e1142a4ba34301be2972295c8ebe472b20c871aece83",
+  "converter_commit": "307e3f1551c2c3c6c0560c454ab46bb64baeb2df",
+  "base_config_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "status": "served_and_evaluated_200_clauses"
+}

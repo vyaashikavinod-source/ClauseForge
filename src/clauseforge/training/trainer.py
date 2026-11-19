@@ -13,6 +13,7 @@ import torch
 from clauseforge.training.config import OptimizationConfig
 from clauseforge.training.targets import stable_id_map
 from clauseforge.training.templates import (
+    BENCHMARK_PROMPT_TEMPLATE_VERSION,
     ID_PROMPT_TEMPLATE_VERSION,
     TrainingExample,
     render_prompt,
@@ -73,7 +74,7 @@ def reserved_target_token_count(tokenizer: Any, prompt_template_version: str) ->
         return cached
     targets = (
         [item.category_id for item in stable_id_map()]
-        if prompt_template_version == ID_PROMPT_TEMPLATE_VERSION
+        if prompt_template_version in {ID_PROMPT_TEMPLATE_VERSION, BENCHMARK_PROMPT_TEMPLATE_VERSION}
         else [item.canonical for item in stable_id_map()]
     )
     count = max(len(target_token_ids(tokenizer, target)) for target in targets)

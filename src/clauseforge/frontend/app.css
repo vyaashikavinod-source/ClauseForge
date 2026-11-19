@@ -29,3 +29,7 @@ body:before{opacity:.68;background:radial-gradient(circle at 78% 3%,#326c6a1a,tr
 @media(max-width:700px){body:before{opacity:.48}.intro{gap:1.8rem}.capability-strip span{padding:.72rem .85rem}.analysis-card{padding-bottom:1.35rem}.result-card{min-height:350px}.review-question{padding:1rem}.history-item{grid-template-columns:1fr auto}}
 @media(max-width:460px){.intro h1{line-height:1}.hero-disclaimer{line-height:1.5}.card-heading h2{font-size:1.5rem}.file-button{padding:.42rem .62rem}textarea{min-height:205px;padding:1rem}.input-meta{align-items:flex-end}.input-meta span:first-child{max-width:68%}#category-name{font-size:2rem}.result-meta{gap:0}.trust-grid{gap:.55rem}}
 @media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#0e171e;--surface:#15222b;--alt:#1a2932;--text:#edf0ec;--muted:#a6b0b2;--line:#32434a;--danger:#e2928d;--shadow-soft:0 1px 2px #0003,0 12px 34px #0003;--shadow:0 3px 8px #0003,0 28px 76px #0007}}
+.intro:has(#evaluation-results){grid-template-columns:1fr}
+.capability-strip:has(#evaluation-results){padding:1.25rem;transform:none}
+#evaluation-results td,.capability-strip th{padding:.7rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.capability-strip:has(#evaluation-results) table{width:100%;border-collapse:collapse;font-size:.85rem}

@@ -1,0 +1,1985 @@
+{
+  "schema_version": 1,
+  "name": "cuad-portfolio-held-out-v1",
+  "seed": 42,
+  "split": "test",
+  "sampling": "category round-robin; contract-disjoint; exact normalized text decontaminated; ambiguous labels excluded",
+  "prompt_version": "cuad-classification-id-v3-taxonomy",
+  "source_checksums": {
+    "clauses.jsonl": "afd4bc9b08bff02fe223a20998b9084c53f76016854672f6fdb4c71b71cddff3",
+    "contracts.jsonl": "74a2fc48d7b78743faa36884a2753762ecc679955f947730a83521652202df1b",
+    "manifest.json": "b27d1401e2f10f8e804722d2662c024bdb4e748f8110e7bb8f1387a155b2e509",
+    "segments.jsonl": "4fb9ea8dae89d6677fcc3218e9ed4e1f837f79a4d28b9ad62abe212dcc683461",
+    "splits.json": "d449e61306e58f785491b161bf1da42737027a44be2d34516360002984905091",
+    "statistics.json": "3e88ea5707b61d29c5f447020fce1032359365737cb9bd38ea6e52a547176f23"
+  },
+  "labels": [
+    {
+      "id": "affiliate_license_licensee",
+      "name": "Affiliate License-Licensee"
+    },
+    {
+      "id": "affiliate_license_licensor",
+      "name": "Affiliate License-Licensor"
+    },
+    {
+      "id": "agreement_date",
+      "name": "Agreement Date"
+    },
+    {
+      "id": "anti_assignment",
+      "name": "Anti-Assignment"
+    },
+    {
+      "id": "audit_rights",
+      "name": "Audit Rights"
+    },
+    {
+      "id": "cap_on_liability",
+      "name": "Cap On Liability"
+    },
+    {
+      "id": "change_of_control",
+      "name": "Change Of Control"
+    },
+    {
+      "id": "competitive_restriction_exception",
+      "name": "Competitive Restriction Exception"
+    },
+    {
+      "id": "covenant_not_to_sue",
+      "name": "Covenant Not To Sue"
+    },
+    {
+      "id": "document_name",
+      "name": "Document Name"
+    },
+    {
+      "id": "effective_date",
+      "name": "Effective Date"
+    },
+    {
+      "id": "exclusivity",
+      "name": "Exclusivity"
+    },
+    {
+      "id": "expiration_date",
+      "name": "Expiration Date"
+    },
+    {
+      "id": "governing_law",
+      "name": "Governing Law"
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance"
+    },
+    {
+      "id": "ip_ownership_assignment",
+      "name": "Ip Ownership Assignment"
+    },
+    {
+      "id": "irrevocable_or_perpetual_license",
+      "name": "Irrevocable Or Perpetual License"
+    },
+    {
+      "id": "joint_ip_ownership",
+      "name": "Joint Ip Ownership"
+    },
+    {
+      "id": "license_grant",
+      "name": "License Grant"
+    },
+    {
+      "id": "liquidated_damages",
+      "name": "Liquidated Damages"
+    },
+    {
+      "id": "minimum_commitment",
+      "name": "Minimum Commitment"
+    },
+    {
+      "id": "most_favored_nation",
+      "name": "Most Favored Nation"
+    },
+    {
+      "id": "no_solicit_of_customers",
+      "name": "No-Solicit Of Customers"
+    },
+    {
+      "id": "no_solicit_of_employees",
+      "name": "No-Solicit Of Employees"
+    },
+    {
+      "id": "non_compete",
+      "name": "Non-Compete"
+    },
+    {
+      "id": "non_disparagement",
+      "name": "Non-Disparagement"
+    },
+    {
+      "id": "non_transferable_license",
+      "name": "Non-Transferable License"
+    },
+    {
+      "id": "notice_period_to_terminate_renewal",
+      "name": "Notice Period To Terminate Renewal"
+    },
+    {
+      "id": "parties",
+      "name": "Parties"
+    },
+    {
+      "id": "post_termination_services",
+      "name": "Post-Termination Services"
+    },
+    {
+      "id": "price_restrictions",
+      "name": "Price Restrictions"
+    },
+    {
+      "id": "renewal_term",
+      "name": "Renewal Term"
+    },
+    {
+      "id": "revenue_profit_sharing",
+      "name": "Revenue/Profit Sharing"
+    },
+    {
+      "id": "rofr_rofo_rofn",
+      "name": "Rofr/Rofo/Rofn"
+    },
+    {
+      "id": "source_code_escrow",
+      "name": "Source Code Escrow"
+    },
+    {
+      "id": "termination_for_convenience",
+      "name": "Termination For Convenience"
+    },
+    {
+      "id": "third_party_beneficiary",
+      "name": "Third Party Beneficiary"
+    },
+    {
+      "id": "uncapped_liability",
+      "name": "Uncapped Liability"
+    },
+    {
+      "id": "unlimited_all_you_can_eat_license",
+      "name": "Unlimited/All-You-Can-Eat-License"
+    },
+    {
+      "id": "volume_restriction",
+      "name": "Volume Restriction"
+    },
+    {
+      "id": "warranty_duration",
+      "name": "Warranty Duration"
+    }
+  ],
+  "examples": [
+    {
+      "clause_id": "clause_19037619ef126a4e742f",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "The Village Media Company shall have the right to sublicense (a) the production and creation of the HOFV Works and (b) Exploitation of the PFHOF Works hereunder to any of its Affiliates; provided, that, Village Media Company shall (x) cause such sublicenses to comply with all terms and conditions of this Agreement and (y) not be relieved of any of its obligations under this Agreement as a result of any such sublicense, and will be primarily responsible for any acts or omissions of such sublicensees.",
+      "label": "Highlight the parts (if any) of this contract related to \"Affiliate License-Licensee\" that should be reviewed by a lawyer. Details: Does the contract contain a license grant to a licensee (incl. sublicensor) and the affiliates of such licensee/sublicensor?",
+      "clause_length": 504,
+      "contract_length": 45234,
+      "target": "affiliate_license_licensee"
+    },
+    {
+      "clause_id": "clause_4c6ba63df7a70df14e7f",
+      "contract_id": "contract_105391d58b9e3e48bd31",
+      "text": "January 26, 1998",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 16,
+      "contract_length": 25288,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_260bd4944365aa6a963f",
+      "contract_id": "contract_b42ad8a8048aaaf72bf2",
+      "text": "Neither party shall have the right to assign this Agreement or any Work Order or to assign any rights thereunder without the prior written consent of the other party.",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 166,
+      "contract_length": 46057,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_dfaab3943d21a0f18b7a",
+      "contract_id": "contract_f756540ff5d2ce7bff59",
+      "text": "Client      may, upon no less than thirty (30) days prior written notice to Intuit,      cause an independent Certified Public Accountant to inspect all relevant      records of Intuit upon which the calculation of Impressions under the Usage      Reports are based during Client's normal business hours.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 304,
+      "contract_length": 40856,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_5087d92c795cdb79836f",
+      "contract_id": "contract_4315a23635a12222e979",
+      "text": "Neither party shall be liable to the other pursuant to this Agreement for any amounts representing loss of profit, loss of business or indirect, consequential, exemplary, or punitive damages of the other party.",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 210,
+      "contract_length": 55889,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_25f197721e3c7b34e2f2",
+      "contract_id": "contract_8b52b415a228a95d79f3",
+      "text": "Skunkware further agrees that, so long as the Option shall be in           existence (whether or not exercisable), it shall be and remain the           sole Stockholder Licensor, and Licensor shall not issue to any other           person or entity any stock, warrants or similar rights to acquire           equity interests in Licensor.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 336,
+      "contract_length": 21994,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_3c053a42887e0899083e",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "Notwithstanding paragraphs 4A, 4B and 4C above, CONSULTANT shall be entitled to endorse and play the [*****].",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 109,
+      "contract_length": 24632,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_0676c1a81618f57e4a11",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "The Village Media Company shall not, and shall cause its Affiliates and their respective permitted sublicensees not to, whether during the Term or thereafter, challenge (a) the rights of PFHOF in and to any PFHOF Work, (b) the validity of any PFHOF Work, (c) PFHOF's right to grant rights or licenses relating to the PFHOF Works or (d) the validity, legality, or enforceability of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 396,
+      "contract_length": 45234,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_bf42079ec3b4aa30b800",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "Co-Hosting Agreement",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 20,
+      "contract_length": 58300,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_9d7210eb681298bf5a32",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": ", 1997",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 6,
+      "contract_length": 70664,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_bd1716f1abd22b33fcf1",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Without limitation of the preceding sentence or any other provision of this Agreement, Allied shall identify and name Newegg as a Founding Partner, and as the exclusive Technology E-Commerce (or E-tail) Partner, of the Arena and in all of Allied's marketing materials in connection with the Arena where reasonably practicable.",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 326,
+      "contract_length": 37796,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_4b06cd3cb2109905df63",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "This Agreement shall be valid for five (5) years from February 1, 2019 through January 31, 2024 unless this Agreement is terminated earlier pursuant to Section 14 (the \"Term\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 176,
+      "contract_length": 37796,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_f7226e9613ccc35839c0",
+      "contract_id": "contract_fdef3f5b59b427733697",
+      "text": "4.8 This Agreement will be governed exclusively by and construed in accordance  with the laws of the Province of British Columbia, and the parties attorn to the exclusive  jurisdiction of the Courts of British Columbia.",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 219,
+      "contract_length": 16402,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_39a86450a8a9c8a7ba49",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "The Commercial General Liability insurance policy must:\n\n1. include AT&T, its Affiliates, and their directors, officers, and employees as additional insureds. Vendor shall provide a copy of the additional insured endorsement to AT&T. The additional insured endorsement may either be specific to AT&T or may be \"blanket\" or \"automatic\" addressing any Person as required by contract. A copy of the additional insured endorsement must be provided within sixty (60) days of execution of this Agreement and within sixty (60) days of each Commercial General Liability policy renewal;\n\n2. include a waiver of subrogation in favor of AT&T, its Affiliates, and their directors, officers and employees; and\n\n3. be primary and non-contributory with respect to any insurance or self-insurance that is maintained by AT&T.",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 808,
+      "contract_length": 228943,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_b1018f23b7a8241c3d81",
+      "contract_id": "contract_48689e70489b5265c3e9",
+      "text": "If any Product Collateral IP (or any aspect thereof) are not designed and/or created by Calm, such Product Collateral IP (or aspect thereof) shall be deemed \"works made for hire\" for Calm within the meaning of the U.S. Copyright Law and/or other applicable comparable laws or, if they do not so qualify, all ownership rights thereto shall be, and are hereby, assigned to Calm.",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 376,
+      "contract_length": 52106,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_8e2b1d9cd1eaeb9c6719",
+      "contract_id": "contract_4315a23635a12222e979",
+      "text": "LMG will maintain, through the Conversion Date or such other date as is specified in Exhibit A, its existing licenses for the Other Third Party Software and provide TAG access to and an irrevocable \"look access only\" right and license to use the Other Third Party Software and applicable Documentation.",
+      "label": "Highlight the parts (if any) of this contract related to \"Irrevocable Or Perpetual License\" that should be reviewed by a lawyer. Details: Does the contract contain a  license grant that is irrevocable or perpetual?",
+      "clause_length": 302,
+      "contract_length": 55889,
+      "target": "irrevocable_or_perpetual_license"
+    },
+    {
+      "clause_id": "clause_253889dedd278b51f8ad",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "New Application Technologies that have been developed by cooperation of the Parties shall be jointly and equally owned by the Parties, and any royalties for the use thereof by third parties shall be shared equitably between the Parties",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 235,
+      "contract_length": 83972,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_9b9ad077a10e30dcd2ed",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "Licensor grants to Rogers the non-exclusive license and right to distribute and exhibit in Canada (the \"Territory\") all entertainment programming to which Licensor owns or controls the VOD distribution and exhibition rights in the Territory (collectively, \"Licensed Programs\") to residential subscribers of Rogers' digital cable television service on a Video-on-Demand (\"VOD\") basis.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 383,
+      "contract_length": 30050,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_b56a62810d06f8577dd7",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "In case that the Driver User unilaterally terminates the Financial Leasing Agreement in advance, Party B shall collect the liquidated damages from the Driver User within 30% of the \"down payment + total monthly rent + last payment\" stipulated in the Financial Leasing Agreement;",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 278,
+      "contract_length": 73890,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_d7a7b28aa846049c3010",
+      "contract_id": "contract_013b095f8638a9e465c3",
+      "text": "Negotiating in good faith, the Parties shall agree to a reasonable minimum percentage of Product supply to [***] Import Alert.",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 126,
+      "contract_length": 40597,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_b0c37e9a7ea72bb1418d",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "Party B guarantees that the Driver User will enjoy the most favorable treatment in accordance with the terms and conditions stipulated in This Agreement during the Period of Cooperation.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 186,
+      "contract_length": 73890,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_21c7e0def699db718ec5",
+      "contract_id": "contract_7a9da18aad9ac1c171a0",
+      "text": "Consultant will not, during the Term, and for a period of one (1) year thereafter, directly or indirectly:",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Customers\" that should be reviewed by a lawyer. Details: Is a party restricted from contracting or soliciting customers or partners of the counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 106,
+      "contract_length": 22359,
+      "target": "no_solicit_of_customers"
+    },
+    {
+      "clause_id": "clause_797b287dbf1bbb45ecd1",
+      "contract_id": "contract_e96d17e2fd804489f1a7",
+      "text": "Without the prior written consent of the other Party, a Party shall not at any time while this Agreement is in force and for a one-year period after termination of this Agreement either for itself or on behalf of any other company solicit, induce or cause any employee of the other Party or any Affiliated Company of this other Party who has been a representative of or employed by the other Party in connection with this Agreement to leave such employment.",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 457,
+      "contract_length": 66253,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_15eb171dbd33497b713a",
+      "contract_id": "contract_f9bac027b2ce143854d5",
+      "text": "Party B and its Affiliates guarantee that following the Effective Date of this Contract, it will not further transfer to any Third Party: i) the proprietary technology for production of Powder (as defined below) to be made into Batteries (as defined below) or ii) the proprietary technology for production of Batteries that use the Bellcore configuration.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 355,
+      "contract_length": 73698,
+      "target": "non_compete"
+    },
+    {
+      "clause_id": "clause_d71c1eddc49b285dcb33",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Licensee will",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?",
+      "clause_length": 13,
+      "contract_length": 112794,
+      "target": "non_disparagement"
+    },
+    {
+      "clause_id": "clause_9fe9f58302e9eb962f81",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "the Customer is granted a non-exclusive, non-transferable and non-assignable right to use the Products solely for their intended use;",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?",
+      "clause_length": 133,
+      "contract_length": 75389,
+      "target": "non_transferable_license"
+    },
+    {
+      "clause_id": "clause_957f0cf473d4d5495bc5",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "Notwithstanding the foregoing, if, at the expiry of this Agreement following the Initial Term or the Renewal Term (if any), as applicable, Licensor and Rogers have not executed a new agreement governing the VOD distribution and exhibition of Licensed Programs and Rogers (or its permitted assigns) continues to distribute and exhibit Licensed Programs on the ROD Service following such expiry, such continued distribution and exhibition shall be governed by the terms of this Agreement in effect at the time of expiry, except that each of Licensor and Rogers shall have the right, on sixty (60) days' prior written notice, to terminate this Agreement, as so extended.",
+      "label": "Highlight the parts (if any) of this contract related to \"Notice Period To Terminate Renewal\" that should be reviewed by a lawyer. Details: What is the notice period required to terminate renewal?",
+      "clause_length": 667,
+      "contract_length": 30050,
+      "target": "notice_period_to_terminate_renewal"
+    },
+    {
+      "clause_id": "clause_de568424f5cdcf342a53",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "Commnet Wireless, LLC",
+      "label": "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract",
+      "clause_length": 21,
+      "contract_length": 228943,
+      "target": "parties"
+    },
+    {
+      "clause_id": "clause_b424d0d925f09e4225e0",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "From and after notice of termination is received by VIP, any new reports or other services provided by VIP other than routine processing services which have been done for BNL under this Agreement shall be deemed to be additional services and shall be performed by VIP at VIP's then current rates for such termination services as specified on Schedule A.",
+      "label": "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?",
+      "clause_length": 353,
+      "contract_length": 39863,
+      "target": "post_termination_services"
+    },
+    {
+      "clause_id": "clause_bcedec8691df7a8ae73f",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "To the extent that the Village Media Company and PFHOF work collaboratively on media projects, the EP's services on such projects for the benefit of PFHOF shall be charged to PFHOF at cost without markup.",
+      "label": "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the  ability of a party to raise or reduce prices of technology, goods, or  services provided?",
+      "clause_length": 204,
+      "contract_length": 45234,
+      "target": "price_restrictions"
+    },
+    {
+      "clause_id": "clause_b0aa54523e866df7f528",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "The Term of this Agreement shall be extended for subsequent one year periods upon the mutual agreement of the parties, which agreement shall be set forth in writing (in which event a party that desires to so extend the Term of this Agreement shall notify the other party at least 120 days prior to the termination of this Agreement).",
+      "label": "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.",
+      "clause_length": 333,
+      "contract_length": 173240,
+      "target": "renewal_term"
+    },
+    {
+      "clause_id": "clause_9901cac605a8ce52ab46",
+      "contract_id": "contract_a75ed97281f5ef0a1630",
+      "text": "The percentage of the respective Advertising Cost Compensation shall be stipulated by the Software Publisher, but shall not exceed 50% of the effective gross sales price of the software.",
+      "label": "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or services?",
+      "clause_length": 186,
+      "contract_length": 22721,
+      "target": "revenue_profit_sharing"
+    },
+    {
+      "clause_id": "clause_c9e73d94f896f4320467",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "In such a case, PFHOF shall promptly notify the Village Media Company and provide the Village Media Company with any bona fide third party offer to license such PFHOF Work that PFHOF is willing to accept, including any specific terms and proposed business plan relating to such offer.",
+      "label": "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?",
+      "clause_length": 284,
+      "contract_length": 45234,
+      "target": "rofr_rofo_rofn"
+    },
+    {
+      "clause_id": "clause_7c99a946656c12665ec5",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "The Parties agree to execute an escrow agreement, within 90 days of the Effective Date, with a nationally recognized escrow agent with respect to  the source code for the Products and name Reseller as a beneficiary.",
+      "label": "Highlight the parts (if any) of this contract related to \"Source Code Escrow\" that should be reviewed by a lawyer. Details: Is one party required to deposit its source code into escrow with a third party, which can be released to the counterparty upon the occurrence of certain events (bankruptcy,  insolvency, etc.)?",
+      "clause_length": 215,
+      "contract_length": 75389,
+      "target": "source_code_escrow"
+    },
+    {
+      "clause_id": "clause_5dceed7c934a1eefff9d",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "by providing written notice to the other Party at least sixty (60) calendar days prior to the effective date of such termination",
+      "label": "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this  contract without cause (solely by giving a notice and allowing a waiting  period to expire)?",
+      "clause_length": 128,
+      "contract_length": 37796,
+      "target": "termination_for_convenience"
+    },
+    {
+      "clause_id": "clause_0c2f0412b7641633ef27",
+      "contract_id": "contract_d04cb6f109d7441c15ab",
+      "text": "Playboy is an intended third-party beneficiary of this Contract.",
+      "label": "Highlight the parts (if any) of this contract related to \"Third Party Beneficiary\" that should be reviewed by a lawyer. Details: Is there a non-contracting party who is a beneficiary to some or all of the clauses in the contract and therefore can enforce its rights against a contracting party?",
+      "clause_length": 64,
+      "contract_length": 3558,
+      "target": "third_party_beneficiary"
+    },
+    {
+      "clause_id": "clause_08f7c1d41334a660c747",
+      "contract_id": "contract_e96d17e2fd804489f1a7",
+      "text": "Limitation of liability as described in this article shall not apply:   a) in case the damage or loss is caused by a Party's willful misconduct (including fraud) or gross negligence, or   b) in case of a breach of a Parties obligation under article 11 (confidentiality) and article 15 (indemnification for breach of intellectual property rights).",
+      "label": "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party’s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.",
+      "clause_length": 346,
+      "contract_length": 66253,
+      "target": "uncapped_liability"
+    },
+    {
+      "clause_id": "clause_cd175c298412dc0989b0",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "Multiple viewings of the Licensed Program shall be permitted during the Viewing Period for no additional fee and all such viewings shall be considered a single exhibition of the Licensed Program for the purposes of calculating License Fees hereunder.",
+      "label": "Highlight the parts (if any) of this contract related to \"Unlimited/All-You-Can-Eat-License\" that should be reviewed by a lawyer. Details: Is there a clause granting one party an “enterprise,” “all you can eat” or unlimited usage license?",
+      "clause_length": 250,
+      "contract_length": 30050,
+      "target": "unlimited_all_you_can_eat_license"
+    },
+    {
+      "clause_id": "clause_1d3c949a30d2b75e1502",
+      "contract_id": "contract_dc4386158a2cd54ce71b",
+      "text": "North agrees to make one (1) Production Appearance on behalf of Company during Contract Year 2011  for the purpose of producing the following: (1) one 30-minute infomercial; (2) one 30-second television commercial; (3) one  demonstration dvd on how to use the Endorsed Product. (4) product testimonials and (5) still photographs for print  advertisements and packaging (hereinafter referred to as \"Production Appearance\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party’s use of the product/services exceeds certain threshold?",
+      "clause_length": 422,
+      "contract_length": 27166,
+      "target": "volume_restriction"
+    },
+    {
+      "clause_id": "clause_13268d5b62e5e8e76ec7",
+      "contract_id": "contract_ef54c9846accf675e0aa",
+      "text": "In the event that the Product fails to conform to the Product Specifications, and/or GMP, Ultragenyx may reject the Product by giving written notice to Cremer within [***] days after receipt of the Product and all documentation (except such [***] day period will not apply for any latent defect).",
+      "label": "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any  warranty against defects or errors in technology, products, or services  provided under the contract?",
+      "clause_length": 296,
+      "contract_length": 14592,
+      "target": "warranty_duration"
+    },
+    {
+      "clause_id": "clause_9820877ba564ac2d4fcf",
+      "contract_id": "contract_6ff14775bb4aa1270bc7",
+      "text": "with respect to any documentation, technical or confidential business information and/or software relating to the Equipment (collectively, \"Software\"), the Purchase Order will grant Lessor a license to use the Software and will allow Lessor to grant a sublicense to the Company to use such Software pursuant to the Lease and will allow Lessor to grant a sublicense to a third party after a termination or the expiration of the Lease in the event the Company does not elect to exercise any purchase option that may be provided for in the Lease;",
+      "label": "Highlight the parts (if any) of this contract related to \"Affiliate License-Licensee\" that should be reviewed by a lawyer. Details: Does the contract contain a license grant to a licensee (incl. sublicensor) and the affiliates of such licensee/sublicensor?",
+      "clause_length": 543,
+      "contract_length": 11355,
+      "target": "affiliate_license_licensee"
+    },
+    {
+      "clause_id": "clause_087cfe1232751aa603f4",
+      "contract_id": "contract_fde221cae066ace266a8",
+      "text": "April 6, 2007",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 13,
+      "contract_length": 28804,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_953d580f2b6176bd40b3",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "Neither party to this Agreement shall assign, subcontract, or otherwise conveyor delegate its rights or duties hereunder to any third party without the prior written consent of the other party hereto, such consent not to be unreasonably withheld.",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 246,
+      "contract_length": 39863,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_0b3ad4624ac82c59b09b",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "AT&T Audits may be conducted once a year (or more frequently if requested by governmental authorities who regulate AT&T's business, if required by applicable Law or if auditors require follow-up access to complete audit inquiries or if an audit uncovers any problems or deficiencies), upon at least ten (10) business days advance notice (unless otherwise mandated by Law) and during business hours. Vendor will cooperate, and will ensure that its Subcontractors cooperate, in the AT&T Audits, and will make the information reasonably required to conduct the AT&T Audits available on a timely basis.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 598,
+      "contract_length": 228943,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_4ecdd4dd151e5a6679ad",
+      "contract_id": "contract_479cfcf691946e20746d",
+      "text": "Notwithstanding the provisions of this Section 8(d), the Agent shall not be required to contribute any amount in excess of the amount by which the total price at which the  Series A Preferred Stock sold pursuant to this Agreement exceeds the amount of any damages which the Agent has otherwise been required to pay by reason of such untrue or alleged untrue statement or omission or alleged omission.",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 400,
+      "contract_length": 134179,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_83c4e8b6dfde5f4ad48d",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "In addition to and without limiting any other provision of this Agreement, if a Change of Control occurs at any time during the Term, PFHOF shall have the right to terminate this Agreement immediately upon giving notice of such termination to the Village Media Company.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 269,
+      "contract_length": 45234,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_ce4f649f3be316214521",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "The parties expressly  agree that CONSULTANT may  permit [*****] the use of CONSULTANT'S  name and/or likeness in [*****] print and/or television advertisement provided that this is executed in a manner consistent with [*****] past  [*****] advertising practice using similarly situated professional golfers  with competing golf club endorsement agreements that include [*****].",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 378,
+      "contract_length": 24632,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_9e5bc141caad29a1cf61",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "King recognizes Depomed's title to the Depomed Trademarks, and shall not at any time, during or after the Term, do or knowingly suffer to be done any act or thing which will in any way impair the rights of Depomed in or to the Depomed Trademarks.",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 246,
+      "contract_length": 173240,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_3b7ef9707f2d422bdf86",
+      "contract_id": "contract_48689e70489b5265c3e9",
+      "text": "PRODUCT SALE AND MARKETING AGREEMENT",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 36,
+      "contract_length": 52106,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_8c8f6933f54601e21e51",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "The Agreement executed offline in paper form shall become effective upon the completion of the execution by both Parties (hereinafter referred to as the \"Effective Date\"); and the Agreement executed online in electronic form shall become effective upon the completion of the execution on the Contracting Platform by both Parties (hereinafter referred to as the \"Effective Date\") recorded by the third-party Online Document Depository.",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 434,
+      "contract_length": 73890,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_6f101132df2a1e457b6f",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Neither party will solicit or enter into any agreement with any third party regarding the bundling of the Wireless Products with any other property (including a Fox property) or with any other products and services including preloading, OEM and soft bundling, except as mutually agreed between the parties.",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 306,
+      "contract_length": 112794,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_a9767baf1bde9fae8db5",
+      "contract_id": "contract_a75ed97281f5ef0a1630",
+      "text": "This Agreement is entered into for an unlimited period of time.",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 63,
+      "contract_length": 22721,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_b6789cc904e3343f5e0b",
+      "contract_id": "contract_8b3428fa1617cd6ba725",
+      "text": "THIS AGREEMENT SHALL BE GOVERNED BY AND INTERPRETED IN ACCORDANCE WITH THE LAWS OF THE STATE OF NEW YORK WITHOUT REGARD TO CONFLICTS OF LAW PRINCIPLES (OTHER THAN SECTION 5-1401 OF THE NEW YORK GENERAL OBLIGATIONS LAW).",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 219,
+      "contract_length": 104732,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_13bd7c8e4e8f5c8b5fc8",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "Professional Liability (Errors & Omissions) insurance with limits of at least $5,000,000 each claim or wrongful act.",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 116,
+      "contract_length": 228943,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_e50509238e83bfd32809",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "AT&T shall be the exclusive owner of all right, title, and interest in and to all Paid- For Development (defined below), including, without limitation, all Intellectual Property Rights therein and thereto.",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 205,
+      "contract_length": 228943,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_3e0d3e0d299188ab060e",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": "All Usage Data shall be owned jointly by Microsoft and\n\n\n\n\n\nInktomi, and Inktomi hereby irrevocably assigns to Microsoft an [*] interest therein.",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 145,
+      "contract_length": 70664,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_72cfb80b97fa0e4fb64d",
+      "contract_id": "contract_f9bac027b2ce143854d5",
+      "text": "Party A and Party B shall sign the Contract for Technology Investment simultaneously with the signature of this Contract, and pursuant to the Contract for Technology Investment shall license to the Joint Venture Company the right to utilize proprietary technology (including patented technology), related documentation and know-how for the production of the Joint Venture Products.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 381,
+      "contract_length": 73698,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_9c5ae9aa0bf31c37e98e",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "The following acts constitute Class B breaches. In the event of any breach below by Party B, Party B shall immediately remedy the breach, and Party A is entitled to request Party B to pay the liquidated damages of an amount from RMB1,000 (RMB ONE THOUSAND) to RMB 5,000 (RMB FIVE THOUSAND) based on the consequences of the breach, and send the Confirmation Letter on the Breach of the Partner of Xiaoju Online Ride-hailing Marketplace to Party B.",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 446,
+      "contract_length": 73890,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_e3ccbdc500817b9605df",
+      "contract_id": "contract_dc4386158a2cd54ce71b",
+      "text": "In consideration for the rights, services and benefits granted by North hereunder,  Company agrees to pay North a non-refundable Guaranteed Service Fee and Marketing Retainer (hereinafter referred to as \"Guaranteed  Fee\") of fifty-five thousand dollars ($55,000USD) in Contract Year 2011 and seventy thousand dollars ($70,000USD) in Contract Year  2012.",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 353,
+      "contract_length": 27166,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_2996d4754d9999c612e8",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "Party B shall provide the Driver User with long-term and stable rental sources and the most favorable financial leasing scheme, complete the vehicle leasing transactions with the Driver User through the Platform, and provide the Driver User with high-quality financial leasing services.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 286,
+      "contract_length": 73890,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_f95227d427b83ba2d0bd",
+      "contract_id": "contract_13ac52df81ec94fb78fe",
+      "text": "(c) solicit or attempt to solicit, canvass, interfere with or entice away from the Company or any Relevant Group Company the custom or any prospective custom of any Client or any Prospect with a view to providing to that Client or Prospect any products or services which are the same as or materially similar to any Restricted Business in competition with the Company or any Relevant Group Company;",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Customers\" that should be reviewed by a lawyer. Details: Is a party restricted from contracting or soliciting customers or partners of the counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 398,
+      "contract_length": 65547,
+      "target": "no_solicit_of_customers"
+    },
+    {
+      "clause_id": "clause_4c03634767e0400fadfc",
+      "contract_id": "contract_b42ad8a8048aaaf72bf2",
+      "text": "Neither party will solicit for employment any employee of the other party during the active term of this Agreement and further, where applicable, the term of any active Work Order.",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 180,
+      "contract_length": 46057,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_77212a914c73d2d15cd0",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "The Destination shall not contain any links to           any third party sites for the purchase of Competitor's Goods; provided           that the Destination will link to the Co-Host Site (which will sell           Competitor's Goods).",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 236,
+      "contract_length": 58300,
+      "target": "non_compete"
+    },
+    {
+      "clause_id": "clause_208d6020301cad35da7f",
+      "contract_id": "contract_dc4386158a2cd54ce71b",
+      "text": "Company and North shall at all times deal with each other in good faith and strive to maintain and enhance each other's positive  image and reputation.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?",
+      "clause_length": 151,
+      "contract_length": 27166,
+      "target": "non_disparagement"
+    },
+    {
+      "clause_id": "clause_a914d7845cb639cdd7bc",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "T&T grants to Vendor a license to access, use, and copy the AT&T Derived Data, with no right to grant sublicenses, solely for the performance of Vendor's obligations during the Term of this Agreement and solely in compliance with AT&T's privacy policies, including obligations relating to Customer Information.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?",
+      "clause_length": 310,
+      "contract_length": 228943,
+      "target": "non_transferable_license"
+    },
+    {
+      "clause_id": "clause_27f063c1d2600e41b665",
+      "contract_id": "contract_4634dee3a6af4120e987",
+      "text": "NETTAXI Online Communities, Inc.",
+      "label": "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract",
+      "clause_length": 32,
+      "contract_length": 43179,
+      "target": "parties"
+    },
+    {
+      "clause_id": "clause_cfe06bb8fb8ee1d55209",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "In the event this Agreement expires or is terminated for any reason other than a breach by Eutectix, Liquidmetal shall purchase from Eutectix existing raw material inventory at the purchase price (including delivery charges) paid by Eutectix to its suppliers in connection with the Orders accepted by Eutectix hereunder.",
+      "label": "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?",
+      "clause_length": 320,
+      "contract_length": 83972,
+      "target": "post_termination_services"
+    },
+    {
+      "clause_id": "clause_5b7a510bd636872d20e9",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "The Parties acknowledge and agree that two hundred twenty five thousand dollars ($225,000) (the \"Youth Sports License Fee\") shall be credited against the Annual Guarantee on the Closing Date and each anniversary of the Closing Date during the Term for the license granted by PFHOF to Youth Sports Management, LLC (\"Youth Sports\") pursuant to that certain branding license agreement to be entered into on the Effective Date between PFHOF and Youth Sports for so long as such agreement remains in effect; provided that after the first five (5) years of the Term, the Youth Sports License Fee shall increase by three percent (3%) on a year-over year basis and thereafter, the aggregate amount of the Youth Sports License Fee, after giving effect to such increase each year, shall be the amount credited against the Annual Guarantee.",
+      "label": "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the  ability of a party to raise or reduce prices of technology, goods, or  services provided?",
+      "clause_length": 829,
+      "contract_length": 45234,
+      "target": "price_restrictions"
+    },
+    {
+      "clause_id": "clause_084a90c51d71078b9884",
+      "contract_id": "contract_e96d17e2fd804489f1a7",
+      "text": "At the end of *** Parties will negotiate in good faith regarding a possible extension of the Initial Term.",
+      "label": "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.",
+      "clause_length": 106,
+      "contract_length": 66253,
+      "target": "renewal_term"
+    },
+    {
+      "clause_id": "clause_3d1a75db56da828d6e1d",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Fox will remit all VGSL Revenue to Licensee and such VGSL Revenue shall be treated as Gross Receipts for the purpose of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or services?",
+      "clause_length": 135,
+      "contract_length": 112794,
+      "target": "revenue_profit_sharing"
+    },
+    {
+      "clause_id": "clause_04bcda7872f1e6c36124",
+      "contract_id": "contract_8b52b415a228a95d79f3",
+      "text": "refusal under this Section within such ninety (90) day period, or if           Licensee shall notify the Offeree within such ninety (90) day period           that Licensee has waived such right, then the Offeree shall have the           right to sell, transfer or convey all or the applicable portion of the           stock in, or assets of, Licensor (as specified in the Offering Notice)           pursuant to the terms of the specific offer described in the           applicable Offering Notice, but not otherwise.",
+      "label": "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?",
+      "clause_length": 516,
+      "contract_length": 21994,
+      "target": "rofr_rofo_rofn"
+    },
+    {
+      "clause_id": "clause_18cb1822862c5d8c93ee",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "The escrow agreement shall provide, among other terms, that the source code shall be released to Reseller if any of the following events  (collectively the \"Release Conditions\") occurs:    (i) Diversinet ceases to support services at levels as stated in Schedule 5 under this Agreement that is not remedied within  sixty (60) days after receipt of written notice of such failure;   (ii) Diversinet makes an assignment for the benefit of creditors, or becomes subject to direct control of a trustee, receiver or  similar authority, or Diversinet becomes subject to any bankruptcy or insolvency proceeding under federal or state  statutes; or  (iii) Diversinet suspends or ceases to carry on its business and a receiver, trustee or assignee does not carry on the  business.",
+      "label": "Highlight the parts (if any) of this contract related to \"Source Code Escrow\" that should be reviewed by a lawyer. Details: Is one party required to deposit its source code into escrow with a third party, which can be released to the counterparty upon the occurrence of certain events (bankruptcy,  insolvency, etc.)?",
+      "clause_length": 771,
+      "contract_length": 75389,
+      "target": "source_code_escrow"
+    },
+    {
+      "clause_id": "clause_1c1f6102e441c9c0e04e",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "After the first year and upon 180 days written notice, Reseller may terminate the AMC.",
+      "label": "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this  contract without cause (solely by giving a notice and allowing a waiting  period to expire)?",
+      "clause_length": 86,
+      "contract_length": 75389,
+      "target": "termination_for_convenience"
+    },
+    {
+      "clause_id": "clause_50d36c79622b460cf425",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "All AT&T Affiliates receiving Material or Services under this Agreement and the federal government of the United States shall be express third party beneficiaries under this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Third Party Beneficiary\" that should be reviewed by a lawyer. Details: Is there a non-contracting party who is a beneficiary to some or all of the clauses in the contract and therefore can enforce its rights against a contracting party?",
+      "clause_length": 184,
+      "contract_length": 228943,
+      "target": "third_party_beneficiary"
+    },
+    {
+      "clause_id": "clause_b158489ec848f03c5c47",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "Nothing in this Section ​8.7 shall operate to limit or exclude any liability under Section ​8.5 with respect to a Claim, or for fraud, or for breach by a Party of the provisions of Article ​7.",
+      "label": "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party’s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.",
+      "clause_length": 192,
+      "contract_length": 57436,
+      "target": "uncapped_liability"
+    },
+    {
+      "clause_id": "clause_66fe917bc82754adf767",
+      "contract_id": "contract_dc4386158a2cd54ce71b",
+      "text": "Should Company request for North to conduct Additional Production/Promotional Appearances and North agrees to  appear, Company shall pay North an additional fee for such appearance(s) as set forth in paragraph 6.d. below. North has no obligation  to make such appearance.",
+      "label": "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party’s use of the product/services exceeds certain threshold?",
+      "clause_length": 271,
+      "contract_length": 27166,
+      "target": "volume_restriction"
+    },
+    {
+      "clause_id": "clause_549ad1b82f0fc088d1ad",
+      "contract_id": "contract_5e77a23b6fd5f52d27ff",
+      "text": "Change Orders do not however cover any bug or glitch fixing produced out of the code written by Developer as any \"bug\" will be fixed by Developer for free up to 3 months after final delivery (Bug Fixing Warranty).",
+      "label": "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any  warranty against defects or errors in technology, products, or services  provided under the contract?",
+      "clause_length": 213,
+      "contract_length": 14822,
+      "target": "warranty_duration"
+    },
+    {
+      "clause_id": "clause_40432a2ae6fb5d7cb0c9",
+      "contract_id": "contract_dc4386158a2cd54ce71b",
+      "text": "21s t day of February 2011",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 26,
+      "contract_length": 27166,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_2e9b252f035000d8ab87",
+      "contract_id": "contract_4315a23635a12222e979",
+      "text": "This Agreement shall be binding on the parties and their respective successors in interest and assigns, but neither party shall have the power to assign this Agreement without the prior written consent of the other party. LMG may not subcontract or delegate any of its duties or obligations of performance in this Agreement to any third party without the prior written consent of TAG.",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 384,
+      "contract_length": 55889,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_cc76f0f73089745064c4",
+      "contract_id": "contract_4634dee3a6af4120e987",
+      "text": "Upon  reasonable  prior  notice,   NETTAXI  will  have  the  right, exercisable  not more  than  once  every  twelve  (12)  months,  to  appoint  an independent   accounting   firm  or  other  agent   reasonably   acceptable   to SpinRecords.com,  at  NETTAXI'S  expense,  to examine  such  books,  records and accounts  during  SpinRecords.com's  normal business hours to verify the amounts due by  SpinRecords.com  to  NETTAXI  herein,  subject  execution  of  NETTAXI's standard  confidentiality  agreement by the accounting firm or agent;  provided, however,  that  execution of such  agreement  will not  preclude  such firm from reporting  its  results  to  NETTAXI.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 672,
+      "contract_length": 43179,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_9ec5d9dd8293f8f4371e",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "Unless any party is in violation of the confidentiality clause, in any case, neither party shall be liable for any indirect, punitive claims, or claims for losses of commercial profits, or damages for business losses of the company or any third Party Arising from this Agreement, or for any loss or inaccuracy of data of any form, whether based on Agreement, tort or any other legal principle, even though the party has been informed of the possibility of such damage.",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 468,
+      "contract_length": 73890,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_a3ed2816af0c2bfaf052",
+      "contract_id": "contract_48689e70489b5265c3e9",
+      "text": "Subject to the foregoing, this Agreement shall be binding upon and inure to the benefit of the Parties hereto and their respective permitted successors and assigns; provided, however, Calm may, without the prior written consent of XSPA, assign or otherwise transfer its rights and obligations to an affiliate of Calm or the acquirer of all or substantially all of the assets of Calm; provided, however, that the prior written consent of XSPA shall be required in connection with the assignment to an acquirer of all or substantially all of the assets of Calm if such acquirer's primary business is an airport-based provider of spa services.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 640,
+      "contract_length": 52106,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_c991d0f25975d8e6e3e5",
+      "contract_id": "contract_105391d58b9e3e48bd31",
+      "text": "The      parties acknowledge that the foregoing will not prevent CNET from      displaying text links and other references to Competing Computer Products      Retailers as reasonably necessary to provide appropriate editorial and      search related services on the CNET Sites. The Retail Promotions granted to      the Company shall be placed in such a way as to provide no more or less      prominence to the Company than is provided to any other Competing Computer      Retailer signing an agreement with CNET.",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 513,
+      "contract_length": 25288,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_6068010105cc738de707",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Licensee acknowledges that Fox is the owner of all right, title and interest in and to the PSM and the Properties, and further acknowledges the great value of the goodwill associated with the PSM and the Properties and that the PSM and the Properties have acquired secondary meaning in the mind of the public and that the trademarks and copyrights included in the PSM and the Properties, and the registrations thereof, are valid and subsisting, and further agrees that it shall not during the Term of this Agreement or at any time thereafter dispute or contest directly or indirectly, or do or cause to be done any act which in any way contests, impairs or tends to impair Fox's",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 678,
+      "contract_length": 112794,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_cd2117923b98a9493ab6",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "VIDEO-ON-DEMAND CONTENT LICENSE AGREEMENT",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 41,
+      "contract_length": 30050,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_bcf9df51f237ef0651bc",
+      "contract_id": "contract_fdef3f5b59b427733697",
+      "text": "Effective Date means May 3, 200ri or such later date as determined under the  Arrangement Agreement,",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 100,
+      "contract_length": 16402,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_983de5ddf3f4d952920d",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Fox has not granted and will not grant any exclusive distribution rights with respect to the Wireless Products to VGSL or any other party",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 137,
+      "contract_length": 112794,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_02062cad8606ca7a0deb",
+      "contract_id": "contract_5e77a23b6fd5f52d27ff",
+      "text": "This Agreement will be for the maximum period of six (6) months beginning for the commencement date, renewable in accordance with the terms hereof, unless earlier terminated pursuant to this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 201,
+      "contract_length": 14822,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_540c4aa048a494209a70",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "This Agreement shall be governed and construed according to the laws of the State of Kansas.",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 92,
+      "contract_length": 24632,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_bd16526c5fcc251d2adf",
+      "contract_id": "contract_13ac52df81ec94fb78fe",
+      "text": "The Executive is entitled to membership of a Group income protection plan and life assurance cover, which will be paid for by the Company.",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 138,
+      "contract_length": 65547,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_d964ec27ffa81ca61b4d",
+      "contract_id": "contract_7a9da18aad9ac1c171a0",
+      "text": "Consultant also hereby irrevocably transfers and assigns to the Company, and agrees to irrevocably transfer and assign to the Company, and waives and agrees never to assert, any and all Moral Rights (as defined below) that Consultant may have in or with respect to any Innovation, during and after the term of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 325,
+      "contract_length": 22359,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_3a523b3aa025cd49d027",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "To the extent that the Parties have jointly developed any New Amorphous Alloy Technology and they have agreed that such New Amorphous Alloy Technology will be jointly owned, as set forth in Section 8.2 above, each Party hereby assigns to the other, and will cause its employees, contractors, representatives, successors, assigns, Affiliates, parents, subsidiaries, officers and directors to assign to the other, a co-equal right, title and interest in and to any such jointly developed New Amorphous Alloy Technology.",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 517,
+      "contract_length": 83972,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_b77abaa4f5c588401ae0",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "In addition to any rights set forth herein, PFHOF shall have the right and license to Exploit HOFV Works, at no fee or charge to PFHOF or any of its Affiliates, for educational, not-for-profit purposes aligned with the mission of PFHOF which usage shall not diminish the value of the Village Media Company's or its Affiliates' Exploitation of such HOFV Work in accordance with the terms of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 405,
+      "contract_length": 45234,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_8e2994335acea36f41ba",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": "Notwithstanding anything contained herein to the contrary, should Microsoft exercise its termination right pursuant to this Section 10.2, then Inktomi will have the right to elect, in writing within fifteen (15) days after receipt of Microsoft's notice of termination hereunder, either one of the following two options for a early termination penalty:\n\n                (a)   Inktomi may require Microsoft to pay to Inktomi, in  [*] immediately following the effective termination date, an amount equal to [*] ([*]) of all outstanding principal, interest and other amounts owed or owing to Microsoft by Inktomi on the date of termination under the Loan Agreement (and outstanding Promissory Notes issued thereunder); or\n\n               (b)    Inktomi may deliver that portion of the Collateral (as defined in the Loan Agreement) which was purchased with Advances evidenced by the then-outstanding Promissory Notes (as defined in the Loan Agreement) (the \"Returned Collateral\") to Microsoft, and assign all right, title and interest in\n\n\n\n\n\nand to said Returned Collateral to Microsoft, and promptly upon such delivery and assignment Inktomi may require Microsoft to pay to Inktomi, in [*]  immediately following the effective date of termination, an amount equal to [*] ([*]) of all outstanding principal, interest and other amounts owed or owing to Microsoft by Inktomi on the date of termination under the Loan Agreement (and outstanding Promissory Notes issued thereunder)",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 1474,
+      "contract_length": 70664,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_83a1d2a7914052ad2681",
+      "contract_id": "contract_ef043caea42fa7914218",
+      "text": "New Shippers will have access to a minimum of ten percent (10%) of the Available Capacity",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 89,
+      "contract_length": 100284,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_89b3348184447afd34b7",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "Eutectix agrees that in the event any Licensed Products shall be sold (1) to any Affiliate (as defined herein), or (2) to a corporation, firm, or association with which, or individual with whom Eutectix or its stockholders or Affiliates shall have any agreement, understanding, or arrangement (such as, among other things, an option to purchase stock, or an arrangement involving a division of profits or special rebates or allowances) without which agreement, understanding, or arrangement, prices paid by such a corporation, firm, association or individual for the Licensed Products would be higher than the Net Sales Price reported by Eutectix, or if such agreement, understanding, or arrangement results in extending to such corporation, firm, association, or individual lower prices for Licensed Products than those charged to outside concerns buying similar products in similar amounts and under similar conditions, then, and in any such events, the royalties to be paid hereunder in respect of such Licensed Products shall be computed based on an assumed or deemed Net Sales Price equal to those charged to such outside concerns.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 1136,
+      "contract_length": 83972,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_53af2f1be2755c5bfa8b",
+      "contract_id": "contract_7a9da18aad9ac1c171a0",
+      "text": "(ii) solicit, participate in or promote the solicitation of any of the Company's clients, customers, or prospective customers with whom Consultant had a Material Contact (hereinafter defined) and/or regarding whom Consultant received Confidential Information, for the purpose of providing products or services (\"Competitive Products/Services\").",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Customers\" that should be reviewed by a lawyer. Details: Is a party restricted from contracting or soliciting customers or partners of the counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 344,
+      "contract_length": 22359,
+      "target": "no_solicit_of_customers"
+    },
+    {
+      "clause_id": "clause_739778ee73c980131ac5",
+      "contract_id": "contract_013b095f8638a9e465c3",
+      "text": "During the term and for a period of [***] thereafter, neither party shall solicit, induce, encourage or attempt to induce or encourage any employee of the other party with whom such party has had direct contact to terminate his or her employment with such other party or to breach any other obligation to such other party.",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 322,
+      "contract_length": 40597,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_5a9a7a4db7d041d377ec",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "The following acts constitute Class D breaches.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 47,
+      "contract_length": 73890,
+      "target": "non_compete"
+    },
+    {
+      "clause_id": "clause_c642a1692a072abc40e8",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "(C) avoid making disparaging, false or misleading statements or representations with regard to Fox, the Property or the Wireless Products,",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?",
+      "clause_length": 138,
+      "contract_length": 112794,
+      "target": "non_disparagement"
+    },
+    {
+      "clause_id": "clause_cb87c11df0fc1956462e",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "The foregoing Licensed Patents and Licensed Technical Information shall not include the right to sublicense the Licensed Patents and Licensed Technical Information without the prior written consent of Liquidmetal. F",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?",
+      "clause_length": 215,
+      "contract_length": 83972,
+      "target": "non_transferable_license"
+    },
+    {
+      "clause_id": "clause_0a32eab977b29ad8d31a",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "Depomed",
+      "label": "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract",
+      "clause_length": 7,
+      "contract_length": 173240,
+      "target": "parties"
+    },
+    {
+      "clause_id": "clause_c16215899b6ae1c1fddb",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "Termination under Subsection 4(a) shall trigger a phase-out period during which Reseller may continue to provide products and  services to Customers.",
+      "label": "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?",
+      "clause_length": 149,
+      "contract_length": 75389,
+      "target": "post_termination_services"
+    },
+    {
+      "clause_id": "clause_620062c5b84dff626121",
+      "contract_id": "contract_ef54c9846accf675e0aa",
+      "text": "The prices payable by Ultragenyx to Cremer for the Product (the \"Price\") shall be agreed [***] every contract year; provided, that the Price may not increase more than the [***] for such period or [***]%, whichever is higher.",
+      "label": "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the  ability of a party to raise or reduce prices of technology, goods, or  services provided?",
+      "clause_length": 225,
+      "contract_length": 14592,
+      "target": "price_restrictions"
+    },
+    {
+      "clause_id": "clause_cf04d4119684f5f4d472",
+      "contract_id": "contract_e96d17e2fd804489f1a7",
+      "text": "Parties can mutually agree in writing to deviate from an automatic extension of *** by extending this Agreement for a longer period than ***.",
+      "label": "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.",
+      "clause_length": 141,
+      "contract_length": 66253,
+      "target": "renewal_term"
+    },
+    {
+      "clause_id": "clause_214f129112088d498f6e",
+      "contract_id": "contract_4634dee3a6af4120e987",
+      "text": "In full consideration for the rights granted              --------------------- by  NETTAXI,  SpinRecords.com  agrees  to  pay NETTAXI fifty (50%) percent of ad revenue  at  an  average  rate  no lower then $6.50 per one thousand impressions (CPM)  payable  to  NETTAXI  which  results when the SpinRecords.com Advertising Revenue  is  multiplied by SpinRecords.com's AR Share.",
+      "label": "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or services?",
+      "clause_length": 377,
+      "contract_length": 43179,
+      "target": "revenue_profit_sharing"
+    },
+    {
+      "clause_id": "clause_a4782bec1b98cbd380e2",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "Depomed shall notify King in writing in the event that Depomed desires to divest itself of its rights to the Product in the Territory (e.g., by asset sale or product license to a Third Party), or of its rights in the Territory to a product owned or controlled by Depomed containing metformin and another active pharmaceutical ingredient in combination with Depomed's proprietary drug delivery technology incorporated within the Product (currently referred to as the AcuForm technology) (a \"Combination Product\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?",
+      "clause_length": 512,
+      "contract_length": 173240,
+      "target": "rofr_rofo_rofn"
+    },
+    {
+      "clause_id": "clause_0da50709a6a7d72e9074",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "Diversinet shall, at least annually, deposit the source code in the escrow account. Costs associated with the  escrow agreement shall be borne by Reseller.",
+      "label": "Highlight the parts (if any) of this contract related to \"Source Code Escrow\" that should be reviewed by a lawyer. Details: Is one party required to deposit its source code into escrow with a third party, which can be released to the counterparty upon the occurrence of certain events (bankruptcy,  insolvency, etc.)?",
+      "clause_length": 155,
+      "contract_length": 75389,
+      "target": "source_code_escrow"
+    },
+    {
+      "clause_id": "clause_a357fdf5311183b04b72",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": "Microsoft may terminate this Agreement at any time without cause upon [*] ([*]) days prior written notice.",
+      "label": "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this  contract without cause (solely by giving a notice and allowing a waiting  period to expire)?",
+      "clause_length": 106,
+      "contract_length": 70664,
+      "target": "termination_for_convenience"
+    },
+    {
+      "clause_id": "clause_cbf413597bc959628a0a",
+      "contract_id": "contract_3e46b38d6c02013ebb13",
+      "text": "NOTWITHSTANDING THE FOREGOING, NONE OF THE FOREGOING LIMITATIONS OF LIABILITY SET FORTH IN THIS SECTION 3.1 SHALL BE AVAILABLE TO EITHER PARTY WITH RESPECT TO A BREACH OF SECTION 4, CONFIDENTIAL INFORMATION, OR FOR CLAIMS TO THE EXTENT THEY ARISE OUT OF A PARTY'S GROSS NEGLIGENCE, FRAUD, OR WILLFUL MISCONDUCT.",
+      "label": "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party’s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.",
+      "clause_length": 311,
+      "contract_length": 34740,
+      "target": "uncapped_liability"
+    },
+    {
+      "clause_id": "clause_8d8fb0f2deb3af388e3f",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "During the term of this Agreement, VIP shall provide BNL such access as necessary to the VIP System to allow BNL to attach one data communication line and up to seventy (70) addressable data communications devices to said VIP System.",
+      "label": "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party’s use of the product/services exceeds certain threshold?",
+      "clause_length": 233,
+      "contract_length": 39863,
+      "target": "volume_restriction"
+    },
+    {
+      "clause_id": "clause_18f1db3313dddadf46b3",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "The warranty period for workmanship and all Services provided",
+      "label": "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any  warranty against defects or errors in technology, products, or services  provided under the contract?",
+      "clause_length": 61,
+      "contract_length": 228943,
+      "target": "warranty_duration"
+    },
+    {
+      "clause_id": "clause_5c2945c6753ff0bc389e",
+      "contract_id": "contract_13ac52df81ec94fb78fe",
+      "text": "1 October 2019",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 14,
+      "contract_length": 65547,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_fbfb19bc8c27d502c757",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Neither Newegg nor Allied shall have the right or power to assign or transfer any part of its rights or obligations under this Agreement without the prior consent in writing of the other Party",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 192,
+      "contract_length": 37796,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_9cb20ff962d8e8238359",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "With respect to AT&T requests for audits or inspections of Vendor's Subcontractors, the following applies:\n\n(i) If Vendor's agreement with its applicable Subcontractor permits an AT&T Audit, AT&T shall be permitted to conduct such audit directly or through a third party representative. Vendor shall work with AT&T in facilitating the Subcontractor's cooperation for an expeditious and thorough audit or inspection.\n\n(ii) If Vendor's contract with its applicable Subcontractor precludes AT&T from directly conducting an audit or inspection, Vendor shall use reasonable best efforts to enable AT&T to perform an audit of the Subcontractor with Vendor coordinating the audit process. Failing those efforts, Vendor shall, upon AT&T's request and at AT&T's expense, conduct the audit or inspection on behalf of AT&T, subject to terms agreed to by Vendor and AT&T for the Subcontractor audit, such as areas to be audited, applicable fees, and the timeframe for reporting audit results to AT&T. If AT&T's request for a Vendor audit or inspection arises from, in AT&T's good faith opinion, materially or consistently deficient Service provided by the Subcontractor under AT&T's account, and the audit in both Parties' opinions confirms such deficiencies, Vendor shall not charge AT&T a fee for the Vendor's audit of its Subcontractor.\n\n(iii) If Vendor's contract with its applicable Subcontractor does not allow Vendor access to the facilities and systems of Subcontractor required to conduct the audit described in Subsection (b) above, then Vendor shall provide a list of such Subcontractors and the services being provided by such Subcontractor to AT&T for its review. To the extent AT&T deems it reasonably necessary to require such access, then Vendor will renegotiate its contract with the applicable Subcontractor in order to obtain the audit rights described in Subsection (b) above.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 1884,
+      "contract_length": 228943,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_6a068c7d0f74a157ab32",
+      "contract_id": "contract_013b095f8638a9e465c3",
+      "text": "Without limiting Section 11, in the event of for cause termination of this Agreement by FUSION pursuant to Section 7.2, CPDC's maximum liability shall be no greater than that set forth in Section 11.2.",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 201,
+      "contract_length": 40597,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_8eebac709f8498022fb5",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "in the event of a Change of Control, the Party which was not subject to the Change of Control may terminate this Agreement upon six (6) months advance written notification.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 172,
+      "contract_length": 57436,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_34f55050f101ada127e5",
+      "contract_id": "contract_f756540ff5d2ce7bff59",
+      "text": "Notwithstanding the above, Intuit may include editorial content or tools      about or from a Client Competitor and include Client Competitors in      directory listings.",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 170,
+      "contract_length": 40856,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_2476318dc209586ec3e2",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "King acknowledges and agrees that it shall not acquire and shall not claim any title to the Depomed Trademarks adverse to Depomed by virtue of the rights granted under this Agreement or through King's use of the Depomed Trademarks, it being the intention of the parties that all goodwill and improved reputation generated by King and use of the Depomed Trademarks shall inure to the benefit of Depomed.",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 402,
+      "contract_length": 173240,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_7163053db637e33089cf",
+      "contract_id": "contract_4634dee3a6af4120e987",
+      "text": "CO-BRANDING AGREEMENT                                      (FORM)",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 65,
+      "contract_length": 43179,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_f1bca5225793cb8da73b",
+      "contract_id": "contract_5e77a23b6fd5f52d27ff",
+      "text": "This Agreement shall commence on 5th March 2019",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 47,
+      "contract_length": 14822,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_708085dec1abd392dff5",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "the PSM in each Property, solely for the purpose of developing the wireless applications specifically set forth for each of the Properties on Exhibits B through M attached hereto (\"Wireless Products\"), some of which Wireless Products are defined in the Glossary attached hereto as Exhibit N",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 290,
+      "contract_length": 112794,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_5fe2189d5fd55201ec69",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "The \"Term\" of this Agreement shall commence on the Effective Date and shall continue in full force and effect until the expiration or earlier termination of the last Addendum to expire or be terminated, at which time this Agreement will expire, unless this Agreement is sooner terminated in accordance with the terms and provisions of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 350,
+      "contract_length": 228943,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_1109b9ce87e1afaade44",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Without reference to choice or conflict of law principles, this Agreement shall be governed by and construed in accordance with the laws of the State of California, USA.",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 169,
+      "contract_length": 37796,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_fa6a6120450282dc028d",
+      "contract_id": "contract_48689e70489b5265c3e9",
+      "text": "The foregoing insurance policies shall name XSPA as the insured and Calm as additional insured (except for Workers' Compensation Insurance).",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 140,
+      "contract_length": 52106,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_7926fad2a133d1bbbfaa",
+      "contract_id": "contract_3e46b38d6c02013ebb13",
+      "text": "The Assignor hereby assigns, transfers, and conveys to and in favor of the Assignee all of the Assignor's right, title, and interest in, to, and under the Transferred Contract, together with its related rights, warranties, remedies, powers, and privileges (collectively, the \"Assigned Rights\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 294,
+      "contract_length": 34740,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_371b9e41ccbbb5a71521",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "New Alloy Technologies that have been developed by cooperation of the Parties shall be jointly and equally owned by the Parties, and any royalties for the use thereof by third parties shall be shared equitably between the Parties",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 229,
+      "contract_length": 83972,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_46915c6cf49dcdc1cba4",
+      "contract_id": "contract_8b3428fa1617cd6ba725",
+      "text": "Operator grants to Owner the limited right to use any Training Materials which are provided under this Agreement, and Owner agrees that upon termination of this Agreement for any reason, Owner shall return all Training Materials, including any copies, to Operator.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 264,
+      "contract_length": 104732,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_980916017e06eeeb2739",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "Termination or expiration of this Agreement if by reason of material           breach by Co-Host shall not affect any of Co-Host's payment           obligations, all of which survive termination of this Agreement;           provided that, in (i) the event of termination of this Agreement by           Co-Host due to a material default by NAI, NAI shall pay to the Co-Host           the Liquidated Damages Amount (as defined in Part 2 of Exhibit \"A",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 448,
+      "contract_length": 58300,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_b7bf18389cd6425a66e8",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "A minimum of:\n\n1 2-D Java Game, which shall include mutually agreed upon 3-D elements\n\n1 Java Application ('Screensaver') where feasible\n\n5 MMS\n\n10 Wallpapers\n\n5 Voicetones",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 172,
+      "contract_length": 112794,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_0c9058f129c428bd0f02",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "In case that the price and other substantive terms offered by Party B to such entity are more favorable than those enjoyed by the Driver User in any commercial cooperative relationship signed or formed between Party B and any entity, the Driver User and Party B shall amend the provisions in the Financial Leasing Agreement signed by both parties to enable the Driver User to enjoy the same or more favorable provisions as those enjoyed by such other entities, such modifications shall include but not limit to the modifications of the monthly rent terms.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 555,
+      "contract_length": 73890,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_b91cedef72cfd017e041",
+      "contract_id": "contract_7a9da18aad9ac1c171a0",
+      "text": "Consultant will not, during the Term, and for a period of one (1) year thereafter, directly or indirectly: (i) solicit, recruit or promote the solicitation or recruitment of any employee or consultant of the Company for the purpose of encouraging that employee or consultant to leave the Company's employ or sever an agreement for services",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 339,
+      "contract_length": 22359,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_841d2c5b73582fab2386",
+      "contract_id": "contract_d04cb6f109d7441c15ab",
+      "text": "Supplier further agrees that it will not produce,  cause to be produced or assist in the production of more units than are specified by Purchaser nor will Supplier produce, cause to be produced or assist in the production of any product or item not specifically requested by Purchaser using any  or all of the Playboy Properties or any trademark, copyright, designations, names, phrases, designs or symbols similar to  any or all of the Playboy Properties during or at any time after the completion of merchandise requested by this Contract.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 541,
+      "contract_length": 3558,
+      "target": "non_compete"
+    },
+    {
+      "clause_id": "clause_157ae97415a45c0e9211",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Each Party covenants that it shall not make, publish or communicate to any person or entity in any online or other public forum any defamatory, misleading or disparaging remarks, comments or statements concerning (a) the other Party or any of its affiliates, or any of such Party's or its affiliates' respective employees, officers, directors, agents, officials, equity holders, investors or sponsors, or (b) any software, products or services of the other Party or any affiliate.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?",
+      "clause_length": 480,
+      "contract_length": 37796,
+      "target": "non_disparagement"
+    },
+    {
+      "clause_id": "clause_73c3f52ef8c0a8442d8d",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Allied grants Newegg a non-exclusive, royalty-free, non-assignable, non-transferable, and non- sublicensable worldwide license to use, publicly display, transmit, broadcast, stream, distribute and reproduce the Allied Marks in all approved forms and in manners for the purposes of this Agreement during the Term",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?",
+      "clause_length": 311,
+      "contract_length": 37796,
+      "target": "non_transferable_license"
+    },
+    {
+      "clause_id": "clause_64601431b28141712f26",
+      "contract_id": "contract_9d88fac4c552e8a8daf6",
+      "text": "Lifeway",
+      "label": "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract",
+      "clause_length": 7,
+      "contract_length": 10996,
+      "target": "parties"
+    },
+    {
+      "clause_id": "clause_342c4dded16736d104ab",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "as contemplated in the Build Addendum and (iv) reimburse AT&T for any AT&T Provided Equipment or other assets that are not installed at a Cell Site and cannot be returned in good working order (based on the acquisition costs plus taxes and shipping costs).",
+      "label": "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?",
+      "clause_length": 256,
+      "contract_length": 228943,
+      "target": "post_termination_services"
+    },
+    {
+      "clause_id": "clause_ff21e1b48c2aa591ed24",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "Commencing with ****, Dexcel may adjust the Supply Price for the next following Year not more often than ****.",
+      "label": "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the  ability of a party to raise or reduce prices of technology, goods, or  services provided?",
+      "clause_length": 110,
+      "contract_length": 57436,
+      "target": "price_restrictions"
+    },
+    {
+      "clause_id": "clause_2f6350adc4bd10d37e8c",
+      "contract_id": "contract_00a1ecb878c909beba90",
+      "text": "Contract is renewable for 1 year extension by amendment to this agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.",
+      "clause_length": 74,
+      "contract_length": 15871,
+      "target": "renewal_term"
+    },
+    {
+      "clause_id": "clause_e1d4acc6624ad03f7913",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "Provided that such referred customer is not already a Eutectix customer, Eutectix may accept such customer referral, and in that case hereby agrees to pay Liquidmetal a cash commission based on a percentage of the invoice price of Licensed Products sold by Eutectix or its permitted sublicensees and for which payment was actually received by Eutectix, in addition to the Liquidmetal Royalty.",
+      "label": "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or services?",
+      "clause_length": 392,
+      "contract_length": 83972,
+      "target": "revenue_profit_sharing"
+    },
+    {
+      "clause_id": "clause_d5107b68a55b95bf082a",
+      "contract_id": "contract_fdef3f5b59b427733697",
+      "text": "In  the ease of a Designated Mineral Property that Glamis intends to dispose of for cash  consideration, the parties will negotiate in good faith to reach a mutually agreeable agreement for  the sale to Western Copper of the [Designated Mineral Property.",
+      "label": "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?",
+      "clause_length": 254,
+      "contract_length": 16402,
+      "target": "rofr_rofo_rofn"
+    },
+    {
+      "clause_id": "clause_4e858098c6b2e6a581af",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": "Inktomi will direct the Escrow Agent to release to Microsoft all Confidential Materials held by the Escrow Agent, subject to Microsoft's agreement to use such Confidential Materials only in connection with its licensed rights under clause (iv) above;",
+      "label": "Highlight the parts (if any) of this contract related to \"Source Code Escrow\" that should be reviewed by a lawyer. Details: Is one party required to deposit its source code into escrow with a third party, which can be released to the counterparty upon the occurrence of certain events (bankruptcy,  insolvency, etc.)?",
+      "clause_length": 250,
+      "contract_length": 70664,
+      "target": "source_code_escrow"
+    },
+    {
+      "clause_id": "clause_2fb71b4b6d02f04ca2e1",
+      "contract_id": "contract_00a1ecb878c909beba90",
+      "text": "Either Party may terminate this agreement for non-cause with a sixty (60) written notice.",
+      "label": "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this  contract without cause (solely by giving a notice and allowing a waiting  period to expire)?",
+      "clause_length": 89,
+      "contract_length": 15871,
+      "target": "termination_for_convenience"
+    },
+    {
+      "clause_id": "clause_b2243df0e680f624f627",
+      "contract_id": "contract_013b095f8638a9e465c3",
+      "text": "EXCEPT FOR DAMAGES FOR WHICH A PARTY IS RESPONSIBLE PURSUANT TO ITS INDEMNIFICATION OBLIGATIONS SET FORTH IN SECTION 10 ABOVE, EACH PARTY SPECIFICALLY DISCLAIMS ALL LIABILITY FOR AND SHALL IN NO EVENT BE LIABLE FOR ANY INCIDENTAL, SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES, EXPENSES, LOST PROFITS, LOST SAVINGS, INTERRUPTIONS OF BUSINESS OR OTHER DAMAGES OF ANY KIND OR CHARACTER WHATSOEVER ARISING OUT OF OR RELATED TO THIS AGREEMENT OR RESULTING FROM THE MANUFACTURE, HANDLING. MARKETING, SALE, DISTRIBUTION OR USE OF LICENSED PRODUCT REGARDLESS OF THE FORM OF ACTION, WHETHER IN CONTRACT, TORT, STRICT LIABILITY OR OTHERWISE, EVEN IF SUCH PARTY WAS ADVISED OF THE POSSIBILITY OF SUCH DAMAGES",
+      "label": "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party’s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.",
+      "clause_length": 695,
+      "contract_length": 40597,
+      "target": "uncapped_liability"
+    },
+    {
+      "clause_id": "clause_20b25ff69d1b2bdd3432",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "During  the term of this Agreement, CONSULTANT  shall make himself available on not more than [*****]  days for television and radio commercials, photo shoots, modeling and  promotional appearances compatible with CONSULTANT'S  own practice, play and personal time requirements.",
+      "label": "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party’s use of the product/services exceeds certain threshold?",
+      "clause_length": 278,
+      "contract_length": 24632,
+      "target": "volume_restriction"
+    },
+    {
+      "clause_id": "clause_8dfd1742501d6e7edb92",
+      "contract_id": "contract_8b3428fa1617cd6ba725",
+      "text": "\"Warranty Period\" means, (i) for each Bloom System, the period beginning on the day following the date that the \"Warranty Period\" for such Bloom System under and as defined in the MESPA has expired and ending on the twenty-first (21st) anniversary of the date of Commencement of Operations for such Bloom System and (ii) for the BOF, the period beginning on the day following the date that the Section 8.2(b) Warranty for such BOF has expired and ending on the twenty-first (21st) anniversary of such starting date.",
+      "label": "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any  warranty against defects or errors in technology, products, or services  provided under the contract?",
+      "clause_length": 515,
+      "contract_length": 104732,
+      "target": "warranty_duration"
+    },
+    {
+      "clause_id": "clause_c75011bf5572de4fd47e",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "1 st  day of May 2006",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 21,
+      "contract_length": 39863,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_c2600fb6e212e0085777",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "During the term of this Agreement, neither party may assign, or transfer its rights and obligations under this Agreement in whole or in part, without the prior written consent of the other party.",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 195,
+      "contract_length": 73890,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_ce63e8e13e8c93c069dc",
+      "contract_id": "contract_f9bac027b2ce143854d5",
+      "text": "The Joint Venture Company shall furnish to the Parties unaudited financial reports on a monthly and quarterly basis so that they may continuously be informed about the Joint Venture Company's financial performance.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 214,
+      "contract_length": 73698,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_64f9972b44cf303f8579",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "BNL shall have no liability with respect to its obligations under this agreement or otherwise for consequential, exemplary, special, indirect, incidental or punitive damages even if it has been advised of the possibility",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 220,
+      "contract_length": 39863,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_3027b25a2bdb72515270",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "Subject to Section 3.5(b), in the event that Vendor, prior to Location Acceptance at all Cell Sites and without the prior written consent of AT&T, consummates (i) any sale, assignment, transfer, license, lease or conveyance of any interest in any Cell Site or any of the Material or Services contemplated in this Agreement or (ii) any Change of Control of Vendor to a Restricted Entity or to any other Person who, in AT&T's reasonable discretion, lacks the financial or operational resources, skill or expertise to fulfill the obligations of Vendor contemplated by this Agreement, then AT&T may terminate this Agreement and exercise any other remedies available to AT&T under this Agreement or at law or equity, including any of its Termination Remedies set forth in the Build Addendum.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 786,
+      "contract_length": 228943,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_0f9c64271c08e4a73665",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "Nothing in this Agreement shall      prohibit Co-Host from distributing competing products in the Territory.",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 108,
+      "contract_length": 58300,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_ecb0d13603ba0130401c",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "Depomed acknowledges and agrees that it shall not acquire and shall not claim any title to the King Trademarks adverse to King by virtue of the rights granted under this Agreement or through Depomed's use of the King Trademarks, it being the intention of the parties that all goodwill and improved reputation generated by Depomed and use of the King Trademarks shall inure to the benefit of King.",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 396,
+      "contract_length": 173240,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_a1e62e4a3b5df6cd3625",
+      "contract_id": "contract_ad9c4d4e2a2fb17b257a",
+      "text": "DISTRIBUTION AND SERVICES AGREEMENT",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 35,
+      "contract_length": 23845,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_5a7f8af73f54de29c4c1",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "December 16, 2004",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 17,
+      "contract_length": 112794,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_8ea3a38b14980c1ef227",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Furthermore, Fox grants to Licensee a limited, exclusive (except as may otherwise be provided in this Agreement), non-transferable (except as permitted in Paragraph 17(d)) right and license to make, have made, reproduce, modify, create derivative works of, advertise, promote, distribute, sell and license the Wireless Products, including any PSM included therein, solely (i) for use on mobile or cellular telephones (the \"Wireless Platform\"); (ii) in the Territory (as defined in Paragraph 3), (iii) during the Term (as defined in Paragraph 4), (iv) for distribution by Licensee through the Distribution Channels (as defined in Paragraph 2(c)) granted herein; and (v) by means of periodic subscription fee, a per-download basis, or through a retail purchase",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 758,
+      "contract_length": 112794,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_498440dd11c54b5b0368",
+      "contract_id": "contract_8b52b415a228a95d79f3",
+      "text": "This Agreement shall be effective           through and including March 31, 2004.",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 81,
+      "contract_length": 21994,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_262949437e8d144307e2",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "The execution, validation, interpretation, performance, modification and termination of this Agreement and the settlement of disputes under this Agreement shall be governed by the Laws of China.",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 194,
+      "contract_length": 73890,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_d71d05d013780fe6cb3e",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "Explosion, Collapse, and Underground Damage Liability will have the same limit requirement as the Commercial General Liability policy.",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 134,
+      "contract_length": 228943,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_bad7de117f722a6d220e",
+      "contract_id": "contract_7a9da18aad9ac1c171a0",
+      "text": "At the Company's request and expense, during and after the term of this Agreement, Consultant will assist and cooperate with the Company in all respects and will execute documents, and, subject to the reasonable availability of Consultant, give testimony and take such further acts reasonably requested by the Company to enable the Company to acquire, transfer, maintain, perfect and enforce its Intellectual Property Rights and other legal protections for the Innovations. Consultant hereby appoints the officers of the Company, as Consultant's attorney-in-fact to execute documents on behalf of Consultant for this limited purpose.",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 633,
+      "contract_length": 22359,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_ec352b24a4ad4e0ce269",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "The Parties shall work cooperatively toward the appropriate patent or other legal protection of such jointly and equally owned Intellectual Property.",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 149,
+      "contract_length": 83972,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_0971abe07b443bc3de87",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "During the term of this Agreement or any extension thereof, BNL shall have a non-exclusive license to use the VIP System on-line as designated by VIP.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 150,
+      "contract_length": 39863,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_b2ad9ceff3051db259a7",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "Any violation of this article by Party B shall be considered as a material breach of the this Agreement, and Party A is entitled to immediately terminate this Agreement and the cooperation relationship between the Parties, and request Party B to pay the liquidated damages of RMB 50,000 (RMB FIFTY THOUSAND) and indemnify for all losses incurred to Party A thereby.",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 365,
+      "contract_length": 73890,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_ad7994caa094de4ebf72",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "In fulfilling its obligations under this Section 4.1(b), King will perform [***], as follows: King will perform no less than an average of [***], with such reach and frequency as the JCC determines as part of the Annual Plan each year.",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 235,
+      "contract_length": 173240,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_111ea25926cbc26dab8f",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "If Licensor enters, or has entered, into an agreement or series of agreements (including side letters, understandings or arrangements, whether oral or written, whether formal or informal, whether now or hereafter effective, or whether on a long-term basis or short-term basis) with a third party for the distribution and exhibition of Licensed Programs in the U.S. or the Territory on a VOD basis, or any other basis that permits the downloading of such Licensed Programs and the subsequent viewing of such Licensed Programs by a residential subscriber, on terms (including, without limitation, license fees, copyright royalty payments, encoding fees and obligations, and marketing support) that are more favourable than those contained in this Agreement, then Rogers has the right to incorporate, or substitute, as the case may be, such term or terms into this Agreement, effective as of the date on which such term or terms were accorded to the third party and for the balance of the period such term or terms are applicable to such third party.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 1047,
+      "contract_length": 30050,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_fed314647bb240925cb4",
+      "contract_id": "contract_13ac52df81ec94fb78fe",
+      "text": "(e) solicit, entice or encourage or attempt to solicit, entice or encourage any Key Individual to leave the employment of the Company or any Relevant Group Company (whether or not such person would commit any breach of his contract of employment by doing so);",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 259,
+      "contract_length": 65547,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_25540e8c769b9eb5d2dd",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "When endorsing a non-competitive product, under no circumstances shall CONSULTANT wear, play, use, hold or in any way be associated with an ADAMS GOLF competitor's Product.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 172,
+      "contract_length": 24632,
+      "target": "non_compete"
+    },
+    {
+      "clause_id": "clause_79b55d9de9e2c7826f31",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "Without limiting the preceding sentence, Allied agrees not to use the Newegg Marks in any advertising materials or conduct any activities in a manner that may be seen to unreasonably modify, alter, detract from or impair the integrity, character, or dignity of the Newegg Marks or reflect unfavorably upon Newegg or Newegg Products.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?",
+      "clause_length": 332,
+      "contract_length": 37796,
+      "target": "non_disparagement"
+    },
+    {
+      "clause_id": "clause_6911d53fcf5a2708c92b",
+      "contract_id": "contract_0658cdbfbb291b6ac921",
+      "text": "The Village Media Company shall not, directly or indirectly, assign, sublicense or otherwise transfer any of its rights or obligations hereunder without the prior written consent of PFHOF. T",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?",
+      "clause_length": 190,
+      "contract_length": 45234,
+      "target": "non_transferable_license"
+    },
+    {
+      "clause_id": "clause_5b45f26cd2ea86d15c4e",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "a.k.a. Beyond.com",
+      "label": "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract",
+      "clause_length": 17,
+      "contract_length": 58300,
+      "target": "parties"
+    },
+    {
+      "clause_id": "clause_d09444c91b26d70cd8c2",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "For three (3) years after each calendar quarter during the           term of this Agreement, Co-Host will keep, at Co-Host's office, full           and accurate books of account and copies of all documents and other           materials for such quarter relating to this Agreement and Co-Host's           records, accounts and contracts relating to the distribution of the           Products.",
+      "label": "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?",
+      "clause_length": 391,
+      "contract_length": 58300,
+      "target": "post_termination_services"
+    },
+    {
+      "clause_id": "clause_8f600090e476c4984ee0",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "After the initial twelve months of this Agreement, VIP may adjust the rates in Schedule A to VIP's then current standard rates for such services, provided that it provides BNL with notice of any such adjustment not less ~han thirty (30) days prior to any such adjustment and that such rates shall not increase by more than ten ( 10% ) percent per year .",
+      "label": "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the  ability of a party to raise or reduce prices of technology, goods, or  services provided?",
+      "clause_length": 353,
+      "contract_length": 39863,
+      "target": "price_restrictions"
+    },
+    {
+      "clause_id": "clause_24921b89dc245b788059",
+      "contract_id": "contract_9d1013460b423d7542e5",
+      "text": "The Parties may negotiate for an extension of this Agreement six (6) months before the expiration of the Cooperation Period.",
+      "label": "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.",
+      "clause_length": 124,
+      "contract_length": 13506,
+      "target": "renewal_term"
+    },
+    {
+      "clause_id": "clause_990569be942926d21661",
+      "contract_id": "contract_f9bac027b2ce143854d5",
+      "text": "Party A's contribution to the registered capital of the Joint Venture Company shall be Fourteen Million Six Hundred Fifty-One Thousand United States Dollars (US$14,651,000), representing a forty-nine percent (49%) share of the Joint Venture Company's registered capital. Party B's contribution to the registered capital of the Joint Venture Company shall be Fifteen Million Two Hundred Forty Nine Thousand United States Dollars (US$15,249,000), representing a fifty-one percent (51%) share of the Joint Venture Company's registered capital.",
+      "label": "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or services?",
+      "clause_length": 540,
+      "contract_length": 73698,
+      "target": "revenue_profit_sharing"
+    },
+    {
+      "clause_id": "clause_ca95d8a050a04f6008ff",
+      "contract_id": "contract_8b52b415a228a95d79f3",
+      "text": "Such option shall be exercisable during a period (the           \"Option Period\") commencing on and including the earlier of (i) the           date upon which Licensee shall have paid to Licensor, in any single           fiscal year of Licensee, royalty payments hereunder in the aggregate           amount of $10,000,000 or (ii) January 1, 2002, and ending upon the           expiration or sooner termination of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?",
+      "clause_length": 427,
+      "contract_length": 21994,
+      "target": "rofr_rofo_rofn"
+    },
+    {
+      "clause_id": "clause_30d388ac7d66e3a8bf7e",
+      "contract_id": "contract_5e77a23b6fd5f52d27ff",
+      "text": "Developer may also terminate this Agreement by giving two (2) weeks' notice in writing to VAL.",
+      "label": "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this  contract without cause (solely by giving a notice and allowing a waiting  period to expire)?",
+      "clause_length": 94,
+      "contract_length": 14822,
+      "target": "termination_for_convenience"
+    },
+    {
+      "clause_id": "clause_77ba2c733f969b18e9d2",
+      "contract_id": "contract_4315a23635a12222e979",
+      "text": "Neither party shall be liable to the other pursuant to this Agreement for any amounts representing loss of profit, loss of business or indirect, consequential, exemplary, or punitive damages of the other party.  The foregoing shall not limit the indemnification, defense and hold harmless obligations set forth in this Agreement other than those set forth in Section 5.4 and shall not apply with respect to damages or losses arising from the wrongful termination of this Agreement by LMG, willful misconduct, gross negligence or breach of LMG's obligations under Section 3. 8.",
+      "label": "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party’s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.",
+      "clause_length": 576,
+      "contract_length": 55889,
+      "target": "uncapped_liability"
+    },
+    {
+      "clause_id": "clause_d2323e68e8da884233db",
+      "contract_id": "contract_ef043caea42fa7914218",
+      "text": "New Shippers will have access to a minimum of ten percent (10%) of the Available Capacity and Historical Shippers will have access to a maximum of ninety percent (90%) of the Available Capacity.",
+      "label": "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party’s use of the product/services exceeds certain threshold?",
+      "clause_length": 194,
+      "contract_length": 100284,
+      "target": "volume_restriction"
+    },
+    {
+      "clause_id": "clause_75d749461ea9ffa4284d",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "Kitov shall provide Dexcel with written notification of any shortfalls in shipment quantity, and (a) any out-of-specification temperature excursions based on the downloaded data logger information following compliance with the provisions of the Quality Agreement, and/or (b) any failure of the Product to meet the Specifications which are apparent upon visual inspection and/or identification testing of the Product delivered to it by Dexcel (each of (a) and (b) being an \"Apparent Defect\"), such notification to be provided within thirty (30) Working Days of receipt of the Product at Kitov's warehouse, accompanied by samples of any such allegedly defective Product and any such Product shall not be removed from quarantine until their status is resolved.",
+      "label": "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any  warranty against defects or errors in technology, products, or services  provided under the contract?",
+      "clause_length": 757,
+      "contract_length": 57436,
+      "target": "warranty_duration"
+    },
+    {
+      "clause_id": "clause_a4f20e55e218813bd4aa",
+      "contract_id": "contract_8b52b415a228a95d79f3",
+      "text": "1st day of January, 1999",
+      "label": "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract",
+      "clause_length": 24,
+      "contract_length": 21994,
+      "target": "agreement_date"
+    },
+    {
+      "clause_id": "clause_d72d7ae91fe22f1b986c",
+      "contract_id": "contract_e23f62acc9ed508c4411",
+      "text": "Each Party may assign its rights under the Agreement, but any assignment of rights will be void to the extent that (i) the assignment purports to impose upon the non-assigning Party additional costs or obligations or requires AT&T to make payments to any Person other than Vendor, (ii) the assignment purports to preclude AT&T from dealing solely and directly with Vendor in all matters pertaining to this Agreement, including with respect to payments of Structured Payments and Maintenance Fees or (iii) the assignee is a Restricted Entity.",
+      "label": "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?",
+      "clause_length": 541,
+      "contract_length": 228943,
+      "target": "anti_assignment"
+    },
+    {
+      "clause_id": "clause_158a422d82ec9b953f04",
+      "contract_id": "contract_31bad523f41ffe93bc91",
+      "text": "SHPS shall have the right, upon reasonable prior written notice, to examine, copy and audit such records. Such audit shall be conducted at the location where such records are maintained and shall be at the expense of SHPS.",
+      "label": "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to  audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?",
+      "clause_length": 222,
+      "contract_length": 12852,
+      "target": "audit_rights"
+    },
+    {
+      "clause_id": "clause_ffb597bc6f924ea449bb",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "With respect to the Operation  Warranty, Reseller's sole remedy, and Diversinet's sole obligation, shall be to cause the Product to operate substantially in accordance with  its documentation in a timely manner.",
+      "label": "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party’s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.",
+      "clause_length": 211,
+      "contract_length": 75389,
+      "target": "cap_on_liability"
+    },
+    {
+      "clause_id": "clause_224dd52786e72bd88016",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "The affected Party is obligated to notify the other Party of its decision to terminate within thirty (30) days following notice of the Change of Control.",
+      "label": "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?",
+      "clause_length": 153,
+      "contract_length": 57436,
+      "target": "change_of_control"
+    },
+    {
+      "clause_id": "clause_a0e03aaf0c4a9bf25daf",
+      "contract_id": "contract_19612564f475a9d67aa7",
+      "text": "(It is expressly understood by the parties that CONSULTANT may play [* ****] clubs in the bag other than ADAMS GOLF clubs including, but not limited to, a putter by a manufacturer other than ADAMS GOLF but may not endorse those clubs and/or putter.)",
+      "label": "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.",
+      "clause_length": 249,
+      "contract_length": 24632,
+      "target": "competitive_restriction_exception"
+    },
+    {
+      "clause_id": "clause_8fb424cd1f51d68cc299",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Licensee hereby does forever waive and agree never to assert any and all Moral Rights it may have in Fox's Intellectual Property Rights in and to the PSM and the Fox Intellectual Property and any derivative works thereof and shall cause its employees and contractors (including the developers) to do likewise.",
+      "label": "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty’s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?",
+      "clause_length": 309,
+      "contract_length": 112794,
+      "target": "covenant_not_to_sue"
+    },
+    {
+      "clause_id": "clause_c244ab165ddf9ff03547",
+      "contract_id": "contract_4a22ccacfc4a9c8acb19",
+      "text": "Intellectual Property Rights Confidentiality and Non-Use Obligations Agreement",
+      "label": "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract",
+      "clause_length": 78,
+      "contract_length": 7042,
+      "target": "document_name"
+    },
+    {
+      "clause_id": "clause_ba148be3db91c3944ecc",
+      "contract_id": "contract_13ac52df81ec94fb78fe",
+      "text": "27 January 2020",
+      "label": "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective ",
+      "clause_length": 15,
+      "contract_length": 65547,
+      "target": "effective_date"
+    },
+    {
+      "clause_id": "clause_f1ae7e5f4c0c8e7944d9",
+      "contract_id": "contract_33e03d400fd5dddf3ec2",
+      "text": "In all of Allied's actions and publications (in all media and formats) in connection with the marketing and conducting of the Events, where possible and appropriate, Allied shall where reasonably practicable communicate that Newegg is the exclusive sponsor of the Arena for the technology e-commerce and online retailer categories.",
+      "label": "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing  commitment with the counterparty? This includes a commitment to procure all “requirements” from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on  collaborating or working with other parties), whether during the contract or  after the contract ends (or both).",
+      "clause_length": 331,
+      "contract_length": 37796,
+      "target": "exclusivity"
+    },
+    {
+      "clause_id": "clause_c582658f18b26b8a5168",
+      "contract_id": "contract_88a2d684910b979b6335",
+      "text": "The initial term of this Agreement shall commence on the Effective Date and shall continue until the fifth (5t h) anniversary of the Effective Date (the \"Term\"), unless the Agreement is sooner terminated in accordance with the terms of this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?",
+      "clause_length": 251,
+      "contract_length": 83972,
+      "target": "expiration_date"
+    },
+    {
+      "clause_id": "clause_486248a4769db7ea1de0",
+      "contract_id": "contract_49288172696e814cc44e",
+      "text": "This Agreement will be governed and interpreted according to the laws           of the State of California, without reference to principles of           conflicts of laws.",
+      "label": "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?",
+      "clause_length": 171,
+      "contract_length": 58300,
+      "target": "governing_law"
+    },
+    {
+      "clause_id": "clause_4d6db104d84c9145a7f4",
+      "contract_id": "contract_a879a4509ca05f7bf474",
+      "text": "to liability and property insurance covering the Hosting Servers and Inktomi's operation thereof) in accordance with the requirements set forth in the Software Development Agreement and Loan Agreement between the parties of even date herewith.",
+      "label": "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?",
+      "clause_length": 243,
+      "contract_length": 70664,
+      "target": "insurance"
+    },
+    {
+      "clause_id": "clause_3a86074de4cebeb22963",
+      "contract_id": "contract_bc3be20e5430becc2467",
+      "text": "Licensee hereby does irrevocably transfer and assign to Fox any and all Moral Rights that Licensee may have in Fox's Intellectual Property Rights in and to the PSM and the Fox Intellectual Property and any derivative works thereof and shall cause Licensee's employees and contractors, including Licensee's developers of the Wireless Products, to do likewise.",
+      "label": "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created  by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?",
+      "clause_length": 358,
+      "contract_length": 112794,
+      "target": "ip_ownership_assignment"
+    },
+    {
+      "clause_id": "clause_32898a5f12750415b6fc",
+      "contract_id": "contract_d7899b24789c2db8a57d",
+      "text": "Subject to the provisions of sections 8.1 and 8.2 above and without derogating therefrom, any and all rights, title and interest in any Intellectual Property Rights resulting from any development made by Dexcel which is related to the Product and embodied in the Deliverables or conceived in connection with the services provided hereunder by Dexcel to Kitov, which is only applicable for the manufacture, research, development, making of, use, sale, production, commercialisation and distribution of the Product, shall be jointly and equally (50%/50%) owned by Dexcel and Kitov (the \"Joint. IP\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?",
+      "clause_length": 597,
+      "contract_length": 57436,
+      "target": "joint_ip_ownership"
+    },
+    {
+      "clause_id": "clause_2a44de981e4282902802",
+      "contract_id": "contract_392b404b7377a2734746",
+      "text": "Depomed hereby grants to King the non-exclusive right, during the Term, to use the Launch Promotional Materials supplied to King pursuant to this Section 4.4(c) in the performance of its obligations under this Agreement.",
+      "label": "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?",
+      "clause_length": 220,
+      "contract_length": 173240,
+      "target": "license_grant"
+    },
+    {
+      "clause_id": "clause_6d979ec822ea8a64a54a",
+      "contract_id": "contract_580ef3793e46b4d08805",
+      "text": "For example, if Party B shall pay liquidated damages as much as RMB N, it shall pay additional RMB N to increase the deposit paid in accordance with Article 4.2 after it pays the liquidated damages or Party A deducts the liquidated damages from the deposit.",
+      "label": "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?",
+      "clause_length": 257,
+      "contract_length": 73890,
+      "target": "liquidated_damages"
+    },
+    {
+      "clause_id": "clause_eed3b6ce6205fb7f63c8",
+      "contract_id": "contract_0f59d16c07b272129da7",
+      "text": "The minimum monthly fee shall not be less than five thousand dollars ($5,000) per month (as applicable, \"Minimum Fee\").",
+      "label": "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?",
+      "clause_length": 119,
+      "contract_length": 39863,
+      "target": "minimum_commitment"
+    },
+    {
+      "clause_id": "clause_179d2f2ab852c08461dc",
+      "contract_id": "contract_5f706b749eb8192bc0cd",
+      "text": "In the event that Licensor grants to another VOD or Pay-Per-View (\"PPV\") service provider in the U.S. or the Territory the right to distribute or exhibit any Licensed Program on an earlier availability date, then Licensor shall also grant to Rogers the right to distribute and exhibit such Licensed Program on such earlier availability date, on the terms provided herein.",
+      "label": "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?",
+      "clause_length": 371,
+      "contract_length": 30050,
+      "target": "most_favored_nation"
+    },
+    {
+      "clause_id": "clause_90826b769033db7c0850",
+      "contract_id": "contract_afb321885815f7cb5e66",
+      "text": "During the Term, the Reseller agrees that it shall not induce any person employed by Diversinet to leave Diversinet's employ to become an  employee of Reseller or its agents or contractors.",
+      "label": "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party’s soliciting or hiring employees and/or contractors from the  counterparty, whether during the contract or after the contract ends (or both)?",
+      "clause_length": 189,
+      "contract_length": 75389,
+      "target": "no_solicit_of_employees"
+    },
+    {
+      "clause_id": "clause_687c3abb13dbdfcab151",
+      "contract_id": "contract_bf6f89a0dea3777ef395",
+      "text": "Party A may not make any identical or similar cooperation regarding the real estate and home furnishing information, products and data in its real estate and home furnishing channel with any competitor of Party B.",
+      "label": "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector? ",
+      "clause_length": 213,
+      "contract_length": 37031,
+      "target": "non_compete"
+    }
+  ],
+  "benchmark_sha256": "087c64082dc9ca2089d272650d5072000692222451a39057a083e541eaceb8d8"
+}

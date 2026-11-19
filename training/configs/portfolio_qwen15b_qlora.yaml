@@ -1,0 +1,40 @@
+model:
+  name: Qwen/Qwen2.5-1.5B-Instruct
+  revision: 989aa7980e4cf806f80c7fef2b1adb7bc71aa306
+  tokenizer_name: Qwen/Qwen2.5-1.5B-Instruct
+  family: qwen2
+  license: Apache-2.0
+  precision: float16
+  quantization: 4bit
+  quant_type: nf4
+  double_quant: true
+  use_cache: false
+lora:
+  rank: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj]
+optimization:
+  learning_rate: 0.0002
+  epochs: 3
+  batch_size: 1
+  gradient_accumulation: 16
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+  optimizer: paged_adamw_8bit
+  scheduler: cosine
+  gradient_checkpointing: true
+  gradient_checkpointing_use_reentrant: false
+  save_steps: 100
+  eval_steps: 100
+data:
+  max_sequence_length: 4096
+  validation_max_new_tokens: 32
+  max_train_examples: null
+  max_validation_examples: null
+seed: 42
+output_dir: checkpoints/portfolio-qwen15b
+prompt_template_version: cuad-classification-id-v3-taxonomy
+target_representation: category_id
+target_representation_version: cuad-category-id-v1
+tags: [portfolio, validation-only, qwen15b, not-yet-trained]

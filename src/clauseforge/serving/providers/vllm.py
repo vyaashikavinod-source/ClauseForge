@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import urllib.request
 from pathlib import Path
 
@@ -46,14 +47,25 @@ class VllmProvider:
                 "vLLM base URL is not configured; optional service unavailable",
             )
         try:
+            headers = self._headers()
+            request = urllib.request.Request(self._url + "/health", headers=headers)
             with urllib.request.urlopen(
-                self._url + "/health", timeout=min(self._timeout, 2.0)
+                request, timeout=min(self._timeout, 2.0)
             ) as response:
                 if response.status != 200:
                     return False, "vLLM health check failed"
-        except OSError:
+        except (OSError, ProviderUnavailableError):
             return False, "vLLM service is unavailable"
         return True, None
+
+    def _headers(self) -> dict[str, str]:
+        headers = {"Content-Type": "application/json"}
+        api_key = os.getenv("CLAUSEFORGE_REMOTE_API_KEY")
+        if api_key:
+            if self._url is None or not self._url.startswith("https://"):
+                raise ProviderUnavailableError
+            headers["Authorization"] = "Bearer " + api_key
+        return headers
 
     def _complete(self, text: str) -> str:
         if self._url is None:
@@ -66,10 +78,11 @@ class VllmProvider:
                 "temperature": self._temperature,
             }
         ).encode()
+        headers = self._headers()
         request = urllib.request.Request(
             self._url + "/v1/completions",
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         try:
             with urllib.request.urlopen(request, timeout=self._timeout) as response:

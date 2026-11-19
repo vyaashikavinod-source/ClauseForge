@@ -36,11 +36,16 @@
         <p>Classify contract clauses against the authoritative CUAD taxonomy and surface structured review context.</p>
         <p class="hero-disclaimer">Decision support for informed review. Not legal advice.</p>
       </div>
-      <div class="capability-strip" aria-label="Workspace capabilities">
-        <span><strong>41</strong> taxonomy categories</span>
-        <span><strong>Exact</strong> output validation</span>
-        <span><strong>Local</strong> development mode</span>
-      </div>
+      <section class="capability-strip" aria-label="Measured evaluation results" style="display:block;overflow-x:auto">
+        <h2>Held-out evaluation</h2>
+        <p id="evaluation-status">Loading recorded evaluation results. The interface demo uses a mock provider.</p>
+        <table><thead><tr><th>Model</th><th>N</th><th>Accuracy</th><th>Macro F1</th><th>p50 latency</th><th>Cost / 1k clauses</th></tr></thead><tbody id="evaluation-results">
+          <tr><td>Zero-shot frontier</td><td colspan="5">Not run — API access required</td></tr>
+          <tr><td>Qwen2.5-1.5B QLoRA</td><td colspan="5">Loading recorded pilot result</td></tr>
+          <tr><td>Quantized adapter</td><td colspan="5">Loading recorded serving result</td></tr>
+        </tbody></table>
+        <p>Same frozen clauses, same prompt and scorer. Missing measurements remain unavailable.</p>
+      </section>
     </section>
 
     <div class="workspace-grid">

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "status": "exported_not_evaluated",
+  "quantization": "Q4_K_M",
+  "file": "model-q4_k_m.gguf",
+  "size_bytes": 986048192,
+  "sha256": "dbfedeeedf8a145f56b3c3f86db5980ac39d85ce4a9d6e10bc06a04c3254c515",
+  "runtime_seconds": 202.70960599800003,
+  "llama_cpp_commit": "307e3f1551c2c3c6c0560c454ab46bb64baeb2df",
+  "note": "Export is not a quality or serving benchmark. Evaluate with the frozen harness."
+}

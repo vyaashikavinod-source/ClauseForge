@@ -7,6 +7,7 @@ from typing import Literal
 
 PROMPT_TEMPLATE_VERSION = "cuad-classification-v1"
 ID_PROMPT_TEMPLATE_VERSION = "cuad-classification-id-v2"
+BENCHMARK_PROMPT_TEMPLATE_VERSION = "cuad-classification-id-v3-taxonomy"
 SYSTEM_INSTRUCTION = (
     "You classify contract clauses using the authoritative ClauseForge/CUAD "
     "category taxonomy. Reply with exactly one category label."
@@ -41,14 +42,21 @@ def render_messages(
 ) -> tuple[PromptMessage, PromptMessage]:
     instruction = (
         ID_SYSTEM_INSTRUCTION
-        if prompt_template_version == ID_PROMPT_TEMPLATE_VERSION
+        if prompt_template_version in {ID_PROMPT_TEMPLATE_VERSION, BENCHMARK_PROMPT_TEMPLATE_VERSION}
         else SYSTEM_INSTRUCTION
     )
     if prompt_template_version not in {
         PROMPT_TEMPLATE_VERSION,
         ID_PROMPT_TEMPLATE_VERSION,
+        BENCHMARK_PROMPT_TEMPLATE_VERSION,
     }:
         raise ValueError("unknown prompt template version")
+    if prompt_template_version == BENCHMARK_PROMPT_TEMPLATE_VERSION:
+        from clauseforge.taxonomy import load_taxonomy_metadata
+
+        instruction += "\nAllowed category IDs and definitions:\n" + "\n".join(
+            f"{item.category_id}: {item.canonical}" for item in load_taxonomy_metadata()
+        )
     return (
         PromptMessage("system", instruction),
         PromptMessage("user", clause_text),

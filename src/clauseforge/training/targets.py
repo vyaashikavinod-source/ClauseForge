@@ -65,6 +65,10 @@ def resolve_generated_target(
 def validate_target_version(
     representation: TargetRepresentation, version: str, prompt_version: str
 ) -> None:
+    if (representation, version, prompt_version) == (
+        "category_id", CATEGORY_ID_TARGET_VERSION, "cuad-classification-id-v3-taxonomy"
+    ):
+        return
     expected = {
         "canonical_question": (CANONICAL_TARGET_VERSION, "cuad-classification-v1"),
         "category_id": (CATEGORY_ID_TARGET_VERSION, "cuad-classification-id-v2"),
