@@ -1,5 +1,19 @@
 # ClauseForge
 
+## Recorded model evidence
+
+[Open the free interface demo](https://clauseforge-demo.onrender.com) ·
+[Inspect results and prediction journals](https://incidentpilot-demo.onrender.com/evidence.html) ·
+[Reproduce the evaluation](docs/portfolio-evidence.md) ·
+[Free Colab handoff](notebooks/portfolio-free-colab.ipynb)
+
+On the same 200 held-out CUAD spans, the public Qwen 1.5B base scored 20.0%,
+the 64-clause QLoRA pilot scored 42.5%, and quantized base + trained GGUF LoRA
+scored 41.0%. The free Gemini 3.5 Flash-Lite API baseline scored 76.5%
+(macro F1 0.736), including 14 service errors as incorrect. All 800 predictions
+are recorded. The small training run is a pilot. The public interface retains
+its mock backend; recorded evidence does not imply live model hosting.
+
 ## Local frontend
 
 ClauseForge includes a polished end-user workspace hosted by the existing

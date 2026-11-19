@@ -198,26 +198,30 @@ Report/journal: `eval/outputs/portfolio/local-q4-lora.json` and `.jsonl`.
 Journal SHA256: `79e602f929a386ae40030710fe112d5bc0c95f08941f14ced7cf2045b99f3b70`.
 The shared compare command verified all three full runs, metrics, checksums and
 example identities. Raw journals and the incomplete infrastructure trial are
-published at the evidence page. Frontier API evaluation and public live model
-hosting remain unexecuted. The ClauseForge interface backend remains honestly
+published at the evidence page. No latest-frontier API comparison or public live model hosting is claimed. The ClauseForge interface backend remains honestly
 labelled mock; source is published with the recorded evidence.
 
 
-## Free API attempt, incomplete
+## Completed free API baseline
 
-The billing-disabled Gemini 3.5 Flash-Lite key passed a synthetic preflight.
-The identical frozen evaluation attempted 73/200 clauses across three segments.
-68 requests returned model responses; five returned HTTP 503. Three consecutive
-503 responses triggered the final safety stop. Errors remain in the journal;
-no clause was retried or dropped. The incomplete attempt is published separately
-from the three completed benchmarks, without claiming full API accuracy.
-Token totals and usage-based cost are unknown where failed calls return no usage.
-No billing was enabled. Public live hosting was declined in favor of replay.
+Gemini 3.5 Flash-Lite attempted all 200 frozen clauses with the identical prompt
+and scorer: **153/200 correct (76.5%), all-41 macro F1 0.7360508732**.
+Fourteen HTTP 503 responses are retained as incorrect (7% request-error rate).
+Execution resumed from verified prefixes without retrying any failed clause.
+This is a Flash-Lite API baseline, not a latest-frontier comparison.
 
-Latest prefix: `eval/outputs/portfolio/gemini35-flashlite-free-resumed2.json`
-and `.jsonl`. Resume into a new path with `--resume-from`, keeping the same
-model, benchmark, role and 4.5-second interval. Continue only when service recovers.
+Median/p95 request latency: 2.031631 / 9.859076 seconds. Active execution took
+1,184.675244 seconds across four segments; pauses between segments are excluded.
+Throughput includes 4.5-second request pacing to respect the free quota.
+Successful responses report token usage, but full totals and usage-based cost
+remain unknown because failed calls omitted usage. Billing stayed disabled;
+no API charges or paid GPU services were used. API server memory is unavailable.
 
+The shared comparison verified all 800 predictions across four completed runs:
+matching example identities, benchmark/prompt checksums, journal hashes and
+recomputed metrics. Raw journals, including earlier infrastructure failures,
+are in `docs/evidence/clauseforge-predictions.json`. Public live hosting was
+declined in favor of replay; the public interface retains its mock backend.
 
 The reproducible free-Colab handoff is `notebooks/portfolio-free-colab.ipynb`.
 This checked-in notebook is a handoff, not an executed-results artifact. Actual
