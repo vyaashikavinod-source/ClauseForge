@@ -1,0 +1,64 @@
+{
+  "model": "qwen15b-q4-plus-trained-lora",
+  "provenance": {
+    "mode": "Q4_K_M base plus F16 GGUF LoRA",
+    "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+    "model_size_bytes": 1117320736,
+    "runtime": "Official llama.cpp b12494 Windows CPU",
+    "threads": 4,
+    "prompt_rendering": "Flat training prompt through an explicit Jinja template; no chat wrapper",
+    "experiment": "Locked 25-step / 64-unique-clause training pilot; not final model release",
+    "adapter_gguf_sha256": "e60c991d247dd2faaca8e1142a4ba34301be2972295c8ebe472b20c871aece83",
+    "adapter_gguf_size_bytes": 4373888,
+    "adapter_training_base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "base_gguf_publisher_revision": "91cad51170dc346986eccefdc2dd33a9da36ead9"
+  },
+  "prompt_version": "cuad-classification-id-v3-taxonomy",
+  "samples": [
+    {
+      "label": "Governing law",
+      "text": "This Agreement is governed by the laws of the State of Delaware, without regard to conflict-of-law principles.",
+      "raw_output": "governing_law",
+      "input_tokens": 2513,
+      "output_tokens": 6,
+      "response_model": "qwen15b-q4-plus-trained-lora",
+      "duration_seconds": 22.3050774000003
+    },
+    {
+      "label": "Termination",
+      "text": "Either party may terminate this Agreement for convenience upon sixty days' written notice to the other party.",
+      "raw_output": "termination_for_convenience",
+      "input_tokens": 2511,
+      "output_tokens": 5,
+      "response_model": "qwen15b-q4-plus-trained-lora",
+      "duration_seconds": 0.7702133000129834
+    },
+    {
+      "label": "Non-compete",
+      "text": "During the term, the Distributor will not market products that directly compete with the Licensed Products in the Territory.",
+      "raw_output": "non_solicit_of_customers",
+      "input_tokens": 2514,
+      "output_tokens": 7,
+      "response_model": "qwen15b-q4-plus-trained-lora",
+      "duration_seconds": 1.0402218000381254
+    },
+    {
+      "label": "Audit rights",
+      "text": "The Company may inspect and audit the relevant books and records once per calendar year upon reasonable prior notice.",
+      "raw_output": "audit_rights",
+      "input_tokens": 2512,
+      "output_tokens": 3,
+      "response_model": "qwen15b-q4-plus-trained-lora",
+      "duration_seconds": 0.5430076000047848
+    },
+    {
+      "label": "Change of control",
+      "text": "A change in control of either party requires prompt written notice to the other party.",
+      "raw_output": "change_of_control",
+      "input_tokens": 2508,
+      "output_tokens": 4,
+      "response_model": "qwen15b-q4-plus-trained-lora",
+      "duration_seconds": 0.5698116999701597
+    }
+  ]
+}

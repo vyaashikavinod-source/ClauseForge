@@ -228,3 +228,27 @@ This checked-in notebook is a handoff, not an executed-results artifact. Actual
 training records are in `docs/evidence/ClauseForge-Colab-pilot-evidence.json`.
 Frozen public CUAD test spans are in `eval/fixtures/cuad-portfolio-200.json`;
 retain CUAD attribution and its source license when redistributing.
+
+
+## Public replay and interpretation update — 21 November 2026
+
+Five exact UI samples were run through the same Qwen2.5-1.5B Q4 base plus
+the trained F16 GGUF LoRA on local CPU. Raw outputs, token usage, latency and
+base/adapter hashes are in `src/clauseforge/frontend/sample-replays.json`.
+The Non-compete sample returns `non_solicit_of_customers`, an incorrect
+invalid ID (the taxonomy uses `no_solicit_of_customers`) that remains visible. Arbitrary input is refused, not sent to
+the mock classifier. No public model inference is claimed.
+
+“Trained” refers to the 25-step pilot on 64 unique clauses / 400 example
+passes. The FP16 row and quantized-serving row use the same adapter.
+42.5% versus 41.0% differs by three test clauses; no meaningful difference or
+quantization improvement is established. Gemini's 35.5-point advantage over
+quantized serving motivates future 3B/7B base, longer training and constrained
+41-label decoding experiments, all explicitly unrun.
+
+Known Gemini usage: 492,297 input and 807 output tokens. At Google standard
+text rates checked 21 November 2026 ($0.30/$2.50 per million input/output),
+this is $0.1497066, or $0.748533 per 1,000 attempted clauses. It is a paid-rate
+equivalent lower bound because fourteen failed calls omitted usage. Actual
+free-tier charge remains zero. Invalid outputs are shown separately from
+request errors in the UI. Pricing source: https://aistudio.google.com/docs/pricing

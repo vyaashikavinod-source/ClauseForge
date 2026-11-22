@@ -17,6 +17,8 @@ const elements = {
   error: byId("form-error"), empty: byId("result-empty"), loading: byId("result-loading"), success: byId("result-success"), resultError: byId("result-error"),
 };
 let taxonomyByCanonical = new Map();
+let sampleReplays;
+const replayReady = fetch("/static/sample-replays.json").then(r => r.json()).then(data => {sampleReplays=data;});
 
 function safeJson(response) { return response.json().catch(() => ({})); }
 function setVisible(target) { [elements.empty, elements.loading, elements.success, elements.resultError].forEach((node) => { node.hidden = node !== target; }); }
@@ -41,17 +43,22 @@ async function analyze() {
   if (!text) { elements.error.textContent = "Enter a contract clause before analyzing."; elements.error.hidden = false; elements.text.focus(); return; }
   elements.analyze.disabled = true; elements.analyze.classList.add("loading"); elements.analyze.setAttribute("aria-busy", "true"); setVisible(elements.loading);
   try {
-    const response = await fetch("/v1/classify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
-    const data = await safeJson(response);
-    if (!response.ok) throw apiError(response.status, data);
+    await replayReady;
+    const replay = sampleReplays.samples.find(row => row.text === text);
+    if (!replay) throw {title:"Choose a recorded example",message:"This public demo replays five exact sample inputs. Select a sample to inspect its real recorded output; free-form inference is not hosted."};
+    if (!taxonomyByCanonical.size) { const t = await fetch("/v1/taxonomy").then(r=>r.json()); taxonomyByCanonical = new Map(t.categories.map(item=>[item.canonical,item])); }
+    const id = replay.raw_output.trim();
+    const known = [...taxonomyByCanonical.values()].find(item => item.category_id === id);
+    if (!known) throw {title:"Replayed invalid model output",message:`The real run returned: ${replay.raw_output}. This is not a valid exact category ID. No replacement prediction was invented.`};
+    const data = {predicted_category:known.canonical};
     const category = formatCategory(data.predicted_category);
     byId("category-name").textContent = category.category_name;
     byId("category-id").textContent = category.category_id;
     byId("category-question").textContent = category.canonical;
-    byId("result-provider").textContent = providerLabel(data.provider, data.processing?.provider_type, data.model_id);
-    byId("result-model-state").textContent = modelStateLabel(data.provider, data.processing?.provider_type);
-    byId("result-latency").textContent = typeof data.processing?.latency_ms === "number" ? `${data.processing.latency_ms.toFixed(1)} ms` : "Completed";
-    byId("result-request").textContent = data.request_id || "Not supplied";
+    byId("result-provider").textContent = "Qwen2.5-1.5B + LoRA · replayed from real run";
+    byId("result-model-state").textContent = "Replayed from real run · no live inference";
+    byId("result-latency").textContent = `${(replay.duration_seconds * 1000).toFixed(1)} ms (recorded)`;
+    byId("result-request").textContent = replay.label;
     setVisible(elements.success); addHistory(text, category.category_name);
   } catch (error) {
     byId("error-title").textContent = error.title || "Analysis unavailable";
@@ -79,10 +86,14 @@ async function refreshStatus() {
     setStatus("status-backend", ready.model_backend_ready, "Ready", "Unavailable");
     byId("detail-provider").textContent = ready.provider || version.provider || "Not supplied"; byId("detail-backend").textContent = version.backend || "Not supplied"; byId("detail-version").textContent = version.application_version || "Not supplied"; byId("detail-build").textContent = version.build_commit || "Not supplied";
     const mock = version.backend === "mock" || ready.provider === "mock-development";
+    await replayReady;
+    byId("status-artifact").textContent="5 recorded real outputs";
+    byId("status-backend").textContent="Replay only";
+    byId("detail-backend").textContent="Saved local CPU run; the mock API is not called by Analyze";
     const notice = byId("model-notice"); notice.hidden = false;
-    byId("model-notice-title").textContent = mock ? "Development / Mock Model" : ready.model_backend_ready ? "Active trained model" : "Real model unavailable";
-    byId("model-notice-detail").textContent = mock ? "Interface demonstration only—not model performance." : ready.model_backend_ready ? `Checkpoint ${ready.checkpoint_step} · ${ready.candidate_status}. Final model selection and release validation are pending.` : "Configured real-model mode failed closed. No mock fallback is active.";
-    pill.className = ready.model_backend_ready ? "status-pill" : "status-pill unavailable"; pill.lastElementChild.textContent = mock ? "Mock system ready" : ready.model_backend_ready ? "Trained candidate ready" : "Backend unavailable";
+    byId("model-notice-title").textContent = mock ? "Replayed from real run" : ready.model_backend_ready ? "Active trained model" : "Real model unavailable";
+    byId("model-notice-detail").textContent = mock ? "Five exact examples use saved Qwen2.5-1.5B + LoRA outputs. No live model runs here." : ready.model_backend_ready ? `Checkpoint ${ready.checkpoint_step} · ${ready.candidate_status}. Final model selection and release validation are pending.` : "Configured real-model mode failed closed. No mock fallback is active.";
+    pill.className = ready.model_backend_ready ? "status-pill" : "status-pill unavailable"; pill.lastElementChild.textContent = mock ? "Real-run replay ready" : ready.model_backend_ready ? "Trained candidate ready" : "Backend unavailable";
   } catch (_) {
     ["status-application", "status-artifact", "status-backend"].forEach((id) => { byId(id).textContent = "Unavailable"; }); pill.className = "status-pill unavailable"; pill.lastElementChild.textContent = "System unavailable";
   }
@@ -121,13 +132,16 @@ async function loadEvaluationEvidence() {
     const evidence = await response.json();
     const status = document.getElementById('evaluation-status');
     if (!status) return;
-    status.textContent = evidence.status_message || 'Recorded evaluation results';
+    status.textContent = 'Four real runs on 200 held-out clauses. *Gemini known usage: 492,297 input + 807 output tokens; paid-rate equivalent ≥$0.1497 total, ≥$0.749 per 1,000 attempted clauses. Fourteen failed calls omit usage, so this is a lower bound. Actual free-tier charge: $0. Google rates checked 21 Nov 2026: $0.30 / $2.50 per million input/output tokens.';
     if (!evidence.runs?.length) return;
     const body = document.getElementById('evaluation-results');
     body.replaceChildren();
     for (const run of evidence.runs) {
       const row = document.createElement('tr');
-      const values = [run.model, run.metrics.sample_size, `${(run.metrics.accuracy * 100).toFixed(1)}%`, run.metrics.macro_f1_all_categories.toFixed(3), `${run.latency_median_seconds.toFixed(3)} s`, run.cost_per_1000_clauses_usd === null ? 'Unavailable' : `$${run.cost_per_1000_clauses_usd.toFixed(3)}`];
+      const names = ['Qwen2.5-1.5B · Q4 base','Qwen2.5-1.5B + LoRA · FP16 pilot','Qwen2.5-1.5B + LoRA · Q4 serving','Gemini 3.5 Flash-Lite'];
+      const index = evidence.runs.indexOf(run);
+      const cost = index === 3 ? '$0 free tier; ≥$0.749 / 1k paid-rate equivalent*' : index === 1 ? 'Colab T4 · free GPU' : 'Local CPU';
+      const values = [names[index] || run.model, run.metrics.sample_size, `${(run.metrics.accuracy * 100).toFixed(1)}%`, run.metrics.macro_f1_all_categories.toFixed(3), `${(Math.max(0,run.metrics.invalid_output_rate-run.metrics.request_error_rate)*100).toFixed(1)}%${run.metrics.request_error_rate ? ` (+${(run.metrics.request_error_rate*100).toFixed(1)}% request errors)` : ""}`, `${run.latency_median_seconds.toFixed(3)} s`, cost];
       for (const value of values) { const cell = document.createElement('td'); cell.textContent = String(value); row.append(cell); }
       body.append(row);
     }
@@ -135,15 +149,3 @@ async function loadEvaluationEvidence() {
 }
 document.addEventListener('DOMContentLoaded', loadEvaluationEvidence);
 
-function syncWorkspaceView() {
-  const evaluation = window.location.hash === '#evaluation';
-  document.getElementById('workspace').hidden = evaluation;
-  document.getElementById('evaluation').hidden = !evaluation;
-  document.querySelectorAll('.primary-nav a').forEach(link => {
-    const active = evaluation ? link.getAttribute('href') === '#evaluation' : link.getAttribute('href') === (window.location.hash || '#workspace');
-    link.classList.toggle('active', active);
-    if (active) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
-  });
-}
-window.addEventListener('hashchange', syncWorkspaceView);
-document.addEventListener('DOMContentLoaded', syncWorkspaceView);
