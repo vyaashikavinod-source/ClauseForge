@@ -42,6 +42,7 @@ from clauseforge.training.targets import (
     resolve_generated_target,
     stable_id_map_checksum,
 )
+from clauseforge.training.suffix_loss import supervised_suffix_loss
 from clauseforge.training.templates import TrainingExample
 from clauseforge.training.trainer import (
     build_training_batch,
@@ -402,7 +403,7 @@ def validation_loss(
         for example in dataset.validation:
             batch = build_training_batch(example, tokenizer, max_length)
             batch = {key: value.to(model.device) for key, value in batch.items()}
-            losses.append(float(model(**batch).loss.detach()))
+            losses.append(float(supervised_suffix_loss(model, batch).detach()))
     return sum(losses) / len(losses)
 
 
@@ -774,9 +775,9 @@ def run_phase3b(
                     example, tokenizer, config.data.max_sequence_length
                 )
                 batch = {key: value.to(model.device) for key, value in batch.items()}
-                output = model(**batch)
-                (output.loss / accumulation).backward()
-                losses.append(float(output.loss.detach()))
+                loss = supervised_suffix_loss(model, batch)
+                (loss / accumulation).backward()
+                losses.append(float(loss.detach()))
                 examples_seen = absolute + 1
                 if examples_seen % accumulation == 0 or index + 1 == len(dataset.train):
                     gradient_norm = float(
