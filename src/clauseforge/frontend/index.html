@@ -40,12 +40,12 @@
     </section>
 
       <section id="evaluation" class="card evaluation-card" aria-label="Measured evaluation results">
-        <h2>Recorded evaluation</h2><p>Gemini: 76.5%; the 25-step LoRA pilot: 42.5%; the same adapter served quantized: 41.0%. No improvement from quantized serving is established.</p>
+        <h2>Recorded evaluation</h2><p>Gemini: 76.5%; the 25-step LoRA pilot: 42.5%; the same adapter served quantized: 41.0%. Constraining the Q4 LoRA run to valid labels removes invalid outputs (13% → 0%) with 43.5% accuracy; the five-clause gain is inconclusive.</p>
         <p id="evaluation-status">Loading recorded results. Analyze replays five real sample outputs.</p>
         <table><thead><tr><th>Model</th><th>N</th><th>Accuracy</th><th>Macro F1</th><th>Invalid outputs</th><th>p50 latency</th><th>Compute / API cost</th></tr></thead><tbody id="evaluation-results">
           <tr><td colspan="7">Loading recorded results...</td></tr>
         </tbody></table>
-        <p>Same frozen 200 clauses and prompt. LoRA training: 25 optimizer steps, 64 unique training clauses, 400 example passes. The FP16 and quantized rows use the same trained adapter; 42.5% versus 41.0% is three clauses and is not evidence of a meaningful difference. Next experiments (not yet run): 3B/7B base, longer training, and output constrained to the 41 labels.</p>
+        <p>Same frozen 200 clauses and prompt. LoRA training: 25 optimizer steps, 64 unique training clauses, 400 example passes. The FP16 and quantized rows use the same trained adapter; 42.5% versus 41.0% is three clauses and is not evidence of a meaningful difference. The constrained run gains five and loses zero clauses versus unconstrained Q4 (paired exact McNemar p=0.0625); this is not strong evidence of a quality improvement. It reuses the evaluated benchmark, so it is a diagnostic follow-up. The 3B constrained base scored 44.5% on the same test set, with no project fine-tuning. Longer free-T4 training has no verified completed result yet.</p>
       </section>
     <div class="workspace-grid">
       <section class="card analysis-card" aria-labelledby="input-title">

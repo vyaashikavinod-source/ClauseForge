@@ -1,0 +1,8 @@
+{
+  "comparison": "same-model Q4 LoRA unconstrained vs 41-label grammar",
+  "gained_correct": 5,
+  "lost_correct": 0,
+  "net_correct": 5,
+  "paired_exact_mcnemar_p": 0.0625,
+  "note": "Diagnostic follow-up on reused benchmark; not a final untouched evaluation or evidence of statistical superiority."
+}

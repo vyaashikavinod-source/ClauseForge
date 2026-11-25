@@ -252,3 +252,29 @@ this is $0.1497066, or $0.748533 per 1,000 attempted clauses. It is a paid-rate
 equivalent lower bound because fourteen failed calls omitted usage. Actual
 free-tier charge remains zero. Invalid outputs are shown separately from
 request errors in the UI. Pricing source: https://aistudio.google.com/docs/pricing
+
+## Constrained-output follow-up — 23 November 2026
+
+The same 25-step adapter on the same Q4 base was evaluated with a 41-label
+GBNF decoding constraint and an unchanged prompt. All 200 requests completed:
+87/200 correct (43.5%), all-category macro F1 0.394628, zero invalid IDs and
+zero request errors. Median/p95 latency: 1.276016 / 2.180212 seconds; sequential
+throughput 0.745291 clauses/second; 510,320 input and 934 output tokens.
+Windows process peak working set including loading/warmup: 1,904,082,944 bytes.
+Local CPU, four threads, official llama.cpp b12494; no API charge is implied
+to mean no hardware or electricity cost.
+
+Paired comparison to the unconstrained Q4 adapter: five gained, zero lost,
+exact two-sided McNemar p=0.0625. The reliable observed change is removal of
+invalid label strings, not established general quality improvement. This
+reuses a previously evaluated benchmark; it is a diagnostic follow-up, not
+a new untouched final holdout. Raw outputs and checksums are preserved in
+`docs/evidence/clauseforge-predictions.json`; paired counts are in
+`docs/evidence/constrained-paired-comparison.json`.
+
+A 3B zero-shot base comparison and a longer free-T4 training experiment are
+in progress. The first 4096-token training attempt encountered GPU memory
+pressure; the retry uses a 3072-token cap, 256 unique training clauses and
+100 planned optimizer steps. No result from unfinished training is claimed.
+
+The pinned Qwen2.5-3B Q4 base with constrained decoding completed 200 requests: 44.5% accuracy, 0.416103 macro F1, 0.0% invalid outputs. Median latency 2.049s. This is zero-shot base inference, not a trained 3B adapter.
