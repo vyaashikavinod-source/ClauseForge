@@ -34,14 +34,15 @@ def test_analyze_form_is_semantic_and_accessible() -> None:
     assert 'class="skip-link"' in html
 
 
-def test_frontend_uses_actual_classify_contract_and_handles_errors() -> None:
+def test_frontend_replays_recorded_outputs_and_refuses_free_form_inference() -> None:
     javascript = (FRONTEND / "app.js").read_text(encoding="utf-8")
-    assert 'fetch("/v1/classify"' in javascript
-    assert "JSON.stringify({ text })" in javascript
-    for field in ("predicted_category", "provider", "processing", "request_id"):
-        assert field in javascript
-    assert "provider_unavailable" in javascript
-    assert "invalid_model_output" in javascript
+    assert 'fetch("/static/sample-replays.json")' in javascript
+    assert 'fetch("/v1/classify"' not in javascript
+    assert "row.text === text" in javascript
+    assert "free-form inference is not hosted" in javascript
+    assert "replay.raw_output" in javascript
+    assert "Replayed invalid model output" in javascript
+    assert "No replacement prediction was invented" in javascript
     assert "unexpected error" in javascript.casefold()
 
 
@@ -83,7 +84,7 @@ def test_frontend_model_state_is_dynamic_and_candidate_safe() -> None:
     assert "production validated" not in javascript.casefold()
 
 
-def test_only_synthetic_samples_and_session_history() -> None:
+def test_sample_inputs_and_history_stay_separate_from_evaluation() -> None:
     javascript = (FRONTEND / "app.js").read_text(encoding="utf-8")
     for label in (
         "Governing law",
@@ -97,7 +98,8 @@ def test_only_synthetic_samples_and_session_history() -> None:
     assert "localStorage" in javascript
     assert "localStorage.setItem(THEME_KEY" in javascript
     assert "CUAD_v1" not in javascript
-    assert "held-out" not in javascript.casefold()
+    assert 'fetch("/static/sample-replays.json")' in javascript
+    assert "fetch('/static/evaluation.json')" in javascript
 
 
 def test_legal_and_privacy_boundaries_are_visible() -> None:

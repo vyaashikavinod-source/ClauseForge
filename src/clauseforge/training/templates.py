@@ -42,7 +42,8 @@ def render_messages(
 ) -> tuple[PromptMessage, PromptMessage]:
     instruction = (
         ID_SYSTEM_INSTRUCTION
-        if prompt_template_version in {ID_PROMPT_TEMPLATE_VERSION, BENCHMARK_PROMPT_TEMPLATE_VERSION}
+        if prompt_template_version
+        in {ID_PROMPT_TEMPLATE_VERSION, BENCHMARK_PROMPT_TEMPLATE_VERSION}
         else SYSTEM_INSTRUCTION
     )
     if prompt_template_version not in {

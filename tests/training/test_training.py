@@ -87,7 +87,18 @@ def test_lora_config_and_cpu_qlora_failure() -> None:
         require_qlora_runtime()
 
 
-def test_qlora_configuration_is_nf4_with_double_quantization() -> None:
+def test_qlora_configuration_is_nf4_with_double_quantization(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Construct configuration on CPU without requiring the optional CUDA package.
+    import importlib.metadata
+
+    original_version = importlib.metadata.version
+
+    def dependency_version(name: str) -> str:
+        return "0.49.0" if name == "bitsandbytes" else original_version(name)
+
+    monkeypatch.setattr(importlib.metadata, "version", dependency_version)
     quantization = build_4bit_config("bfloat16")
     assert quantization.load_in_4bit is True
     assert quantization.bnb_4bit_quant_type == "nf4"

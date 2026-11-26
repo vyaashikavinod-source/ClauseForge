@@ -11,7 +11,7 @@ from transformers import PreTrainedTokenizerFast
 def build_smoke_tokenizer(texts: Iterable[str]) -> PreTrainedTokenizerFast:
     tokenizer = Tokenizer(models.WordLevel(unk_token="[UNK]"))
     tokenizer.pre_tokenizer = pre_tokenizers.Whitespace()
-    trainer = trainers.WordLevelTrainer(  # type: ignore[no-untyped-call]
+    trainer = trainers.WordLevelTrainer(
         vocab_size=2048,
         special_tokens=["[PAD]", "[UNK]", "[BOS]", "[EOS]"],
     )

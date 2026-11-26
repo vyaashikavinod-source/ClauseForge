@@ -36,13 +36,13 @@ from clauseforge.training.pilot import (
     diagnostic_validation_selection,
     restore_pilot_selection,
 )
+from clauseforge.training.suffix_loss import supervised_suffix_loss
 from clauseforge.training.targets import (
     TargetRepresentation,
     UnknownTargetError,
     resolve_generated_target,
     stable_id_map_checksum,
 )
-from clauseforge.training.suffix_loss import supervised_suffix_loss
 from clauseforge.training.templates import TrainingExample
 from clauseforge.training.trainer import (
     build_training_batch,

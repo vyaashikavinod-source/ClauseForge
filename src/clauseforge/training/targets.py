@@ -66,7 +66,9 @@ def validate_target_version(
     representation: TargetRepresentation, version: str, prompt_version: str
 ) -> None:
     if (representation, version, prompt_version) == (
-        "category_id", CATEGORY_ID_TARGET_VERSION, "cuad-classification-id-v3-taxonomy"
+        "category_id",
+        CATEGORY_ID_TARGET_VERSION,
+        "cuad-classification-id-v3-taxonomy",
     ):
         return
     expected = {
