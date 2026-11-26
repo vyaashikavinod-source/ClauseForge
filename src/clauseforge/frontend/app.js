@@ -138,7 +138,7 @@ async function loadEvaluationEvidence() {
     body.replaceChildren();
     for (const run of evidence.runs) {
       const row = document.createElement('tr');
-      const names = ['Qwen2.5-1.5B · Q4 base','Qwen2.5-1.5B + LoRA · FP16 pilot','Qwen2.5-1.5B + LoRA · Q4 serving','Gemini 3.5 Flash-Lite','Qwen2.5-1.5B + LoRA · Q4, constrained','Qwen2.5-3B · Q4 base, constrained'];
+      const names = ['Qwen2.5-1.5B · Q4 base','Qwen2.5-1.5B + LoRA · FP16 pilot','Qwen2.5-1.5B + LoRA · Q4 serving','Gemini 3.5 Flash-Lite','Qwen2.5-1.5B + LoRA · Q4, constrained','Qwen2.5-3B · Q4 base, constrained','Qwen2.5-1.5B + LoRA · 100 steps, Q4 constrained'];
       const index = evidence.runs.indexOf(run);
       const cost = index === 3 ? '$0 free tier; ≥$0.749 / 1k paid-rate equivalent*' : index === 1 ? 'Colab T4 · free GPU' : 'Local CPU';
       const values = [names[index] || run.model, run.metrics.sample_size, `${(run.metrics.accuracy * 100).toFixed(1)}%`, run.metrics.macro_f1_all_categories.toFixed(3), `${(Math.max(0,run.metrics.invalid_output_rate-run.metrics.request_error_rate)*100).toFixed(1)}%${run.metrics.request_error_rate ? ` (+${(run.metrics.request_error_rate*100).toFixed(1)}% request errors)` : ""}`, `${run.latency_median_seconds.toFixed(3)} s`, cost];

@@ -1,0 +1,15 @@
+{
+  "description": "100 optimizer steps on 256 unique CUAD train clauses; 1600 example passes; rank-8 QLoRA, free T4; resumed from verified step10 after runtime loss. Validation-only checkpoint selection chose step100 among steps50/100.",
+  "selected_checkpoint_step": 100,
+  "unique_train_clauses": 256,
+  "validation_clauses": 32,
+  "examples_seen": 1600,
+  "max_sequence_length": 3072,
+  "source_commit": "383bc39637cebbe9f7f1a4f84028b266d3caa3b1",
+  "archive_sha256": "8dbb9f6c38b55d2a281957aa425716fbc8c3a6eaee14c4f7b9f5e1ab1b516026",
+  "validation_accuracy": 0.4375,
+  "validation_macro_f1": 0.2967479674796748,
+  "validation_invalid_output_rate": 0.03125,
+  "resume_caveat": "Adapter, optimizer, scheduler and example position restored; RNG state was not serialized, so continuation is not bitwise identical.",
+  "evaluation_caveat": "Same previously evaluated frozen200 diagnostic set; not a new untouched holdout. Never choose the checkpoint using this test score."
+}
